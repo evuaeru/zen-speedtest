@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zen SpeedTest Pro - Master Zay</title>
+  <style>
+    :root {
+      --bg-dark: #070a12;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --bg-card-hover: rgba(22, 33, 62, 0.85);
+      --border-card: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(0, 242, 254, 0.5);
+      
+      --cyan-neon: #00f2fe;
+      --cyan-glow: rgba(0, 242, 254, 0.35);
+      --blue-accent: #4facfe;
+      --purple-neon: #a855f7;
+      --purple-glow: rgba(168, 85, 247, 0.35);
+      --pink-neon: #ec4899;
+      --emerald-neon: #10b981;
+      --amber-neon: #f59e0b;
+      --rose-neon: #ef4444;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(0, 242, 254, 0.07) 0%, transparent 40%),
+        radial-gradient(circle at 85% 20%, rgba(168, 85, 247, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 50% 85%, rgba(79, 172, 254, 0.06) 0%, transparent 50%);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 40px;
+      overflow-x: hidden;
+    }
+
+    /* Container utama */
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Header Nav */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding: 18px 24px;
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--cyan-neon), var(--purple-neon));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px var(--cyan-glow);
+    }
+
+    .brand-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: #ffffff;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+
+    .brand-text h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      background: linear-gradient(to right, #ffffff, var(--cyan-neon));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-text p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Network Info Chips */
+    .net-meta-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .meta-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-card);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meta-chip strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald-neon);
+      box-shadow: 0 0 8px var(--emerald-neon);
+      animation: pulse-dot 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* Speedometer Hero Section */
+    .speedometer-hero {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-card);
+      border-radius: 28px;
+      padding: 36px 24px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    /* Ambient glow behind gauge */
+    .gauge-glow {
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      top: 30px;
+      background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%);
+      filter: blur(50px);
+      pointer-events: none;
+      z-index: 0;
+      transition: background 0.8s ease;
+    }
+
+    /* Gauge Container */
+    .gauge-container {
+      position: relative;
+      width: 340px;
+      height: 260px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      z-index: 1;
+    }
+
+    .gauge-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 340px;
+      height: 260px;
+    }
+
+    .gauge-bg-arc {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.08);
+      stroke-width: 14;
+      stroke-linecap: round;
+    }
+
+    .gauge-active-arc {
+      fill: none;
+      stroke: url(#cyan-gradient);
+      stroke-width: 14;
+      stroke-linecap: round;
+      stroke-dasharray: 612;
+      stroke-dashoffset: 612;
+      transition: stroke-dashoffset 0.15s ease-out, stroke 0.6s ease;
+      filter: drop-shadow(0 0 10px var(--cyan-neon));
+    }
+
+    /* Gauge Digital Display */
+    .gauge-center-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .speed-number {
+      font-size: 4.2rem;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -2px;
+      font-variant-numeric: tabular-nums;
+      background: linear-gradient(to bottom, #ffffff, #d5e6fb);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 4px 16px rgba(0, 242, 254, 0.4));
+    }
+
+    .speed-unit {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--cyan-neon);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-top: 4px;
+      cursor: pointer;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 8px;
+      background: rgba(0, 242, 254, 0.1);
+      border: 1px solid rgba(0, 242, 254, 0.2);
+      transition: all 0.2s ease;
+    }
+
+    .speed-unit:hover {
+      background: rgba(0, 242, 254, 0.2);
+    }
+
+    .test-phase-badge {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 5px 16px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-card);
+      color: var(--text-muted);
+      transition: all 0.3s ease;
+    }
+
+    /* Live Graph Sparkline */
+    .graph-wrapper {
+      width: 100%;
+      max-width: 600px;
+      height: 60px;
+      margin-top: 10px;
+      position: relative;
+    }
+
+    #speedCanvas {
+      width: 100%;
+      height: 100%;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Action Buttons Row */
+    .action-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 24px;
+      z-index: 2;
+    }
+
+    .btn-main {
+      position: relative;
+      background: linear-gradient(135deg, var(--cyan-neon) 0%, var(--blue-accent) 50%, var(--purple-neon) 100%);
+      color: #070a12;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 16px 48px;
+      border: none;
+      border-radius: 40px;
+      cursor: pointer;
+      box-shadow: 0 0 30px var(--cyan-glow), 0 8px 24px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      user-select: none;
+    }
+
+    .btn-main:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 0 45px rgba(0, 242, 254, 0.6), 0 12px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .btn-main:active {
+      transform: translateY(1px) scale(0.98);
+    }
+
+    .btn-main svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+    }
+
+    .btn-cancel {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      font-size: 0.95rem;
+      font-weight: 700;
+      padding: 14px 28px;
+      border-radius: 40px;
+      cursor: pointer;
+      display: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-cancel:hover {
+      background: rgba(239, 68, 68, 0.3);
+      color: #ffffff;
+    }
+
+    /* Metric Cards Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 20px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: transparent;
+      transition: background 0.3s ease;
+    }
+
+    .metric-card.active {
+      border-color: var(--border-active);
+      box-shadow: 0 6px 24px rgba(0, 242, 254, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .metric-card.active::before {
+      background: var(--cyan-neon);
+    }
+
+    .metric-card.active-upload {
+      border-color: var(--purple-neon);
+      box-shadow: 0 6px 24px var(--purple-glow);
+    }
+
+    .metric-card.active-upload::before {
+      background: var(--purple-neon);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-muted);
+    }
+
+    .card-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-title svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .card-value-wrap {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .card-val {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: var(--text-main);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+    }
+
+    .card-unit {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-dim);
+    }
+
+    .card-sub {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Rating & Quality Verdict Badge */
+    .verdict-box {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(0, 242, 254, 0.08));
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 16px;
+      padding: 16px 20px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .verdict-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .grade-badge {
+      width: 50px;
+      height: 50px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--emerald-neon), #059669);
+      color: #ffffff;
+      font-size: 1.5rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+    }
+
+    .verdict-text h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .verdict-text p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .btn-share {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-card);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-share:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Settings & Preferences Bar */
+    .settings-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 18px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .setting-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .setting-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    select, input[type="text"] {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border-card);
+      color: var(--text-main);
+      padding: 7px 12px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      outline: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    select:focus {
+      border-color: var(--cyan-neon);
+    }
+
+    /* History Table Section */
+    .history-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .history-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-head h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .history-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-card);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+      text-align: left;
+    }
+
+    th {
+      padding: 10px 14px;
+      color: var(--text-dim);
+      font-weight: 600;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .grade-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+
+    .grade-pill.A { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .grade-pill.B { background: rgba(79, 172, 254, 0.2); color: #60a5fa; }
+    .grade-pill.C { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .grade-pill.D { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+    /* Footer & Maid Dedication */
+    footer {
+      text-align: center;
+      padding: 20px 0 10px;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    footer a {
+      color: var(--cyan-neon);
+      text-decoration: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .gauge-container {
+        width: 290px;
+        height: 220px;
+      }
+      .gauge-svg {
+        width: 290px;
+        height: 220px;
+      }
+      .speed-number {
+        font-size: 3.4rem;
+      }
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="brand-wrap">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div class="brand-text">
+          <h1>ZEN SPEEDTEST PRO</h1>
+          <p>High-Precision Bandwidth & Latency Benchmark</p>
+        </div>
+      </div>
+
+      <div class="net-meta-wrap">
+        <div class="meta-chip">
+          <span class="status-dot"></span>
+          <span>Server: <strong id="serverNodeDisplay">Cloudflare Global Edge</strong></span>
+        </div>
+        <div class="meta-chip">
+          <span>IP: <strong id="clientIpDisplay">Mendeteksi...</strong></span>
+        </div>
+        <div class="meta-chip">
+          <span>Lokasi: <strong id="clientLocationDisplay">Indonesia</strong></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Speedometer Hero Section -->
+    <section class="speedometer-hero">
+      <div class="gauge-glow" id="gaugeGlow"></div>
+
+      <div class="gauge-container">
+        <svg class="gauge-svg" viewBox="0 0 340 260">
+          <defs>
+            <linearGradient id="cyan-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#00f2fe" />
+              <stop offset="50%" stop-color="#4facfe" />
+              <stop offset="100%" stop-color="#a855f7" />
+            </linearGradient>
+            <linearGradient id="upload-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#a855f7" />
+              <stop offset="50%" stop-color="#ec4899" />
+              <stop offset="100%" stop-color="#f43f5e" />
+            </linearGradient>
+          </defs>
+
+          <!-- Background Gauge Track: 270 deg Arc (from 135 deg to 405 deg) -->
+          <!-- Center: (170, 155), Radius: 130 -->
+          <path class="gauge-bg-arc" d="M 78.07 246.92 A 130 130 0 1 1 261.92 246.92" />
+          <!-- Active Value Arc -->
+          <path class="gauge-active-arc" id="gaugeActiveArc" d="M 78.07 246.92 A 130 130 0 1 1 261.92 246.92" />
+
+          <!-- Speed Ticks & Lines (Mathematically calibrated to speedToRatio) -->
+          <g fill="rgba(255,255,255,0.4)" font-size="9" font-weight="600" text-anchor="middle">
+            <line x1="83.7" y1="241.3" x2="78.1" y2="246.9" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
+            <text x="96.5" y="232.5">0</text>
+            <line x1="49.5" y1="135.9" x2="41.6" y2="134.7" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
+            <text x="67.3" y="142.7">5</text>
+            <line x1="86.5" y1="66.1" x2="81.0" y2="60.2" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
+            <text x="98.8" y="83.2">15</text>
+            <line x1="192.9" y1="35.2" x2="194.4" y2="27.3" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
+            <text x="189.5" y="56.8">50</text>
+            <line x1="261.5" y1="74.3" x2="267.5" y2="69.0" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
+            <text x="248.0" y="90.2">100</text>
+            <line x1="290.5" y1="135.9" x2="298.4" y2="134.7" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
+            <text x="272.7" y="142.7">250</text>
+            <line x1="286.0" y1="192.7" x2="293.6" y2="195.2" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
+            <text x="268.9" y="191.1">500</text>
+            <line x1="256.3" y1="241.3" x2="261.9" y2="246.9" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
+            <text x="243.5" y="232.5">1000+</text>
+          </g>
+        </svg>
+
+        <div class="gauge-center-content">
+          <div class="speed-number" id="liveSpeedNumber">0.0</div>
+          <div class="speed-unit" id="unitToggleBtn" title="Klik untuk mengubah satuan (Mbps / MB/s)">
+            <span id="speedUnitText">Mbps</span> ▾
+          </div>
+          <div>
+            <span class="test-phase-badge" id="phaseBadge">STANDBY</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Sparkline Graph -->
+      <div class="graph-wrapper">
+        <canvas id="speedCanvas"></canvas>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-row">
+        <button class="btn-main" id="btnStartTest">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <span id="btnStartText">MULAI TES</span>
+        </button>
+        <button class="btn-cancel" id="btnCancelTest">Batalkan</button>
+      </div>
+    </section>
+
+    <!-- Key Metrics Grid -->
+    <section class="metrics-grid">
+      <!-- Ping Card -->
+      <div class="metric-card" id="cardPing">
+        <div class="card-top">
+          <span class="card-title">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+            Ping (Latency)
+          </span>
+          <span id="pingIndicator">⚡</span>
+        </div>
+        <div class="card-value-wrap">
+          <span class="card-val" id="valPing">--</span>
+          <span class="card-unit">ms</span>
+        </div>
+        <div class="card-sub">
+          <span>Min: <b id="subPingMin">--</b></span>
+          <span>Avg: <b id="subPingAvg">--</b></span>
+        </div>
+      </div>
+
+      <!-- Jitter Card -->
+      <div class="metric-card" id="cardJitter">
+        <div class="card-top">
+          <span class="card-title">
+            <svg viewBox="0 0 24 24"><path d="M4 11h4v2H4zm6 0h4v2h-4zm6 0h4v2h-4zM2 4h20v2H2zm0 14h20v2H2z"/></svg>
+            Jitter
+          </span>
+          <span>〰️</span>
+        </div>
+        <div class="card-value-wrap">
+          <span class="card-val" id="valJitter">--</span>
+          <span class="card-unit">ms</span>
+        </div>
+        <div class="card-sub">
+          <span>Stabilitas: <b id="subJitterQual">--</b></span>
+        </div>
+      </div>
+
+      <!-- Download Card -->
+      <div class="metric-card" id="cardDownload">
+        <div class="card-top">
+          <span class="card-title">
+            <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+            Download
+          </span>
+          <span id="dlIndicator">⬇️</span>
+        </div>
+        <div class="card-value-wrap">
+          <span class="card-val" id="valDownload">--</span>
+          <span class="card-unit" id="unitDl">Mbps</span>
+        </div>
+        <div class="card-sub">
+          <span>Puncak: <b id="subDlPeak">--</b></span>
+          <span>Data: <b id="subDlTotal">--</b></span>
+        </div>
+      </div>
+
+      <!-- Upload Card -->
+      <div class="metric-card" id="cardUpload">
+        <div class="card-top">
+          <span class="card-title">
+            <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+            Upload
+          </span>
+          <span id="ulIndicator">⬆️</span>
+        </div>
+        <div class="card-value-wrap">
+          <span class="card-val" id="valUpload">--</span>
+          <span class="card-unit" id="unitUl">Mbps</span>
+        </div>
+        <div class="card-sub">
+          <span>Puncak: <b id="subUlPeak">--</b></span>
+          <span>Data: <b id="subUlTotal">--</b></span>
+        </div>
+      </div>
+
+      <!-- Loaded Latency (Bufferbloat) -->
+      <div class="metric-card" id="cardBufferbloat">
+        <div class="card-top">
+          <span class="card-title">
+            <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            Bufferbloat
+          </span>
+          <span>📶</span>
+        </div>
+        <div class="card-value-wrap">
+          <span class="card-val" id="valBufferbloat">--</span>
+          <span class="card-unit">ms</span>
+        </div>
+        <div class="card-sub">
+          <span>Ping Terbebani: <b id="subLoadedPing">--</b></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Overall Quality Verdict Box -->
+    <div class="verdict-box" id="verdictBox">
+      <div class="verdict-left">
+        <div class="grade-badge" id="gradeBadge">A+</div>
+        <div class="verdict-text">
+          <h4 id="verdictTitle">Koneksi Sangat Luar Biasa</h4>
+          <p id="verdictDesc">Latency sangat rendah dan jitter stabil. Sempurna untuk game kompetitif (Valorant/CS2), Discord, dan streaming 4K tanpa buffering.</p>
+        </div>
+      </div>
+      <button class="btn-share" id="btnCopySummary">
+        📋 Salin Ringkasan
+      </button>
+    </div>
+
+    <!-- Preferences & Advanced Settings -->
+    <section class="settings-bar">
+      <div class="setting-group">
+        <span class="setting-label">Server Sumber:</span>
+        <select id="serverModeSelect">
+          <option value="cloudflare" selected>Cloudflare Global CDN (Internet WAN)</option>
+          <option value="local">Local Python Server (LAN / Loopback)</option>
+          <option value="auto">Otomatis (Pilih yang tercepat)</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <span class="setting-label">Koneksi Stream:</span>
+        <select id="streamCountSelect">
+          <option value="1">1 Stream (Konservatif)</option>
+          <option value="3" selected>3 Stream (Standar Broadband)</option>
+          <option value="6">6 Stream (Gigabit Fiber Saturation)</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <span class="setting-label">Durasi Uji:</span>
+        <select id="durationSelect">
+          <option value="6">Cepat (6 Detik)</option>
+          <option value="10" selected>Standar (10 Detik)</option>
+          <option value="15">Komprehensif (15 Detik)</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <span class="setting-label">Efek Suara:</span>
+        <select id="soundEffectSelect">
+          <option value="on" selected>Aktif (Audio Synth)</option>
+          <option value="off">Mati</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Test History -->
+    <section class="history-card">
+      <div class="history-head">
+        <h3>
+          <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+          Riwayat Pengujian
+        </h3>
+        <div class="history-actions">
+          <button class="btn-secondary" id="btnExportCsv">Unduh CSV</button>
+          <button class="btn-secondary" id="btnClearHistory">Hapus Riwayat</button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table id="historyTable">
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Server</th>
+              <th>Ping</th>
+              <th>Jitter</th>
+              <th>Download</th>
+              <th>Upload</th>
+              <th>Bufferbloat</th>
+              <th>Grade</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <tr>
+              <td colspan="8" style="text-align: center; color: var(--text-dim); padding: 24px;">Belum ada riwayat pengujian. Klik "MULAI TES" untuk memulai.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      Dibuat khusus untuk kenyamanan <strong>Master Zay</strong> oleh <strong>Pelayan Ancellia</strong>.
+    </footer>
+  </div>
+
+  <!-- SCRIPT SPEEDTEST ENGINE -->
+  <script>
+    (function () {
+      "use strict";
+
+      // --- KONFIGURASI ENDPOINT & FALLBACK ---
+      function getLocalOrigin() {
+        if (window.location.protocol.startsWith('http')) {
+          return window.location.origin;
+        }
+        return 'http://127.0.0.1:8080';
+      }
+
+      let detectedLocalOrigin = getLocalOrigin();
+
+      function getEndpoints() {
+        return {
+          cloudflare: {
+            name: "Cloudflare Global Edge",
+            ping: "https://speed.cloudflare.com/__down?bytes=0",
+            down: "https://speed.cloudflare.com/__down",
+            up: "https://speed.cloudflare.com/__up"
+          },
+          local: {
+            name: "Local Python Server (LAN/Bridge)",
+            ping: `${detectedLocalOrigin}/api/ping`,
+            down: `${detectedLocalOrigin}/api/download`,
+            up: `${detectedLocalOrigin}/api/upload`
+          }
+        };
+      }
+
+      const CONFIG = getEndpoints();
+
+      // State Aplikasi
+      const state = {
+        testing: false,
+        phase: "idle", // 'idle' | 'ping' | 'download' | 'upload' | 'completed'
+        abortController: null,
+        unit: "Mbps", // 'Mbps' | 'MB/s'
+        serverMode: "cloudflare",
+        currentEndpoint: CONFIG.cloudflare,
+        clientIp: "Mendeteksi...",
+        colo: "",
+        city: "",
+        country: "ID",
+        results: {
+          ping: 0,
+          pingMin: 0,
+          pingAvg: 0,
+          jitter: 0,
+          download: 0,
+          downloadPeak: 0,
+          downloadBytes: 0,
+          upload: 0,
+          uploadPeak: 0,
+          uploadBytes: 0,
+          loadedPing: 0,
+          bufferbloat: 0,
+          grade: "A+"
+        },
+        history: []
+      };
+
+      // Elemen DOM
+      const dom = {
+        liveSpeedNumber: document.getElementById("liveSpeedNumber"),
+        unitToggleBtn: document.getElementById("unitToggleBtn"),
+        speedUnitText: document.getElementById("speedUnitText"),
+        phaseBadge: document.getElementById("phaseBadge"),
+        gaugeActiveArc: document.getElementById("gaugeActiveArc"),
+        gaugeGlow: document.getElementById("gaugeGlow"),
+        btnStartTest: document.getElementById("btnStartTest"),
+        btnStartText: document.getElementById("btnStartText"),
+        btnCancelTest: document.getElementById("btnCancelTest"),
+        serverNodeDisplay: document.getElementById("serverNodeDisplay"),
+        clientIpDisplay: document.getElementById("clientIpDisplay"),
+        clientLocationDisplay: document.getElementById("clientLocationDisplay"),
+        
+        // Cards
+        cardPing: document.getElementById("cardPing"),
+        valPing: document.getElementById("valPing"),
+        subPingMin: document.getElementById("subPingMin"),
+        subPingAvg: document.getElementById("subPingAvg"),
+
+        cardJitter: document.getElementById("cardJitter"),
+        valJitter: document.getElementById("valJitter"),
+        subJitterQual: document.getElementById("subJitterQual"),
+
+        cardDownload: document.getElementById("cardDownload"),
+        valDownload: document.getElementById("valDownload"),
+        unitDl: document.getElementById("unitDl"),
+        subDlPeak: document.getElementById("subDlPeak"),
+        subDlTotal: document.getElementById("subDlTotal"),
+
+        cardUpload: document.getElementById("cardUpload"),
+        valUpload: document.getElementById("valUpload"),
+        unitUl: document.getElementById("unitUl"),
+        subUlPeak: document.getElementById("subUlPeak"),
+        subUlTotal: document.getElementById("subUlTotal"),
+
+        cardBufferbloat: document.getElementById("cardBufferbloat"),
+        valBufferbloat: document.getElementById("valBufferbloat"),
+        subLoadedPing: document.getElementById("subLoadedPing"),
+
+        verdictBox: document.getElementById("verdictBox"),
+        gradeBadge: document.getElementById("gradeBadge"),
+        verdictTitle: document.getElementById("verdictTitle"),
+        verdictDesc: document.getElementById("verdictDesc"),
+        btnCopySummary: document.getElementById("btnCopySummary"),
+
+        serverModeSelect: document.getElementById("serverModeSelect"),
+        streamCountSelect: document.getElementById("streamCountSelect"),
+        durationSelect: document.getElementById("durationSelect"),
+        soundEffectSelect: document.getElementById("soundEffectSelect"),
+
+        speedCanvas: document.getElementById("speedCanvas"),
+        historyTableBody: document.getElementById("historyTableBody"),
+        btnExportCsv: document.getElementById("btnExportCsv"),
+        btnClearHistory: document.getElementById("btnClearHistory")
+      };
+
+      // Web Audio Synthesizer (Zero-dependency sound effects)
+      const audio = {
+        ctx: null,
+        init() {
+          if (!this.ctx && (window.AudioContext || window.webkitAudioContext)) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AudioCtx();
+          }
+        },
+        playBlip(freq = 600, duration = 0.08) {
+          if (dom.soundEffectSelect.value !== "on") return;
+          try {
+            this.init();
+            if (!this.ctx) return;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + duration);
+          } catch (e) {}
+        },
+        playSuccessChime() {
+          if (dom.soundEffectSelect.value !== "on") return;
+          try {
+            this.init();
+            if (!this.ctx) return;
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 chord
+            notes.forEach((freq, idx) => {
+              setTimeout(() => {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = "triangle";
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.4);
+              }, idx * 90);
+            });
+          } catch (e) {}
+        }
+      };
+
+      // --- CANVAS SPARKLINE GRAPH ---
+      let canvasCtx = null;
+      let graphSamples = [];
+      const MAX_GRAPH_POINTS = 60;
+
+      function initCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = dom.speedCanvas.getBoundingClientRect();
+        dom.speedCanvas.width = rect.width * dpr;
+        dom.speedCanvas.height = rect.height * dpr;
+        canvasCtx = dom.speedCanvas.getContext("2d");
+        canvasCtx.scale(dpr, dpr);
+      }
+
+      function pushGraphSample(speed) {
+        graphSamples.push(speed);
+        if (graphSamples.length > MAX_GRAPH_POINTS) {
+          graphSamples.shift();
+        }
+        drawGraph();
+      }
+
+      function resetGraph() {
+        graphSamples = [];
+        if (canvasCtx) {
+          const rect = dom.speedCanvas.getBoundingClientRect();
+          canvasCtx.clearRect(0, 0, rect.width, rect.height);
+        }
+      }
+
+      function drawGraph() {
+        if (!canvasCtx || graphSamples.length < 2) return;
+        const rect = dom.speedCanvas.getBoundingClientRect();
+        const width = rect.width;
+        const height = rect.height;
+
+        canvasCtx.clearRect(0, 0, width, height);
+
+        const maxVal = Math.max(10, ...graphSamples) * 1.15;
+        const step = width / (MAX_GRAPH_POINTS - 1);
+        const startIndex = MAX_GRAPH_POINTS - graphSamples.length;
+
+        canvasCtx.beginPath();
+        graphSamples.forEach((val, i) => {
+          const x = (startIndex + i) * step;
+          const y = height - (val / maxVal) * (height - 6) - 3;
+          if (i === 0) canvasCtx.moveTo(x, y);
+          else canvasCtx.lineTo(x, y);
+        });
+
+        // Line style
+        const isUpload = state.phase === "upload";
+        canvasCtx.strokeStyle = isUpload ? "#ec4899" : "#00f2fe";
+        canvasCtx.lineWidth = 2.5;
+        canvasCtx.stroke();
+
+        // Area fill
+        canvasCtx.lineTo((startIndex + graphSamples.length - 1) * step, height);
+        canvasCtx.lineTo(startIndex * step, height);
+        canvasCtx.closePath();
+
+        const grad = canvasCtx.createLinearGradient(0, 0, 0, height);
+        if (isUpload) {
+          grad.addColorStop(0, "rgba(236, 72, 153, 0.35)");
+          grad.addColorStop(1, "rgba(236, 72, 153, 0.0)");
+        } else {
+          grad.addColorStop(0, "rgba(0, 242, 254, 0.35)");
+          grad.addColorStop(1, "rgba(0, 242, 254, 0.0)");
+        }
+        canvasCtx.fillStyle = grad;
+        canvasCtx.fill();
+      }
+
+      // --- GAUGE NEEDLE & ARC MATH ---
+      // Arc total length = 612px
+      const TOTAL_ARC_LENGTH = 612;
+
+      // Non-linear calibration: kecepatan (Mbps) -> persentase sudut (0 - 1)
+      function speedToRatio(mbps) {
+        if (mbps <= 0) return 0;
+        if (mbps <= 1) return (mbps / 1) * 0.08;
+        if (mbps <= 5) return 0.08 + ((mbps - 1) / 4) * 0.12;
+        if (mbps <= 10) return 0.20 + ((mbps - 5) / 5) * 0.10;
+        if (mbps <= 25) return 0.30 + ((mbps - 10) / 15) * 0.12;
+        if (mbps <= 50) return 0.42 + ((mbps - 25) / 25) * 0.12;
+        if (mbps <= 100) return 0.54 + ((mbps - 50) / 50) * 0.14;
+        if (mbps <= 250) return 0.68 + ((mbps - 100) / 150) * 0.12;
+        if (mbps <= 500) return 0.80 + ((mbps - 250) / 250) * 0.10;
+        if (mbps <= 1000) return 0.90 + ((mbps - 500) / 500) * 0.10;
+        return 1.0;
+      }
+
+      function updateGauge(mbps, phaseColor = "cyan") {
+        const ratio = Math.min(1, Math.max(0, speedToRatio(mbps)));
+        const offset = TOTAL_ARC_LENGTH * (1 - ratio);
+        dom.gaugeActiveArc.style.strokeDashoffset = offset;
+
+        if (phaseColor === "purple") {
+          dom.gaugeActiveArc.setAttribute("stroke", "url(#upload-gradient)");
+          dom.gaugeGlow.style.background = "radial-gradient(circle, var(--purple-glow) 0%, transparent 70%)";
+        } else {
+          dom.gaugeActiveArc.setAttribute("stroke", "url(#cyan-gradient)");
+          dom.gaugeGlow.style.background = "radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%)";
+        }
+
+        // Tampilkan angka dengan satuan aktif
+        const displayValue = state.unit === "MB/s" ? (mbps / 8) : mbps;
+        dom.liveSpeedNumber.textContent = displayValue.toFixed(displayValue >= 100 ? 0 : 1);
+      }
+
+      // --- DETEKSI JARINGAN & SERVER INFO ---
+      async function detectNetworkMetadata() {
+        try {
+          // Probe koneksi server lokal
+          let localAvailable = false;
+          const candidateOrigins = [];
+          if (window.location.protocol.startsWith('http')) {
+            candidateOrigins.push(window.location.origin);
+          }
+          candidateOrigins.push('http://127.0.0.1:8080', 'http://127.0.0.1:8081', 'http://localhost:8080');
+
+          for (const cand of candidateOrigins) {
+            try {
+              const localCheck = await fetch(`${cand}/api/info`, {
+                signal: AbortSignal.timeout(600),
+                mode: "cors"
+              });
+              if (localCheck.ok) {
+                const info = await localCheck.json();
+                localAvailable = true;
+                detectedLocalOrigin = cand;
+                console.log("[SpeedTest] Server lokal terdeteksi di " + cand, info);
+                break;
+              }
+            } catch (e) {}
+          }
+
+          const currentEndpoints = getEndpoints();
+          const selectedMode = dom.serverModeSelect.value;
+
+          if (selectedMode === "local" || (selectedMode === "auto" && localAvailable)) {
+            state.serverMode = "local";
+            state.currentEndpoint = currentEndpoints.local;
+            dom.serverNodeDisplay.textContent = currentEndpoints.local.name;
+            if (localAvailable) {
+              dom.clientIpDisplay.textContent = "127.0.0.1 (Localhost)";
+              dom.clientLocationDisplay.textContent = "Local Network / PC";
+            } else {
+              dom.clientIpDisplay.textContent = "Offline (Port 8080)";
+              dom.clientLocationDisplay.textContent = "Server Belum Aktif";
+            }
+            return;
+          }
+
+          // Cek Cloudflare Metadata
+          state.serverMode = "cloudflare";
+          state.currentEndpoint = currentEndpoints.cloudflare;
+          dom.serverNodeDisplay.textContent = currentEndpoints.cloudflare.name;
+
+          const res = await fetch("https://speed.cloudflare.com/__down?bytes=0", {
+            cache: "no-store",
+            mode: "cors",
+            signal: AbortSignal.timeout(4000)
+          });
+
+          const ip = res.headers.get("cf-meta-ip") || "Terdeteksi";
+          const city = res.headers.get("city") || "";
+          const country = res.headers.get("country") || "ID";
+          const colo = res.headers.get("colo") || "SIN";
+
+          state.clientIp = ip;
+          state.city = city;
+          state.country = country;
+          state.colo = colo;
+
+          dom.clientIpDisplay.textContent = ip;
+          dom.clientLocationDisplay.textContent = `${city ? city + ", " : ""}${country} (${colo})`;
+        } catch (err) {
+          console.warn("[SpeedTest] Deteksi metadata gagal, menggunakan fallback:", err);
+          dom.clientIpDisplay.textContent = "Terhubung";
+          dom.clientLocationDisplay.textContent = "Internet Online";
+        }
+      }
+
+      // --- PENGUKURAN PING & JITTER ---
+      async function measurePingAndJitter(signal) {
+        state.phase = "ping";
+        dom.phaseBadge.textContent = "MENGUKUR PING & JITTER...";
+        dom.cardPing.classList.add("active");
+        dom.cardJitter.classList.add("active");
+
+        const rtts = [];
+        const iterations = 8;
+        const pingUrl = state.currentEndpoint.ping;
+
+        for (let i = 0; i < iterations; i++) {
+          if (signal.aborted) break;
+          const t0 = performance.now();
+          try {
+            await fetch(`${pingUrl}${pingUrl.includes('?') ? '&' : '?'}t=${Date.now()}_${i}`, {
+              cache: "no-store",
+              mode: "cors",
+              signal
+            });
+            const t1 = performance.now();
+            const rtt = Math.max(1, t1 - t0);
+            rtts.push(rtt);
+
+            // Update UI real-time
+            dom.valPing.textContent = Math.round(rtt);
+            audio.playBlip(750, 0.05);
+          } catch (e) {
+            if (signal.aborted) return;
+          }
+          await new Promise(r => setTimeout(r, 60));
+        }
+
+        if (rtts.length === 0) throw new Error("Gagal mengukur latency jaringan.");
+
+        const minPing = Math.min(...rtts);
+        const avgPing = rtts.reduce((a, b) => a + b, 0) / rtts.length;
+
+        // RFC 3550 Jitter: rata-rata selisih absolut antar-paket berturutan
+        let jitterSum = 0;
+        for (let i = 1; i < rtts.length; i++) {
+          jitterSum += Math.abs(rtts[i] - rtts[i - 1]);
+        }
+        const jitter = rtts.length > 1 ? jitterSum / (rtts.length - 1) : 0;
+
+        state.results.ping = Math.round(avgPing);
+        state.results.pingMin = Math.round(minPing);
+        state.results.pingAvg = Math.round(avgPing);
+        state.results.jitter = Math.round(jitter * 10) / 10;
+
+        dom.valPing.textContent = state.results.ping;
+        dom.subPingMin.textContent = `${state.results.pingMin} ms`;
+        dom.subPingAvg.textContent = `${state.results.pingAvg} ms`;
+
+        dom.valJitter.textContent = state.results.jitter;
+        dom.subJitterQual.textContent = jitter < 2 ? "Sangat Stabil" : jitter < 8 ? "Normal" : "Kurang Stabil";
+
+        dom.cardPing.classList.remove("active");
+        dom.cardJitter.classList.remove("active");
+      }
+
+      // --- PENGUKURAN DOWNLOAD ---
+      async function measureDownload(signal, durationSeconds, streamCount) {
+        state.phase = "download";
+        dom.phaseBadge.textContent = "MENGUJI DOWNLOAD...";
+        dom.cardDownload.classList.add("active");
+
+        let totalBytes = 0;
+        let peakSpeed = 0;
+        let smoothSpeed = 0;
+        const speedSamples = [];
+
+        const startTime = performance.now();
+        const endTime = startTime + (durationSeconds * 1000);
+        const warmupCutoff = startTime + (durationSeconds * 1000 * 0.20); // 20% warmup cutoff
+
+        // Bufferbloat tracking
+        const loadedPings = [];
+        let lastPingCheck = performance.now();
+
+        const activeReaders = [];
+        let isDone = false;
+
+        // Worker generator
+        async function runDownloadWorker() {
+          let chunkSize = 1 * 1024 * 1024; // Mulai dari 1MB
+          while (performance.now() < endTime && !signal.aborted && !isDone) {
+            const downUrl = `${state.currentEndpoint.down}?bytes=${chunkSize}&t=${Date.now()}_${Math.random()}`;
+            try {
+              const res = await fetch(downUrl, { mode: "cors", cache: "no-store", signal });
+              if (!res.body) {
+                const blob = await res.blob();
+                totalBytes += blob.size;
+              } else {
+                const reader = res.body.getReader();
+                activeReaders.push(reader);
+                try {
+                  while (performance.now() < endTime && !signal.aborted && !isDone) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    totalBytes += value.length;
+                  }
+                } finally {
+                  const idx = activeReaders.indexOf(reader);
+                  if (idx !== -1) activeReaders.splice(idx, 1);
+                  try { await reader.cancel(); } catch (e) {}
+                }
+              }
+              // Adaptasi ukuran chunk jika kecepatan tinggi
+              if (smoothSpeed > 100 && chunkSize < 25 * 1024 * 1024) {
+                chunkSize = 10 * 1024 * 1024;
+              } else if (smoothSpeed > 30 && chunkSize < 5 * 1024 * 1024) {
+                chunkSize = 5 * 1024 * 1024;
+              }
+            } catch (err) {
+              if (signal.aborted || isDone) break;
+              await new Promise(r => setTimeout(r, 80));
+            }
+          }
+        }
+
+        // Jalankan workers secara paralel
+        const workers = [];
+        for (let i = 0; i < streamCount; i++) {
+          workers.push(runDownloadWorker());
+        }
+
+        // Timer monitor real-time (60fps / 100ms interval)
+        let lastSampleTime = startTime;
+        let lastSampleBytes = 0;
+
+        while (performance.now() < endTime && !signal.aborted) {
+          await new Promise(r => setTimeout(r, 100));
+          const now = performance.now();
+          const dt = (now - lastSampleTime) / 1000;
+          const dBytes = totalBytes - lastSampleBytes;
+          lastSampleTime = now;
+          lastSampleBytes = totalBytes;
+
+          if (dt > 0) {
+            const instantMbps = (dBytes * 8) / (dt * 1e6);
+            smoothSpeed = smoothSpeed === 0 ? instantMbps : (smoothSpeed * 0.65 + instantMbps * 0.35);
+            peakSpeed = Math.max(peakSpeed, smoothSpeed);
+
+            if (now >= warmupCutoff && instantMbps > 0) {
+              speedSamples.push(instantMbps);
+            }
+
+            updateGauge(smoothSpeed, "cyan");
+            pushGraphSample(smoothSpeed);
+
+            const displaySpeed = state.unit === "MB/s" ? (smoothSpeed / 8) : smoothSpeed;
+            dom.valDownload.textContent = displaySpeed.toFixed(1);
+          }
+
+          // Bufferbloat Ping probe (setiap 1.2 detik saat download penuh)
+          if (now - lastPingCheck > 1200 && (now - startTime) > 1500) {
+            lastPingCheck = now;
+            (async () => {
+              const pt0 = performance.now();
+              try {
+                await fetch(`${state.currentEndpoint.ping}?bb=dl_${Date.now()}`, { mode: "cors", cache: "no-store", signal });
+                loadedPings.push(Math.max(1, performance.now() - pt0));
+              } catch(e) {}
+            })();
+          }
+        }
+
+        // Stop all download workers promptly
+        isDone = true;
+        for (const reader of activeReaders) {
+          try { reader.cancel(); } catch (e) {}
+        }
+
+        await Promise.allSettled(workers);
+
+        // Steady-state plateau throughput calculation (trimmed 90th percentile / median)
+        let calculatedSpeed = 0;
+        if (speedSamples.length >= 4) {
+          speedSamples.sort((a, b) => a - b);
+          // Ambil rata-rata 80% atas dari sampel stabil (menghilangkan drop mendadak dan rampup)
+          const p80Start = Math.floor(speedSamples.length * 0.2);
+          const validSubset = speedSamples.slice(p80Start);
+          calculatedSpeed = validSubset.reduce((a, b) => a + b, 0) / validSubset.length;
+        } else {
+          const totalElapsed = (performance.now() - startTime) / 1000;
+          calculatedSpeed = totalElapsed > 0 ? (totalBytes * 8) / (totalElapsed * 1e6) : 0;
+        }
+
+        const totalMb = totalBytes / (1024 * 1024);
+        state.results.download = Math.round(calculatedSpeed * 10) / 10;
+        state.results.downloadPeak = Math.round(peakSpeed * 10) / 10;
+        state.results.downloadBytes = totalMb;
+
+        const displayFinal = state.unit === "MB/s" ? (state.results.download / 8) : state.results.download;
+        const displayPeak = state.unit === "MB/s" ? (state.results.downloadPeak / 8) : state.results.downloadPeak;
+
+        dom.valDownload.textContent = displayFinal.toFixed(1);
+        dom.subDlPeak.textContent = `${displayPeak.toFixed(1)} ${state.unit}`;
+        dom.subDlTotal.textContent = `${totalMb.toFixed(1)} MB`;
+
+        // Simpan sample loaded ping
+        if (loadedPings.length > 0) {
+          const avgLoaded = loadedPings.reduce((a, b) => a + b, 0) / loadedPings.length;
+          state.results.loadedPing = Math.round(avgLoaded);
+          state.results.bufferbloat = Math.max(0, Math.round(avgLoaded - state.results.ping));
+          dom.valBufferbloat.textContent = `+${state.results.bufferbloat}`;
+          dom.subLoadedPing.textContent = `${state.results.loadedPing} ms`;
+        }
+
+        dom.cardDownload.classList.remove("active");
+      }
+
+      // --- PENGUKURAN UPLOAD ---
+      async function measureUpload(signal, durationSeconds, streamCount) {
+        state.phase = "upload";
+        dom.phaseBadge.textContent = "MENGUJI UPLOAD...";
+        dom.cardUpload.classList.add("active-upload");
+        resetGraph();
+
+        let totalBytes = 0;
+        let peakSpeed = 0;
+        let smoothSpeed = 0;
+        const speedSamples = [];
+
+        const startTime = performance.now();
+        const endTime = startTime + (durationSeconds * 1000);
+        const warmupCutoff = startTime + (durationSeconds * 1000 * 0.20);
+
+        // Buat dummy payload non-kompresi (2 MB buffer)
+        const CHUNK_SIZE = 2 * 1024 * 1024;
+        const payloadBuffer = new Uint8Array(CHUNK_SIZE);
+        for (let i = 0; i < payloadBuffer.length; i += 4) {
+          payloadBuffer[i] = (i * 33 + 7) & 0xff;
+          payloadBuffer[i + 1] = (i * 13 + 19) & 0xff;
+          payloadBuffer[i + 2] = (i * 47 + 51) & 0xff;
+          payloadBuffer[i + 3] = (i * 91 + 103) & 0xff;
+        }
+
+        const activeXhrs = [];
+        let uploadDone = false;
+
+        function uploadSingleStream() {
+          return new Promise((resolve) => {
+            if (performance.now() >= endTime || signal.aborted || uploadDone) {
+              resolve();
+              return;
+            }
+
+            const xhr = new XMLHttpRequest();
+            activeXhrs.push(xhr);
+            let lastUploaded = 0;
+
+            xhr.open("POST", state.currentEndpoint.up, true);
+            xhr.setRequestHeader("Content-Type", "application/octet-stream");
+
+            xhr.upload.onprogress = (e) => {
+              if (signal.aborted || uploadDone) {
+                try { xhr.abort(); } catch (e) {}
+                resolve();
+                return;
+              }
+              const delta = e.loaded - lastUploaded;
+              if (delta > 0) {
+                totalBytes += delta;
+                lastUploaded = e.loaded;
+              }
+            };
+
+            const cleanup = () => {
+              const idx = activeXhrs.indexOf(xhr);
+              if (idx !== -1) activeXhrs.splice(idx, 1);
+              resolve();
+            };
+
+            xhr.onload = cleanup;
+            xhr.onerror = cleanup;
+            xhr.onabort = cleanup;
+
+            signal.addEventListener("abort", () => {
+              try { xhr.abort(); } catch (e) {}
+              cleanup();
+            }, { once: true });
+
+            xhr.send(payloadBuffer);
+          });
+        }
+
+        async function runUploadWorker() {
+          while (performance.now() < endTime && !signal.aborted && !uploadDone) {
+            await uploadSingleStream();
+          }
+        }
+
+        const workers = [];
+        for (let i = 0; i < streamCount; i++) {
+          workers.push(runUploadWorker());
+        }
+
+        let lastSampleTime = startTime;
+        let lastSampleBytes = 0;
+
+        while (performance.now() < endTime && !signal.aborted) {
+          await new Promise(r => setTimeout(r, 100));
+          const now = performance.now();
+          const dt = (now - lastSampleTime) / 1000;
+          const dBytes = totalBytes - lastSampleBytes;
+          lastSampleTime = now;
+          lastSampleBytes = totalBytes;
+
+          if (dt > 0) {
+            const instantMbps = (dBytes * 8) / (dt * 1e6);
+            smoothSpeed = smoothSpeed === 0 ? instantMbps : (smoothSpeed * 0.65 + instantMbps * 0.35);
+            peakSpeed = Math.max(peakSpeed, smoothSpeed);
+
+            if (now >= warmupCutoff && instantMbps > 0) {
+              speedSamples.push(instantMbps);
+            }
+
+            updateGauge(smoothSpeed, "purple");
+            pushGraphSample(smoothSpeed);
+
+            const displaySpeed = state.unit === "MB/s" ? (smoothSpeed / 8) : smoothSpeed;
+            dom.valUpload.textContent = displaySpeed.toFixed(1);
+          }
+        }
+
+        // Abort in-flight upload chunks immediately so upload finishes promptly
+        uploadDone = true;
+        for (const xhr of activeXhrs) {
+          try { xhr.abort(); } catch (e) {}
+        }
+
+        await Promise.allSettled(workers);
+
+        let calculatedSpeed = 0;
+        if (speedSamples.length >= 4) {
+          speedSamples.sort((a, b) => a - b);
+          const p80Start = Math.floor(speedSamples.length * 0.2);
+          const validSubset = speedSamples.slice(p80Start);
+          calculatedSpeed = validSubset.reduce((a, b) => a + b, 0) / validSubset.length;
+        } else {
+          const totalElapsed = (performance.now() - startTime) / 1000;
+          calculatedSpeed = totalElapsed > 0 ? (totalBytes * 8) / (totalElapsed * 1e6) : 0;
+        }
+
+        const totalMb = totalBytes / (1024 * 1024);
+        state.results.upload = Math.round(calculatedSpeed * 10) / 10;
+        state.results.uploadPeak = Math.round(peakSpeed * 10) / 10;
+        state.results.uploadBytes = totalMb;
+
+        const displayFinal = state.unit === "MB/s" ? (state.results.upload / 8) : state.results.upload;
+        const displayPeak = state.unit === "MB/s" ? (state.results.uploadPeak / 8) : state.results.uploadPeak;
+
+        dom.valUpload.textContent = displayFinal.toFixed(1);
+        dom.subUlPeak.textContent = `${displayPeak.toFixed(1)} ${state.unit}`;
+        dom.subUlTotal.textContent = `${totalMb.toFixed(1)} MB`;
+
+        dom.cardUpload.classList.remove("active-upload");
+      }
+
+      // --- EVALUASI KUALITAS & GRADE ---
+      function evaluateNetworkGrade() {
+        const { ping, jitter, download, bufferbloat } = state.results;
+
+        let grade = "A+";
+        let title = "Koneksi Sempurna & Super Cepat";
+        let desc = "Latency sangat rendah, jitter minimal, dan throughput prima. Ideal untuk Gaming Kompetitif (Valorant/Apex), Voice Chat, dan 4K Streaming.";
+
+        if (ping <= 25 && jitter <= 4 && download >= 50 && bufferbloat <= 15) {
+          grade = "A+";
+          title = "Koneksi Kelas Turnamen (Grade A+)";
+          desc = "Koneksi internet luar biasa stabil. Ping responsif untuk gaming kompetitif tanpa packet delay.";
+        } else if (ping <= 45 && jitter <= 8 && download >= 25 && bufferbloat <= 30) {
+          grade = "A";
+          title = "Koneksi Sangat Bagus (Grade A)";
+          desc = "Sangat lancar untuk video call HD, streaming resolusi tinggi, dan download file besar.";
+        } else if (ping <= 75 && download >= 10) {
+          grade = "B";
+          title = "Koneksi Cukup Baik (Grade B)";
+          desc = "Bagus untuk browsing dan YouTube, namun mungkin terasa sedikit latency pada game online sensitif.";
+        } else if (download >= 3) {
+          grade = "C";
+          title = "Koneksi Sedang (Grade C)";
+          desc = "Cukup untuk kebutuhan dasar, namun unduhan file besar dan streaming multi-device akan tersendat.";
+        } else {
+          grade = "D";
+          title = "Koneksi Terbatas (Grade D)";
+          desc = "Bandwidth atau kestabilan jaringan rendah. Disarankan memeriksa router atau ganti saluran Wi-Fi.";
+        }
+
+        state.results.grade = grade;
+        dom.gradeBadge.textContent = grade;
+        dom.verdictTitle.textContent = title;
+        dom.verdictDesc.textContent = desc;
+        dom.verdictBox.style.display = "flex";
+      }
+
+      // --- SIMPAN RIWAYAT KE LOCALSTORAGE ---
+      function saveTestHistory() {
+        const item = {
+          id: Date.now(),
+          time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+          date: new Date().toLocaleDateString("id-ID"),
+          server: state.currentEndpoint.name.split(" ")[0],
+          ping: state.results.ping,
+          jitter: state.results.jitter,
+          download: state.results.download,
+          upload: state.results.upload,
+          bufferbloat: state.results.bufferbloat,
+          grade: state.results.grade
+        };
+
+        state.history.unshift(item);
+        if (state.history.length > 20) state.history.pop();
+
+        try {
+          localStorage.setItem("zen_speedtest_history", JSON.stringify(state.history));
+        } catch (e) {}
+
+        renderHistoryTable();
+      }
+
+      function loadTestHistory() {
+        try {
+          const raw = localStorage.getItem("zen_speedtest_history");
+          if (raw) {
+            state.history = JSON.parse(raw);
+            renderHistoryTable();
+          }
+        } catch (e) {}
+      }
+
+      function renderHistoryTable() {
+        if (!state.history.length) {
+          dom.historyTableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-dim); padding: 24px;">Belum ada riwayat pengujian. Klik "MULAI TES" untuk memulai.</td></tr>`;
+          return;
+        }
+
+        dom.historyTableBody.innerHTML = state.history.map(item => `
+          <tr>
+            <td><strong>${item.time}</strong> <small style="color:var(--text-dim)">(${item.date})</small></td>
+            <td>${item.server}</td>
+            <td>${item.ping} ms</td>
+            <td>${item.jitter} ms</td>
+            <td><strong style="color:var(--cyan-neon)">${item.download}</strong> Mbps</td>
+            <td><strong style="color:var(--purple-neon)">${item.upload}</strong> Mbps</td>
+            <td>+${item.bufferbloat} ms</td>
+            <td><span class="grade-pill ${item.grade.charAt(0)}">${item.grade}</span></td>
+          </tr>
+        `).join("");
+      }
+
+      // --- FLOW EKSEKUSI TES LENGKAP ---
+      async function startCompleteSpeedTest() {
+        if (state.testing) return;
+        state.testing = true;
+        state.abortController = new AbortController();
+
+        // UI Reset
+        dom.btnStartTest.style.display = "none";
+        dom.btnCancelTest.style.display = "inline-block";
+        dom.verdictBox.style.display = "none";
+        resetGraph();
+
+        dom.valPing.textContent = "--";
+        dom.valJitter.textContent = "--";
+        dom.valDownload.textContent = "--";
+        dom.valUpload.textContent = "--";
+        dom.valBufferbloat.textContent = "--";
+
+        audio.playBlip(520, 0.1);
+
+        const duration = parseInt(dom.durationSelect.value, 10) || 10;
+        const streams = parseInt(dom.streamCountSelect.value, 10) || 3;
+
+        try {
+          // Update Server Endpoint jika dipilih Master
+          await detectNetworkMetadata();
+
+          // Phase 1: Ping & Jitter
+          await measurePingAndJitter(state.abortController.signal);
+
+          // Phase 2: Download
+          await measureDownload(state.abortController.signal, duration, streams);
+
+          // Phase 3: Upload
+          await measureUpload(state.abortController.signal, Math.max(5, Math.round(duration * 0.8)), Math.min(streams, 4));
+
+          // Evaluasi Akhir
+          evaluateNetworkGrade();
+          saveTestHistory();
+          audio.playSuccessChime();
+
+          state.phase = "completed";
+          dom.phaseBadge.textContent = "PENGUJIAN SELESAI";
+          updateGauge(state.results.download, "cyan");
+
+        } catch (err) {
+          if (state.abortController && state.abortController.signal.aborted) {
+            dom.phaseBadge.textContent = "PENGUJIAN DIBATALKAN";
+          } else {
+            console.error("[SpeedTest] Error:", err);
+            dom.phaseBadge.textContent = "TERJADI KESALAHAN KONEKSI";
+            dom.gradeBadge.textContent = "!";
+            dom.gradeBadge.style.background = "linear-gradient(135deg, #ef4444, #991b1b)";
+            dom.verdictTitle.textContent = "Kendala Jaringan Terdeteksi";
+            dom.verdictDesc.textContent = (state.serverMode === "local"
+              ? "Gagal menghubungi server lokal. Pastikan Jalankan_SpeedTest.bat aktif, atau pilih Cloudflare Global CDN."
+              : "Gagal menyambung ke server uji bandwidth: " + err.message);
+            dom.verdictBox.style.display = "flex";
+          }
+          updateGauge(0);
+        } finally {
+          state.testing = false;
+          dom.btnStartTest.style.display = "inline-flex";
+          dom.btnCancelTest.style.display = "none";
+        }
+      }
+
+      function cancelSpeedTest() {
+        if (state.abortController) {
+          state.abortController.abort();
+        }
+      }
+
+      // --- EVENT HANDLERS ---
+      dom.btnStartTest.addEventListener("click", startCompleteSpeedTest);
+      dom.btnCancelTest.addEventListener("click", cancelSpeedTest);
+
+      // Unit toggle (Mbps <-> MB/s)
+      dom.unitToggleBtn.addEventListener("click", () => {
+        state.unit = state.unit === "Mbps" ? "MB/s" : "Mbps";
+        dom.speedUnitText.textContent = state.unit;
+        dom.unitDl.textContent = state.unit;
+        dom.unitUl.textContent = state.unit;
+
+        if (state.results.download > 0) {
+          const dl = state.unit === "MB/s" ? (state.results.download / 8) : state.results.download;
+          dom.valDownload.textContent = dl.toFixed(1);
+          dom.subDlPeak.textContent = `${(state.unit === "MB/s" ? state.results.downloadPeak / 8 : state.results.downloadPeak).toFixed(1)} ${state.unit}`;
+        }
+        if (state.results.upload > 0) {
+          const ul = state.unit === "MB/s" ? (state.results.upload / 8) : state.results.upload;
+          dom.valUpload.textContent = ul.toFixed(1);
+          dom.subUlPeak.textContent = `${(state.unit === "MB/s" ? state.results.uploadPeak / 8 : state.results.uploadPeak).toFixed(1)} ${state.unit}`;
+        }
+      });
+
+      // Salin Ringkasan ke Clipboard
+      dom.btnCopySummary.addEventListener("click", () => {
+        const text = `⚡ ZEN SPEEDTEST PRO - LAPORAN KECEPATAN
+Waktu: ${new Date().toLocaleString("id-ID")}
+Server: ${dom.serverNodeDisplay.textContent}
+Lokasi: ${dom.clientLocationDisplay.textContent}
+IP: ${dom.clientIpDisplay.textContent}
+
+- Ping: ${state.results.ping} ms (Min: ${state.results.pingMin} ms, Avg: ${state.results.pingAvg} ms)
+- Jitter: ${state.results.jitter} ms
+- Download: ${state.results.download} Mbps (Puncak: ${state.results.downloadPeak} Mbps)
+- Upload: ${state.results.upload} Mbps (Puncak: ${state.results.uploadPeak} Mbps)
+- Bufferbloat: +${state.results.bufferbloat} ms
+- Kualitas Jaringan: ${state.results.grade} (${dom.verdictTitle.textContent})
+
+Diuji melalui Zen SpeedTest Pro oleh Pelayan Ancellia.`;
+
+        navigator.clipboard.writeText(text).then(() => {
+          dom.btnCopySummary.textContent = "✅ Berhasil Disalin!";
+          setTimeout(() => {
+            dom.btnCopySummary.textContent = "📋 Salin Ringkasan";
+          }, 2000);
+        });
+      });
+
+      // Unduh Riwayat CSV
+      dom.btnExportCsv.addEventListener("click", () => {
+        if (!state.history.length) {
+          alert("Belum ada data riwayat untuk diunduh.");
+          return;
+        }
+
+        const headers = ["Waktu", "Tanggal", "Server", "Ping_ms", "Jitter_ms", "Download_Mbps", "Upload_Mbps", "Bufferbloat_ms", "Grade"];
+        const rows = state.history.map(h => [
+          h.time, h.date, h.server, h.ping, h.jitter, h.download, h.upload, h.bufferbloat, h.grade
+        ]);
+
+        const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `speedtest_history_${Date.now()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+
+      // Hapus Riwayat
+      dom.btnClearHistory.addEventListener("click", () => {
+        if (confirm("Apakah Master Zay yakin ingin membersihkan riwayat pengujian?")) {
+          state.history = [];
+          localStorage.removeItem("zen_speedtest_history");
+          renderHistoryTable();
+        }
+      });
+
+      // Switch server mode
+      dom.serverModeSelect.addEventListener("change", () => {
+        detectNetworkMetadata();
+      });
+
+      // Inisialisasi awal
+      window.addEventListener("DOMContentLoaded", () => {
+        initCanvas();
+        window.addEventListener("resize", initCanvas);
+        loadTestHistory();
+        detectNetworkMetadata();
+      });
+
+    })();
+  </script>
+</body>
+</html>
