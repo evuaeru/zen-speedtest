@@ -1522,12 +1522,19 @@
         let isDone = false;
 
         // Worker generator
-        async function runDownloadWorker() {
-          let chunkSize = 1 * 1024 * 1024; // Mulai dari 1MB
+        async function runDownloadWorker(workerId) {
+          // Cloudflare safe max is 5MB to guarantee 0 HTTP 429 rate limit errors
+          let chunkSize = 2 * 1024 * 1024; // 2MB default
           while (performance.now() < endTime && !signal.aborted && !isDone) {
-            const downUrl = `${state.currentEndpoint.down}?bytes=${chunkSize}&t=${Date.now()}_${Math.random()}`;
+            const downUrl = `${state.currentEndpoint.down}?bytes=${chunkSize}&worker=${workerId}&t=${Date.now()}_${Math.random()}`;
             try {
               const res = await fetch(downUrl, { mode: "cors", cache: "no-store", signal });
+              if (!res.ok) {
+                // Auto recovery if rate limited (429)
+                chunkSize = 1 * 1024 * 1024;
+                await new Promise(r => setTimeout(r, 120));
+                continue;
+              }
               if (!res.body) {
                 const blob = await res.blob();
                 totalBytes += blob.size;
@@ -1546,15 +1553,23 @@
                   try { await reader.cancel(); } catch (e) {}
                 }
               }
-              // Adaptasi ukuran chunk jika kecepatan tinggi
-              if (smoothSpeed > 100 && chunkSize < 25 * 1024 * 1024) {
-                chunkSize = 10 * 1024 * 1024;
-              } else if (smoothSpeed > 30 && chunkSize < 5 * 1024 * 1024) {
-                chunkSize = 5 * 1024 * 1024;
+              // Adaptasi ukuran chunk (Aman untuk Cloudflare WAN: Max 5MB)
+              if (state.serverMode === "local") {
+                if (smoothSpeed > 100 && chunkSize < 15 * 1024 * 1024) {
+                  chunkSize = 10 * 1024 * 1024;
+                } else if (smoothSpeed > 30 && chunkSize < 5 * 1024 * 1024) {
+                  chunkSize = 5 * 1024 * 1024;
+                }
+              } else {
+                // Mode Cloudflare WAN: jaga ketat di 5MB maksimum agar tidak pernah terkena HTTP 429
+                if (smoothSpeed > 40 && chunkSize < 5 * 1024 * 1024) {
+                  chunkSize = 5 * 1024 * 1024;
+                }
               }
             } catch (err) {
               if (signal.aborted || isDone) break;
-              await new Promise(r => setTimeout(r, 80));
+              chunkSize = 1 * 1024 * 1024;
+              await new Promise(r => setTimeout(r, 100));
             }
           }
         }
@@ -1562,7 +1577,7 @@
         // Jalankan workers secara paralel
         const workers = [];
         for (let i = 0; i < streamCount; i++) {
-          workers.push(runDownloadWorker());
+          workers.push(runDownloadWorker(i));
         }
 
         // Timer monitor real-time (High-frequency sampling: 45ms interval)
@@ -1601,7 +1616,8 @@
             (async () => {
               const pt0 = performance.now();
               try {
-                await fetch(`${state.currentEndpoint.ping}?bb=dl_${Date.now()}`, { mode: "cors", cache: "no-store", signal });
+                const sep = state.currentEndpoint.ping.includes('?') ? '&' : '?';
+                await fetch(`${state.currentEndpoint.ping}${sep}bb=dl_${Date.now()}`, { mode: "cors", cache: "no-store", signal });
                 loadedPings.push(Math.max(1, performance.now() - pt0));
               } catch(e) {}
             })();
