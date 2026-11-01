@@ -216,10 +216,17 @@
       stroke: url(#cyan-gradient);
       stroke-width: 14;
       stroke-linecap: round;
-      stroke-dasharray: 612;
-      stroke-dashoffset: 612;
-      transition: stroke-dashoffset 0.15s ease-out, stroke 0.6s ease;
+      stroke-dasharray: 612.6;
+      stroke-dashoffset: 612.6;
+      transition: stroke 0.4s ease;
       filter: drop-shadow(0 0 10px var(--cyan-neon));
+      will-change: stroke-dashoffset;
+    }
+
+    .gauge-head-dot {
+      pointer-events: none;
+      filter: drop-shadow(0 0 8px #00f2fe) drop-shadow(0 0 14px rgba(0, 242, 254, 0.8));
+      will-change: cx, cy, opacity;
     }
 
     /* Gauge Digital Display */
@@ -746,6 +753,8 @@
           <path class="gauge-bg-arc" d="M 78.07 246.92 A 130 130 0 1 1 261.92 246.92" />
           <!-- Active Value Arc -->
           <path class="gauge-active-arc" id="gaugeActiveArc" d="M 78.07 246.92 A 130 130 0 1 1 261.92 246.92" />
+          <!-- Dynamic Glowing Needle Head Dot (60-165 FPS hardware lerped) -->
+          <circle id="gaugeHeadDot" class="gauge-head-dot" cx="78.07" cy="246.92" r="7.5" fill="#ffffff" stroke="#00f2fe" stroke-width="2.5" style="opacity: 0; transition: opacity 0.25s ease;" />
 
           <!-- Speed Ticks & Lines (Mathematically calibrated to speedToRatio) -->
           <g fill="rgba(255,255,255,0.4)" font-size="9" font-weight="600" text-anchor="middle">
@@ -1055,6 +1064,7 @@
         speedUnitText: document.getElementById("speedUnitText"),
         phaseBadge: document.getElementById("phaseBadge"),
         gaugeActiveArc: document.getElementById("gaugeActiveArc"),
+        gaugeHeadDot: document.getElementById("gaugeHeadDot"),
         gaugeGlow: document.getElementById("gaugeGlow"),
         btnStartTest: document.getElementById("btnStartTest"),
         btnStartText: document.getElementById("btnStartText"),
@@ -1156,6 +1166,106 @@
         }
       };
 
+      // --- ULTRA-SMOOTH 60-165 FPS HARDWARE RENDER ENGINE ---
+      const TOTAL_ARC_LENGTH = 612.6;
+
+      const anim = {
+        currentSpeed: 0,       // Lerped speed in Mbps
+        targetSpeed: 0,        // Raw target throughput from network
+        currentRatio: 0,       // Lerped arc ratio (0 to 1)
+        displayedNumber: 0,    // Smooth digital rolling odometer
+        phaseColor: "cyan",    // "cyan" | "purple"
+        lastTimestamp: performance.now(),
+        loopRunning: false
+      };
+
+      // Non-linear calibration: kecepatan (Mbps) -> persentase sudut (0 - 1)
+      function speedToRatio(mbps) {
+        if (mbps <= 0) return 0;
+        if (mbps <= 1) return (mbps / 1) * 0.08;
+        if (mbps <= 5) return 0.08 + ((mbps - 1) / 4) * 0.12;
+        if (mbps <= 10) return 0.20 + ((mbps - 5) / 5) * 0.10;
+        if (mbps <= 25) return 0.30 + ((mbps - 10) / 15) * 0.12;
+        if (mbps <= 50) return 0.42 + ((mbps - 25) / 25) * 0.12;
+        if (mbps <= 100) return 0.54 + ((mbps - 50) / 50) * 0.14;
+        if (mbps <= 250) return 0.68 + ((mbps - 100) / 150) * 0.12;
+        if (mbps <= 500) return 0.80 + ((mbps - 250) / 250) * 0.10;
+        if (mbps <= 1000) return 0.90 + ((mbps - 500) / 500) * 0.10;
+        return 1.0;
+      }
+
+      function updateGauge(mbps, phaseColor = "cyan") {
+        anim.targetSpeed = Math.max(0, mbps);
+        anim.phaseColor = phaseColor;
+
+        if (phaseColor === "purple") {
+          dom.gaugeActiveArc.setAttribute("stroke", "url(#upload-gradient)");
+          dom.gaugeGlow.style.background = "radial-gradient(circle, var(--purple-glow) 0%, transparent 70%)";
+        } else {
+          dom.gaugeActiveArc.setAttribute("stroke", "url(#cyan-gradient)");
+          dom.gaugeGlow.style.background = "radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%)";
+        }
+      }
+
+      // Continuous RAF render engine (operates at monitor native 60Hz / 120Hz / 165Hz)
+      function renderEngineLoop(now) {
+        const dt = Math.min(0.08, (now - anim.lastTimestamp) / 1000);
+        anim.lastTimestamp = now;
+
+        // Exponential smoothing: frame-rate independent (lambda = 12)
+        const decay = 1 - Math.exp(-12 * dt);
+
+        anim.currentSpeed += (anim.targetSpeed - anim.currentSpeed) * decay;
+        anim.displayedNumber += (anim.currentSpeed - anim.displayedNumber) * decay;
+
+        const targetRatio = speedToRatio(anim.currentSpeed);
+        anim.currentRatio += (targetRatio - anim.currentRatio) * decay;
+
+        // 1. Sub-pixel SVG Arc rendering
+        const offset = Math.max(0, Math.min(TOTAL_ARC_LENGTH, TOTAL_ARC_LENGTH * (1 - anim.currentRatio)));
+        dom.gaugeActiveArc.style.strokeDashoffset = offset.toFixed(2);
+
+        // 2. Glowing Needle Head Bullet (Calibrated 270 deg Arc)
+        if (dom.gaugeHeadDot) {
+          if (anim.currentRatio > 0.002) {
+            const angleRad = (135 + anim.currentRatio * 270) * (Math.PI / 180);
+            const hx = 170 + 130 * Math.cos(angleRad);
+            const hy = 155 + 130 * Math.sin(angleRad);
+            dom.gaugeHeadDot.setAttribute("cx", hx.toFixed(2));
+            dom.gaugeHeadDot.setAttribute("cy", hy.toFixed(2));
+            dom.gaugeHeadDot.style.opacity = "1";
+
+            if (anim.phaseColor === "purple") {
+              dom.gaugeHeadDot.setAttribute("stroke", "#ec4899");
+              dom.gaugeHeadDot.style.filter = "drop-shadow(0 0 8px #ec4899) drop-shadow(0 0 16px rgba(236,72,153,0.9))";
+            } else {
+              dom.gaugeHeadDot.setAttribute("stroke", "#00f2fe");
+              dom.gaugeHeadDot.style.filter = "drop-shadow(0 0 8px #00f2fe) drop-shadow(0 0 16px rgba(0,242,254,0.9))";
+            }
+          } else {
+            dom.gaugeHeadDot.style.opacity = "0";
+          }
+        }
+
+        // 3. Smooth Digital Odometer Counter
+        const displayVal = state.unit === "MB/s" ? (anim.displayedNumber / 8) : anim.displayedNumber;
+        dom.liveSpeedNumber.textContent = displayVal < 0.05 ? "0.0" : displayVal.toFixed(displayVal >= 100 ? 0 : 1);
+
+        // 4. Smooth card values during active tests
+        if (state.testing) {
+          if (state.phase === "download") {
+            dom.valDownload.textContent = displayVal < 0.05 ? "0.0" : displayVal.toFixed(1);
+          } else if (state.phase === "upload") {
+            dom.valUpload.textContent = displayVal < 0.05 ? "0.0" : displayVal.toFixed(1);
+          }
+        }
+
+        // 5. Smooth Bezier Canvas Sparkline
+        drawGraph();
+
+        requestAnimationFrame(renderEngineLoop);
+      }
+
       // --- CANVAS SPARKLINE GRAPH ---
       let canvasCtx = null;
       let graphSamples = [];
@@ -1175,7 +1285,6 @@
         if (graphSamples.length > MAX_GRAPH_POINTS) {
           graphSamples.shift();
         }
-        drawGraph();
       }
 
       function resetGraph() {
@@ -1194,27 +1303,44 @@
 
         canvasCtx.clearRect(0, 0, width, height);
 
-        const maxVal = Math.max(10, ...graphSamples) * 1.15;
+        const maxVal = Math.max(10, ...graphSamples, anim.currentSpeed) * 1.15;
         const step = width / (MAX_GRAPH_POINTS - 1);
         const startIndex = MAX_GRAPH_POINTS - graphSamples.length;
 
-        canvasCtx.beginPath();
-        graphSamples.forEach((val, i) => {
-          const x = (startIndex + i) * step;
-          const y = height - (val / maxVal) * (height - 6) - 3;
-          if (i === 0) canvasCtx.moveTo(x, y);
-          else canvasCtx.lineTo(x, y);
-        });
+        const points = [];
+        for (let i = 0; i < graphSamples.length; i++) {
+          const val = (i === graphSamples.length - 1) ? anim.currentSpeed : graphSamples[i];
+          points.push({
+            x: (startIndex + i) * step,
+            y: height - (val / maxVal) * (height - 8) - 4
+          });
+        }
 
-        // Line style
+        canvasCtx.beginPath();
+        canvasCtx.moveTo(points[0].x, points[0].y);
+
+        for (let i = 0; i < points.length - 1; i++) {
+          const p0 = points[i];
+          const p1 = points[i + 1];
+          const midX = (p0.x + p1.x) / 2;
+          const midY = (p0.y + p1.y) / 2;
+          canvasCtx.quadraticCurveTo(p0.x, p0.y, midX, midY);
+        }
+        const last = points[points.length - 1];
+        canvasCtx.lineTo(last.x, last.y);
+
+        // Neon line
         const isUpload = state.phase === "upload";
         canvasCtx.strokeStyle = isUpload ? "#ec4899" : "#00f2fe";
         canvasCtx.lineWidth = 2.5;
+        canvasCtx.shadowColor = isUpload ? "rgba(236, 72, 153, 0.7)" : "rgba(0, 242, 254, 0.7)";
+        canvasCtx.shadowBlur = 10;
         canvasCtx.stroke();
+        canvasCtx.shadowBlur = 0;
 
-        // Area fill
-        canvasCtx.lineTo((startIndex + graphSamples.length - 1) * step, height);
-        canvasCtx.lineTo(startIndex * step, height);
+        // Gradient Area fill
+        canvasCtx.lineTo(last.x, height);
+        canvasCtx.lineTo(points[0].x, height);
         canvasCtx.closePath();
 
         const grad = canvasCtx.createLinearGradient(0, 0, 0, height);
@@ -1227,43 +1353,15 @@
         }
         canvasCtx.fillStyle = grad;
         canvasCtx.fill();
-      }
 
-      // --- GAUGE NEEDLE & ARC MATH ---
-      // Arc total length = 612px
-      const TOTAL_ARC_LENGTH = 612;
-
-      // Non-linear calibration: kecepatan (Mbps) -> persentase sudut (0 - 1)
-      function speedToRatio(mbps) {
-        if (mbps <= 0) return 0;
-        if (mbps <= 1) return (mbps / 1) * 0.08;
-        if (mbps <= 5) return 0.08 + ((mbps - 1) / 4) * 0.12;
-        if (mbps <= 10) return 0.20 + ((mbps - 5) / 5) * 0.10;
-        if (mbps <= 25) return 0.30 + ((mbps - 10) / 15) * 0.12;
-        if (mbps <= 50) return 0.42 + ((mbps - 25) / 25) * 0.12;
-        if (mbps <= 100) return 0.54 + ((mbps - 50) / 50) * 0.14;
-        if (mbps <= 250) return 0.68 + ((mbps - 100) / 150) * 0.12;
-        if (mbps <= 500) return 0.80 + ((mbps - 250) / 250) * 0.10;
-        if (mbps <= 1000) return 0.90 + ((mbps - 500) / 500) * 0.10;
-        return 1.0;
-      }
-
-      function updateGauge(mbps, phaseColor = "cyan") {
-        const ratio = Math.min(1, Math.max(0, speedToRatio(mbps)));
-        const offset = TOTAL_ARC_LENGTH * (1 - ratio);
-        dom.gaugeActiveArc.style.strokeDashoffset = offset;
-
-        if (phaseColor === "purple") {
-          dom.gaugeActiveArc.setAttribute("stroke", "url(#upload-gradient)");
-          dom.gaugeGlow.style.background = "radial-gradient(circle, var(--purple-glow) 0%, transparent 70%)";
-        } else {
-          dom.gaugeActiveArc.setAttribute("stroke", "url(#cyan-gradient)");
-          dom.gaugeGlow.style.background = "radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%)";
-        }
-
-        // Tampilkan angka dengan satuan aktif
-        const displayValue = state.unit === "MB/s" ? (mbps / 8) : mbps;
-        dom.liveSpeedNumber.textContent = displayValue.toFixed(displayValue >= 100 ? 0 : 1);
+        // Glowing pulse head on waveform
+        canvasCtx.beginPath();
+        canvasCtx.arc(last.x, last.y, 4, 0, Math.PI * 2);
+        canvasCtx.fillStyle = "#ffffff";
+        canvasCtx.shadowColor = isUpload ? "#ec4899" : "#00f2fe";
+        canvasCtx.shadowBlur = 12;
+        canvasCtx.fill();
+        canvasCtx.shadowBlur = 0;
       }
 
       // --- DETEKSI JARINGAN & SERVER INFO ---
@@ -1467,12 +1565,13 @@
           workers.push(runDownloadWorker());
         }
 
-        // Timer monitor real-time (60fps / 100ms interval)
+        // Timer monitor real-time (High-frequency sampling: 45ms interval)
         let lastSampleTime = startTime;
         let lastSampleBytes = 0;
+        let lastGraphPushTime = startTime;
 
         while (performance.now() < endTime && !signal.aborted) {
-          await new Promise(r => setTimeout(r, 100));
+          await new Promise(r => setTimeout(r, 45));
           const now = performance.now();
           const dt = (now - lastSampleTime) / 1000;
           const dBytes = totalBytes - lastSampleBytes;
@@ -1481,7 +1580,7 @@
 
           if (dt > 0) {
             const instantMbps = (dBytes * 8) / (dt * 1e6);
-            smoothSpeed = smoothSpeed === 0 ? instantMbps : (smoothSpeed * 0.65 + instantMbps * 0.35);
+            smoothSpeed = smoothSpeed === 0 ? instantMbps : (smoothSpeed * 0.75 + instantMbps * 0.25);
             peakSpeed = Math.max(peakSpeed, smoothSpeed);
 
             if (now >= warmupCutoff && instantMbps > 0) {
@@ -1489,10 +1588,11 @@
             }
 
             updateGauge(smoothSpeed, "cyan");
-            pushGraphSample(smoothSpeed);
 
-            const displaySpeed = state.unit === "MB/s" ? (smoothSpeed / 8) : smoothSpeed;
-            dom.valDownload.textContent = displaySpeed.toFixed(1);
+            if (now - lastGraphPushTime >= 80) {
+              pushGraphSample(smoothSpeed);
+              lastGraphPushTime = now;
+            }
           }
 
           // Bufferbloat Ping probe (setiap 1.2 detik saat download penuh)
@@ -1641,9 +1741,10 @@
 
         let lastSampleTime = startTime;
         let lastSampleBytes = 0;
+        let lastGraphPushTime = startTime;
 
         while (performance.now() < endTime && !signal.aborted) {
-          await new Promise(r => setTimeout(r, 100));
+          await new Promise(r => setTimeout(r, 45));
           const now = performance.now();
           const dt = (now - lastSampleTime) / 1000;
           const dBytes = totalBytes - lastSampleBytes;
@@ -1652,7 +1753,7 @@
 
           if (dt > 0) {
             const instantMbps = (dBytes * 8) / (dt * 1e6);
-            smoothSpeed = smoothSpeed === 0 ? instantMbps : (smoothSpeed * 0.65 + instantMbps * 0.35);
+            smoothSpeed = smoothSpeed === 0 ? instantMbps : (smoothSpeed * 0.75 + instantMbps * 0.25);
             peakSpeed = Math.max(peakSpeed, smoothSpeed);
 
             if (now >= warmupCutoff && instantMbps > 0) {
@@ -1660,10 +1761,11 @@
             }
 
             updateGauge(smoothSpeed, "purple");
-            pushGraphSample(smoothSpeed);
 
-            const displaySpeed = state.unit === "MB/s" ? (smoothSpeed / 8) : smoothSpeed;
-            dom.valUpload.textContent = displaySpeed.toFixed(1);
+            if (now - lastGraphPushTime >= 80) {
+              pushGraphSample(smoothSpeed);
+              lastGraphPushTime = now;
+            }
           }
         }
 
@@ -1956,6 +2058,7 @@ Diuji melalui Zen SpeedTest Pro oleh Pelayan Ancellia.`;
         window.addEventListener("resize", initCanvas);
         loadTestHistory();
         detectNetworkMetadata();
+        requestAnimationFrame(renderEngineLoop);
       });
 
     })();
