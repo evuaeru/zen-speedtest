@@ -456,14 +456,17 @@ function makeSimpleDot() {
 const audioTelemetry = {
   resumed: 0,
   oscillators: [],
+  gains: [],
   filters: [],
   compressors: 0,
   panners: [],
   noiseBuffers: 0,
+  noiseArrays: [],
   noiseSources: 0,
   linearRamps: 0,
   disconnectedNodes: 0,
-  nanDetected: false
+  nanDetected: false,
+  zeroExpRampDetected: false
 };
 
 function makeAudioParam() {
@@ -475,7 +478,11 @@ function makeAudioParam() {
     events,
     setValueAtTime: (v, t) => { checkVal(v, t); events.push({ type: "set", v, t }); },
     linearRampToValueAtTime: (v, t) => { checkVal(v, t); audioTelemetry.linearRamps++; events.push({ type: "linear", v, t }); },
-    exponentialRampToValueAtTime: (v, t) => { checkVal(v, t); events.push({ type: "exp", v, t }); }
+    exponentialRampToValueAtTime: (v, t) => {
+      checkVal(v, t);
+      if (v <= 0) audioTelemetry.zeroExpRampDetected = true;
+      events.push({ type: "exp", v, t });
+    }
   };
 }
 
@@ -505,11 +512,13 @@ class MockAudioContext {
     return osc;
   }
   createGain() {
-    return {
+    const g = {
       gain: makeAudioParam(),
       connect: () => {},
       disconnect: () => { audioTelemetry.disconnectedNodes++; }
     };
+    audioTelemetry.gains.push(g);
+    return g;
   }
   createBiquadFilter() {
     const f = {
@@ -541,6 +550,7 @@ class MockAudioContext {
   createBuffer(channels, length, sampleRate) {
     audioTelemetry.noiseBuffers++;
     const arr = new Float32Array(length);
+    audioTelemetry.noiseArrays.push(arr);
     return { getChannelData: () => arr };
   }
   createBufferSource() {
@@ -698,7 +708,7 @@ if (elements.unitDl.textContent !== "Mbps" || elements.speedUnitText.textContent
   console.error("FAIL: Unit toggle Mbps gagal"); process.exit(1);
 }
 
-// 3b. Verifikasi Sound Profile Selector (zen, minimal, off, on) & Mute Protection
+// 3b. Verifikasi Sound Profile Selector (zen, minimal, off, on), Duration Selector, & Mute Protection
 elements.soundEffectSelect.value = "zen";
 elements.soundEffectSelect.trigger("change");
 if (storage.zen_sound_mode !== "zen") {
@@ -719,6 +729,13 @@ if (audioTelemetry.oscillators.length !== oscCountWhenMuted) {
 }
 elements.soundEffectSelect.value = "on";
 elements.soundEffectSelect.trigger("change");
+const oscBeforeDurationChange = audioTelemetry.oscillators.length;
+elements.durationSelect.value = "10";
+elements.durationSelect.trigger("change");
+if (audioTelemetry.oscillators.length <= oscBeforeDurationChange) {
+  console.error("FAIL: durationSelect change tidak membunyikan tactile click"); process.exit(1);
+}
+elements.durationSelect.value = "6";
 
 // 4. Uji Pembatalan (Cancel) SETELAH fase Ping selesai (memastikan seluruh sub-label ikut di-reset ke '--')
 fastForwardMode = true;
@@ -829,11 +846,15 @@ const waitDownloadPhase = setInterval(() => {
 
               // 7. Verifikasi mendalam Web Audio DSP (Zen Tactile Acoustic Engine)
               const hasTriangle = audioTelemetry.oscillators.some(o => o.type === "triangle" || o.type === "square" || o.type === "sawtooth");
-              if (hasTriangle || audioTelemetry.nanDetected) {
-                console.error("FAIL: Ditemukan oscillator kasar atau NaN AudioParam:", { hasTriangle, nanDetected: audioTelemetry.nanDetected });
+              if (hasTriangle || audioTelemetry.nanDetected || audioTelemetry.zeroExpRampDetected) {
+                console.error("FAIL: Ditemukan oscillator kasar, NaN, atau <=0 expRamp:", {
+                  hasTriangle,
+                  nanDetected: audioTelemetry.nanDetected,
+                  zeroExpRampDetected: audioTelemetry.zeroExpRampDetected
+                });
                 process.exit(1);
               }
-              if (audioTelemetry.resumed < 1 || audioTelemetry.compressors < 1 || audioTelemetry.noiseBuffers < 1 || audioTelemetry.noiseSources < 4 || audioTelemetry.panners.length < 5 || audioTelemetry.filters.length < 20 || audioTelemetry.linearRamps < 30 || audioTelemetry.disconnectedNodes < 20) {
+              if (audioTelemetry.resumed < 1 || audioTelemetry.compressors < 1 || audioTelemetry.noiseBuffers < 1 || audioTelemetry.noiseSources < 12 || audioTelemetry.panners.length < 15 || audioTelemetry.filters.length < 20 || audioTelemetry.linearRamps < 35 || audioTelemetry.disconnectedNodes < 20) {
                 console.error("FAIL: Arsitektur DSP Tactile Acoustic tidak lengkap:", {
                   resumed: audioTelemetry.resumed,
                   compressors: audioTelemetry.compressors,
@@ -844,6 +865,32 @@ const waitDownloadPhase = setInterval(() => {
                   linearRamps: audioTelemetry.linearRamps,
                   disconnectedNodes: audioTelemetry.disconnectedNodes
                 });
+                process.exit(1);
+              }
+
+              // Pastikan pink-noise buffer memiliki >400 zero-crossings (bukan DC ramp) & bounded dalam [-1.0, 1.0]
+              const pinkArr = audioTelemetry.noiseArrays[0];
+              let zc = 0;
+              let maxAbsNoise = 0;
+              for (let i = 0; i < pinkArr.length; i++) {
+                const absV = Math.abs(pinkArr[i]);
+                if (absV > maxAbsNoise) maxAbsNoise = absV;
+                if (i > 0 && ((pinkArr[i] >= 0 && pinkArr[i - 1] < 0) || (pinkArr[i] < 0 && pinkArr[i - 1] >= 0))) zc++;
+              }
+              if (zc < 400 || maxAbsNoise > 1.0 || maxAbsNoise < 0.2) {
+                console.error("FAIL: Pink-noise buffer tidak valid (DC ramp / clipping):", { zc, maxAbsNoise });
+                process.exit(1);
+              }
+
+              // Pastikan overtone gains (overGain & bellGain) menggunakan relative gain (>= 0.15), bukan double-attenuated peak^2 (< 0.008)
+              const hasAudibleOvertoneGain = audioTelemetry.gains.some(g =>
+                g.gain.events.some(e => e.type === "linear" && e.v >= 0.15 && e.v <= 0.45)
+              );
+              const hasInaudibleDoubleAttenuatedGain = audioTelemetry.gains.some(g =>
+                g.gain.events.some(e => e.type === "linear" && e.v > 0 && e.v < 0.0075)
+              );
+              if (!hasAudibleOvertoneGain || hasInaudibleDoubleAttenuatedGain) {
+                console.error("FAIL: Overtone gain mengalami double-attenuation (peak^2):", { hasAudibleOvertoneGain, hasInaudibleDoubleAttenuatedGain });
                 process.exit(1);
               }
 

@@ -2060,13 +2060,14 @@
             const length = Math.floor(sampleRate * 0.06);
             const buf = this.ctx.createBuffer(1, length, sampleRate);
             const data = buf.getChannelData(0);
-            let b0 = 0, b1 = 0, b2 = 0;
+            let b0 = 0, b1 = 0, b2 = 0, seed = 48271;
             for (let i = 0; i < length; i++) {
-              const white = ((i * 16807) % 2147483647) / 1073741823.5 - 1.0;
+              seed = (seed * 16807) % 2147483647;
+              const white = (seed / 1073741823.5) - 1.0;
               b0 = 0.99765 * b0 + white * 0.0990460;
               b1 = 0.96300 * b1 + white * 0.2965164;
               b2 = 0.57000 * b2 + white * 1.0526913;
-              data[i] = (b0 + b1 + b2 + white * 0.1848) * 0.12;
+              data[i] = Math.max(-0.95, Math.min(0.95, (b0 + b1 + b2 + white * 0.1848) * 0.18));
             }
             this.noiseBuffer = buf;
           }
@@ -2088,22 +2089,26 @@
             const safeAccent = (Number.isFinite(accent) && accent > 0) ? Math.max(0.4, Math.min(2.0, accent)) : 1.0;
             const safeOffset = Number.isFinite(startTimeOffset) ? Math.max(0, startTimeOffset) : 0;
             const t0 = this.ctx.currentTime + safeOffset;
+            const isZen = mode === "zen";
 
-            // 1. Physical membrane thump (rapid pitch drop 185Hz -> 46Hz in 18ms)
+            // 1. Physical membrane/wood thump (rapid pitch drop)
             const bodyOsc = this.ctx.createOscillator();
             const bodyGain = this.ctx.createGain();
             bodyOsc.type = "sine";
-            bodyOsc.frequency.setValueAtTime(185 * safeAccent, t0);
-            bodyOsc.frequency.exponentialRampToValueAtTime(46, t0 + 0.018);
+            const startFreq = (isZen ? 230 : 185) * safeAccent;
+            const endFreq = isZen ? 78 : 46;
+            const dropDur = isZen ? 0.026 : 0.018;
+            bodyOsc.frequency.setValueAtTime(startFreq, t0);
+            bodyOsc.frequency.exponentialRampToValueAtTime(endFreq, t0 + dropDur);
 
             bodyGain.gain.setValueAtTime(0.0001, t0);
-            bodyGain.gain.linearRampToValueAtTime(0.048, t0 + 0.0018);
-            bodyGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.022);
+            bodyGain.gain.linearRampToValueAtTime(isZen ? 0.036 : 0.048, t0 + 0.0018);
+            bodyGain.gain.exponentialRampToValueAtTime(0.0001, t0 + (isZen ? 0.032 : 0.022));
 
             if (typeof this.ctx.createBiquadFilter === "function") {
               const lp = this.ctx.createBiquadFilter();
               lp.type = "lowpass";
-              lp.frequency.setValueAtTime(680, t0);
+              lp.frequency.setValueAtTime(isZen ? 540 : 680, t0);
               bodyOsc.connect(lp);
               lp.connect(bodyGain);
             } else {
@@ -2112,7 +2117,7 @@
             bodyGain.connect(this.masterBus);
             this.disconnectAfter(bodyOsc, bodyGain);
             bodyOsc.start(t0);
-            bodyOsc.stop(t0 + 0.024);
+            bodyOsc.stop(t0 + (isZen ? 0.035 : 0.024));
 
             // 2. Micro-texture transient (band-passed pink noise snap)
             if (this.noiseBuffer && typeof this.ctx.createBufferSource === "function" && typeof this.ctx.createBiquadFilter === "function") {
@@ -2120,11 +2125,11 @@
               noiseSrc.buffer = this.noiseBuffer;
               const bp = this.ctx.createBiquadFilter();
               bp.type = "bandpass";
-              bp.frequency.setValueAtTime(1950 * safeAccent, t0);
-              bp.Q.setValueAtTime(2.4, t0);
+              bp.frequency.setValueAtTime((isZen ? 1450 : 1950) * safeAccent, t0);
+              bp.Q.setValueAtTime(isZen ? 3.0 : 2.4, t0);
               const nGain = this.ctx.createGain();
               nGain.gain.setValueAtTime(0.0001, t0);
-              nGain.gain.linearRampToValueAtTime(0.014, t0 + 0.0012);
+              nGain.gain.linearRampToValueAtTime(isZen ? 0.008 : 0.015, t0 + 0.0012);
               nGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.009);
               noiseSrc.connect(bp);
               bp.connect(nGain);
@@ -2152,48 +2157,74 @@
             const baseFreq = scale[safeIdx % scale.length];
             const rttFactor = Math.max(0.985, Math.min(1.015, 1 + (25 - Math.min(80, safeRtt)) * 0.0003));
             const freq = baseFreq * rttFactor;
-            const decayTime = mode === "zen" ? 0.135 : 0.085;
-            const peakLevel = mode === "zen" ? 0.026 : 0.032;
+            const isZen = mode === "zen";
+            const decayTime = isZen ? 0.155 : 0.092;
+            const peakLevel = isZen ? 0.028 : 0.034;
 
             const voiceGain = this.ctx.createGain();
             voiceGain.gain.setValueAtTime(0.0001, t0);
             voiceGain.gain.linearRampToValueAtTime(peakLevel, t0 + 0.003);
             voiceGain.gain.exponentialRampToValueAtTime(0.0001, t0 + decayTime);
 
+            let destNode = this.masterBus;
+            let busConnector = voiceGain;
+            if (typeof this.ctx.createStereoPanner === "function") {
+              const panSteps = [-0.16, -0.11, -0.06, -0.02, 0.02, 0.06, 0.11, 0.16];
+              const panner = this.ctx.createStereoPanner();
+              panner.pan.setValueAtTime(panSteps[safeIdx % panSteps.length], t0);
+              panner.connect(this.masterBus);
+              destNode = panner;
+              busConnector = panner;
+            }
+
             let targetNode = voiceGain;
             if (typeof this.ctx.createBiquadFilter === "function") {
               const filter = this.ctx.createBiquadFilter();
               filter.type = "lowpass";
-              filter.frequency.setValueAtTime(freq * 4.5, t0);
-              filter.frequency.exponentialRampToValueAtTime(freq * 1.2, t0 + 0.065);
-              filter.Q.setValueAtTime(1.4, t0);
+              filter.frequency.setValueAtTime(freq * (isZen ? 5.2 : 4.5), t0);
+              filter.frequency.exponentialRampToValueAtTime(freq * 1.25, t0 + 0.065);
+              filter.Q.setValueAtTime(isZen ? 1.8 : 1.4, t0);
               filter.connect(voiceGain);
               targetNode = filter;
             }
-            voiceGain.connect(this.masterBus);
+            voiceGain.connect(destNode);
 
             // Fundamental acoustic body with subtle droplet pitch envelope
             const fundOsc = this.ctx.createOscillator();
             fundOsc.type = "sine";
-            fundOsc.frequency.setValueAtTime(freq * 1.035, t0);
+            fundOsc.frequency.setValueAtTime(freq * (isZen ? 1.022 : 1.035), t0);
             fundOsc.frequency.exponentialRampToValueAtTime(freq, t0 + 0.012);
             fundOsc.connect(targetNode);
-            this.disconnectAfter(fundOsc, voiceGain);
+            this.disconnectAfter(fundOsc, busConnector);
             fundOsc.start(t0);
             fundOsc.stop(t0 + decayTime + 0.005);
 
-            // 2nd harmonic wooden/mallet overtone (decays faster than fundamental)
+            // 2nd harmonic wooden/kalimba overtone (relative gain into voiceGain, decays 2.3x faster)
             const overOsc = this.ctx.createOscillator();
             const overGain = this.ctx.createGain();
             overOsc.type = "sine";
-            overOsc.frequency.setValueAtTime(freq * 2.0, t0);
+            overOsc.frequency.setValueAtTime(freq * (isZen ? 2.003 : 2.0), t0);
             overGain.gain.setValueAtTime(0.0001, t0);
-            overGain.gain.linearRampToValueAtTime(peakLevel * 0.22, t0 + 0.002);
-            overGain.gain.exponentialRampToValueAtTime(0.0001, t0 + decayTime * 0.42);
+            overGain.gain.linearRampToValueAtTime(isZen ? 0.30 : 0.24, t0 + 0.002);
+            overGain.gain.exponentialRampToValueAtTime(0.0001, t0 + decayTime * 0.44);
             overOsc.connect(overGain);
             overGain.connect(targetNode);
             overOsc.start(t0);
-            overOsc.stop(t0 + decayTime * 0.45);
+            overOsc.stop(t0 + decayTime * 0.46);
+
+            // Subtle physical mallet micro-transient from pink-noise buffer
+            if (this.noiseBuffer && typeof this.ctx.createBufferSource === "function") {
+              const malletSrc = this.ctx.createBufferSource();
+              malletSrc.buffer = this.noiseBuffer;
+              const malletGain = this.ctx.createGain();
+              malletGain.gain.setValueAtTime(0.0001, t0);
+              malletGain.gain.linearRampToValueAtTime(isZen ? 0.12 : 0.18, t0 + 0.0012);
+              malletGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.007);
+              malletSrc.connect(malletGain);
+              malletGain.connect(targetNode);
+              malletSrc.start(t0);
+              malletSrc.stop(t0 + 0.008);
+            }
           } catch (e) {}
         },
         playPhaseShift(phase = "download") {
@@ -2206,19 +2237,21 @@
           try {
             if (!this.init()) return;
             const t0 = this.ctx.currentTime;
+            const isZen = mode === "zen";
+            const swellDur = isZen ? 0.34 : 0.24;
             const intervals = phase === "upload" ? [196.00, 293.66] : [146.83, 220.00];
             const swellGain = this.ctx.createGain();
             swellGain.gain.setValueAtTime(0.0001, t0);
-            swellGain.gain.linearRampToValueAtTime(0.020, t0 + 0.032);
-            swellGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.24);
+            swellGain.gain.linearRampToValueAtTime(isZen ? 0.018 : 0.022, t0 + (isZen ? 0.048 : 0.032));
+            swellGain.gain.exponentialRampToValueAtTime(0.0001, t0 + swellDur);
 
             let inputNode = swellGain;
             if (typeof this.ctx.createBiquadFilter === "function") {
               const lp = this.ctx.createBiquadFilter();
               lp.type = "lowpass";
               lp.frequency.setValueAtTime(280, t0);
-              lp.frequency.exponentialRampToValueAtTime(980, t0 + 0.06);
-              lp.frequency.exponentialRampToValueAtTime(320, t0 + 0.24);
+              lp.frequency.exponentialRampToValueAtTime(isZen ? 1220 : 980, t0 + 0.065);
+              lp.frequency.exponentialRampToValueAtTime(320, t0 + swellDur);
               lp.connect(swellGain);
               inputNode = lp;
             }
@@ -2232,7 +2265,7 @@
               osc.connect(inputNode);
               if (idx === intervals.length - 1) this.disconnectAfter(osc, swellGain);
               osc.start(t0);
-              osc.stop(t0 + 0.25);
+              osc.stop(t0 + swellDur + 0.01);
             });
           } catch (e) {}
         },
@@ -2247,17 +2280,18 @@
           try {
             if (!this.init()) return;
             const t0 = this.ctx.currentTime;
+            const isZen = mode === "zen";
             // Warm Dmaj9 acoustic vibraphone/glass voicing (D4, A4, C#5, E5, A5) — scheduled on Web Audio clock
             const chord = (grade === "C" || grade === "D")
               ? [246.94, 369.99, 440.00, 587.33]
               : [293.66, 440.00, 554.37, 659.25, 880.00];
             const panPositions = [-0.22, -0.10, 0.0, 0.12, 0.22];
-            const noteDuration = mode === "zen" ? 0.82 : 0.64;
+            const noteDuration = isZen ? 0.86 : 0.64;
 
             chord.forEach((freq, idx) => {
               const startAt = t0 + idx * 0.068;
               const noteGain = this.ctx.createGain();
-              const peak = (mode === "zen" ? 0.028 : 0.034) * (1 - idx * 0.08);
+              const peak = (isZen ? 0.028 : 0.034) * (1 - idx * 0.08);
               noteGain.gain.setValueAtTime(0.0001, startAt);
               noteGain.gain.linearRampToValueAtTime(peak, startAt + 0.006);
               noteGain.gain.exponentialRampToValueAtTime(0.0001, startAt + noteDuration);
@@ -2276,9 +2310,9 @@
               if (typeof this.ctx.createBiquadFilter === "function") {
                 const lp = this.ctx.createBiquadFilter();
                 lp.type = "lowpass";
-                lp.frequency.setValueAtTime(3200, startAt);
-                lp.frequency.exponentialRampToValueAtTime(780, startAt + noteDuration * 0.85);
-                lp.Q.setValueAtTime(0.9, startAt);
+                lp.frequency.setValueAtTime(isZen ? 3600 : 3200, startAt);
+                lp.frequency.exponentialRampToValueAtTime(isZen ? 920 : 780, startAt + noteDuration * 0.85);
+                lp.Q.setValueAtTime(isZen ? 1.15 : 0.9, startAt);
                 lp.connect(noteGain);
                 voiceInput = lp;
               }
@@ -2293,29 +2327,31 @@
               osc1.start(startAt);
               osc1.stop(startAt + noteDuration + 0.01);
 
-              // Subtle detuned harmonic shimmer companion
+              // Subtle detuned harmonic shimmer companion (smooth envelope)
               const osc2 = this.ctx.createOscillator();
               const shimmerGain = this.ctx.createGain();
               osc2.type = "sine";
               osc2.frequency.setValueAtTime(freq * 1.0022, startAt);
-              shimmerGain.gain.setValueAtTime(0.32, startAt);
+              shimmerGain.gain.setValueAtTime(0.0001, startAt);
+              shimmerGain.gain.linearRampToValueAtTime(isZen ? 0.38 : 0.30, startAt + 0.008);
+              shimmerGain.gain.exponentialRampToValueAtTime(0.0001, startAt + noteDuration);
               osc2.connect(shimmerGain);
               shimmerGain.connect(voiceInput);
               osc2.start(startAt);
               osc2.stop(startAt + noteDuration + 0.01);
 
-              // Crystalline mallet/glass strike transient (3rd harmonic, fast decay)
+              // Crystalline mallet/glass strike transient (3rd harmonic, relative gain into noteGain)
               const bellOsc = this.ctx.createOscillator();
               const bellGain = this.ctx.createGain();
               bellOsc.type = "sine";
               bellOsc.frequency.setValueAtTime(freq * 3.0, startAt);
               bellGain.gain.setValueAtTime(0.0001, startAt);
-              bellGain.gain.linearRampToValueAtTime(peak * 0.16, startAt + 0.002);
-              bellGain.gain.exponentialRampToValueAtTime(0.0001, startAt + 0.075);
+              bellGain.gain.linearRampToValueAtTime(isZen ? 0.24 : 0.18, startAt + 0.002);
+              bellGain.gain.exponentialRampToValueAtTime(0.0001, startAt + 0.085);
               bellOsc.connect(bellGain);
               bellGain.connect(voiceInput);
               bellOsc.start(startAt);
-              bellOsc.stop(startAt + 0.08);
+              bellOsc.stop(startAt + 0.09);
             });
           } catch (e) {}
         },
@@ -2330,6 +2366,8 @@
           try {
             if (!this.init()) return;
             const t0 = this.ctx.currentTime;
+            const isZen = mode === "zen";
+            const dur = isZen ? 0.15 : 0.11;
             const notes = [246.94, 185.00];
             notes.forEach((freq, idx) => {
               const startAt = t0 + idx * 0.072;
@@ -2338,12 +2376,12 @@
               osc.type = "sine";
               osc.frequency.setValueAtTime(freq, startAt);
               gain.gain.setValueAtTime(0.0001, startAt);
-              gain.gain.linearRampToValueAtTime(0.028, startAt + 0.004);
-              gain.gain.exponentialRampToValueAtTime(0.0001, startAt + 0.11);
+              gain.gain.linearRampToValueAtTime(isZen ? 0.024 : 0.028, startAt + 0.004);
+              gain.gain.exponentialRampToValueAtTime(0.0001, startAt + dur);
               if (typeof this.ctx.createBiquadFilter === "function") {
                 const lp = this.ctx.createBiquadFilter();
                 lp.type = "lowpass";
-                lp.frequency.setValueAtTime(560, startAt);
+                lp.frequency.setValueAtTime(isZen ? 640 : 560, startAt);
                 osc.connect(lp);
                 lp.connect(gain);
               } else {
@@ -2352,7 +2390,7 @@
               gain.connect(this.masterBus);
               this.disconnectAfter(osc, gain);
               osc.start(startAt);
-              osc.stop(startAt + 0.115);
+              osc.stop(startAt + dur + 0.005);
             });
           } catch (e) {}
         },
@@ -3551,6 +3589,11 @@
       dom.streamCountSelect.addEventListener("change", () => {
         audio.playTactileClick(0.9);
         dom.connModeToggle.textContent = dom.streamCountSelect.value === "1" ? "Single" : "Multi";
+      });
+
+      dom.durationSelect.addEventListener("change", () => {
+        audio.playTactileClick(0.92);
+        showToast(`Durasi Pengujian: ${dom.durationSelect.value} Detik`);
       });
 
       // IP Privacy Masking
