@@ -3,35 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Speedtest Custom — Master Zay</title>
+  <title>Zen SpeedTest Pro — Master Zay</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-page: #000000;
-      --bg-card: #101115;
-      --bg-card-elevated: #171920;
+      --bg-dark: #070a12;
+      --bg-card: rgba(15, 23, 42, 0.76);
+      --bg-card-hover: rgba(22, 33, 62, 0.86);
+      --bg-chip: rgba(255, 255, 255, 0.04);
+      --border-card: rgba(255, 255, 255, 0.08);
       --border-subtle: rgba(255, 255, 255, 0.05);
-      --border-icon: rgba(255, 255, 255, 0.22);
+      --border-active: rgba(0, 242, 254, 0.5);
 
-      --cyan-neon: #00d2ff;
-      --cyan-soft: rgba(0, 210, 255, 0.14);
-      --cyan-glow: rgba(0, 210, 255, 0.30);
+      --cyan-neon: #00f2fe;
+      --cyan-glow: rgba(0, 242, 254, 0.35);
+      --cyan-soft: rgba(0, 242, 254, 0.12);
+      --blue-accent: #4facfe;
       --purple-neon: #a855f7;
+      --purple-glow: rgba(168, 85, 247, 0.35);
       --purple-soft: rgba(168, 85, 247, 0.14);
-      --purple-glow: rgba(168, 85, 247, 0.30);
-      --yellow-ping: #eab308;
+      --pink-neon: #ec4899;
       --emerald-neon: #10b981;
+      --emerald-soft: rgba(16, 185, 129, 0.14);
+      --amber-neon: #f59e0b;
+      --amber-soft: rgba(245, 158, 11, 0.14);
       --rose-neon: #ef4444;
+      --rose-soft: rgba(239, 68, 68, 0.14);
 
-      --text-main: #ffffff;
-      --text-secondary: #d1d5db;
-      --text-muted: #8b95a5;
-      --text-dim: #5b6478;
+      --text-main: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
 
-      --font-ui: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      --font-num: 'Barlow Condensed', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     }
 
     * {
@@ -42,372 +49,627 @@
     }
 
     body {
-      background-color: var(--bg-page);
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(circle at 15% 15%, rgba(0, 242, 254, 0.07) 0%, transparent 40%),
+        radial-gradient(circle at 85% 20%, rgba(168, 85, 247, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 50% 85%, rgba(79, 172, 254, 0.06) 0%, transparent 50%);
       color: var(--text-main);
-      font-family: var(--font-ui);
+      font-family: var(--font-family);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      padding: 28px 16px 48px;
+      padding: 24px 16px 44px;
       overflow-x: hidden;
     }
 
-    .app-shell {
+    .container {
       width: 100%;
-      max-width: 900px;
+      max-width: 1120px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 20px;
     }
 
-    /* ==================== TOP UTILITY BAR (OOKLA REFERENCE) ==================== */
-    .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-      padding: 4px 4px;
-      font-size: 0.86rem;
-    }
-
-    .share-group {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-    }
-
-    .share-label {
-      font-weight: 600;
-      color: var(--text-main);
-      margin-right: 2px;
-    }
-
-    .circle-icon-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      border: 1.5px solid var(--cyan-neon);
-      background: transparent;
-      color: var(--cyan-neon);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .circle-icon-btn:hover {
-      background: var(--cyan-soft);
-      box-shadow: 0 0 10px var(--cyan-glow);
-    }
-
-    .circle-icon-btn svg {
-      width: 13px;
-      height: 13px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .result-id-wrap {
-      color: var(--text-muted);
-      font-size: 0.86rem;
-      font-weight: 500;
-    }
-
-    .result-id-wrap span {
-      color: var(--cyan-neon);
-      font-weight: 500;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-
-    .result-id-wrap span:hover {
-      opacity: 0.8;
-      text-decoration: underline;
-    }
-
-    .top-nav-links {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-    }
-
-    .nav-action-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-main);
-      font-family: var(--font-ui);
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      padding: 5px 8px;
-      border-radius: 6px;
-      transition: color 0.2s, background 0.2s;
-    }
-
-    .nav-action-btn:hover,
-    .nav-action-btn.active {
-      color: var(--cyan-neon);
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .nav-action-btn svg {
+    /* ==================== Minimalist Vector Icon System ==================== */
+    .vec-icon {
       width: 16px;
       height: 16px;
-      stroke: var(--text-muted);
       fill: none;
-      stroke-width: 1.8;
-      transition: stroke 0.2s;
+      stroke: currentColor;
+      stroke-width: 1.85;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
     }
 
-    .nav-action-btn:hover svg,
-    .nav-action-btn.active svg {
-      stroke: var(--cyan-neon);
+    .vec-icon-sm {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
     }
 
-    /* ==================== MAIN OOKLA BOARD CARD ==================== */
-    .main-board {
+    .vec-icon-lg {
+      width: 19px;
+      height: 19px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.85;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+
+    /* ==================== HEADER BAR ==================== */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding: 18px 24px;
       background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 40px 56px 44px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--cyan-neon), var(--purple-neon));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px var(--cyan-glow);
+      color: #ffffff;
+    }
+
+    .brand-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+    }
+
+    .brand-text h1 {
+      font-size: 1.22rem;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      background: linear-gradient(to right, #ffffff, var(--cyan-neon));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-text p {
+      font-size: 0.77rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 1px;
+    }
+
+    /* Network Info Chips */
+    .net-meta-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .meta-chip {
+      background: var(--bg-chip);
+      border: 1px solid var(--border-card);
+      padding: 6px 13px;
+      border-radius: 30px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .meta-chip.interactive {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .meta-chip.interactive:hover {
+      border-color: rgba(0, 242, 254, 0.35);
+      background: rgba(0, 242, 254, 0.06);
+    }
+
+    .meta-chip strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .meta-chip .vec-icon-sm {
+      color: var(--cyan-neon);
+      opacity: 0.85;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald-neon);
+      box-shadow: 0 0 8px var(--emerald-neon);
+      animation: pulse-dot 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* ==================== SPEEDOMETER HERO SECTION ==================== */
+    .speedometer-hero {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-card);
+      border-radius: 28px;
+      padding: 34px 24px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       position: relative;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
       overflow: hidden;
     }
 
     .gauge-glow {
       position: absolute;
-      width: 280px;
-      height: 280px;
-      left: 40px;
-      top: 30px;
-      background: radial-gradient(circle, rgba(0, 210, 255, 0.07) 0%, transparent 70%);
-      filter: blur(35px);
+      width: 380px;
+      height: 380px;
+      top: 25px;
+      background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%);
+      filter: blur(50px);
       pointer-events: none;
       z-index: 0;
-      opacity: 0;
-      transition: background 0.6s ease, opacity 0.5s ease;
+      transition: background 0.8s ease;
     }
 
-    /* Upper Grid: Left = MULAI Circle / Gauge, Right = Readouts + Ping + Icons */
-    .board-upper {
-      display: grid;
-      grid-template-columns: 220px 1fr;
-      align-items: center;
-      gap: 36px;
+    .gauge-container {
       position: relative;
+      width: 340px;
+      height: 260px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
       z-index: 1;
     }
 
-    /* Left Column: Zero-Layout-Shift Circular Hub */
-    .left-dial-zone {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      width: 210px;
-      height: 220px;
-      margin: 0 auto;
-    }
-
-    /* Iconic Circular MULAI Button (Matches Reference Screenshot 1:1) */
-    .btn-mulai-circle {
-      width: 202px;
-      height: 202px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(0, 229, 255, 0.03) 0%, rgba(0, 0, 0, 0.2) 100%);
-      border: 2px solid rgba(255, 255, 255, 0.06);
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      user-select: none;
-      transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-      outline: none;
-    }
-
-    .btn-mulai-circle::before {
-      content: "";
-      position: absolute;
-      inset: 13px;
-      border-radius: 50%;
-      border: 2px solid var(--cyan-neon);
-      box-shadow: 0 0 20px rgba(0, 229, 255, 0.18), inset 0 0 16px rgba(0, 229, 255, 0.08);
-      transition: all 0.3s ease;
-    }
-
-    .btn-mulai-circle:hover {
-      transform: scale(1.025);
-    }
-
-    .btn-mulai-circle:hover::before {
-      box-shadow: 0 0 28px rgba(0, 229, 255, 0.4), inset 0 0 22px rgba(0, 229, 255, 0.15);
-    }
-
-    .btn-mulai-circle:active {
-      transform: scale(0.985);
-    }
-
-    .mulai-label {
-      font-family: var(--font-ui);
-      font-size: 1.65rem;
-      font-weight: 700;
-      letter-spacing: 0.8px;
-      color: #ffffff;
-      text-transform: uppercase;
-      z-index: 2;
-    }
-
-    /* Active Radial Gauge (Same 202px Footprint -> Zero Layout Shift) */
-    .active-gauge-wrap {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      width: 210px;
-      height: 220px;
-    }
-
-    .active-gauge-wrap.testing-active {
-      display: flex;
-    }
-
     .gauge-svg {
-      width: 210px;
-      height: 175px;
-      overflow: visible;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 340px;
+      height: 260px;
     }
 
     .gauge-bg-arc {
       fill: none;
       stroke: rgba(255, 255, 255, 0.08);
-      stroke-width: 13;
+      stroke-width: 14;
       stroke-linecap: round;
     }
 
     .gauge-active-arc {
       fill: none;
       stroke: url(#cyan-gradient);
-      stroke-width: 13;
+      stroke-width: 14;
       stroke-linecap: round;
       stroke-dasharray: 612.6;
       stroke-dashoffset: 612.6;
-      filter: drop-shadow(0 0 8px var(--cyan-neon));
+      transition: stroke 0.4s ease;
+      filter: drop-shadow(0 0 10px var(--cyan-neon));
       will-change: stroke-dashoffset;
     }
 
     .gauge-head-dot {
       pointer-events: none;
-      filter: drop-shadow(0 0 6px #00e5ff);
+      filter: drop-shadow(0 0 8px #00f2fe) drop-shadow(0 0 14px rgba(0, 242, 254, 0.8));
+      will-change: cx, cy, opacity;
     }
 
-    .gauge-center-readout {
-      position: absolute;
-      top: 46px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .gauge-center-content {
+      position: relative;
+      z-index: 2;
       text-align: center;
+      margin-bottom: 22px;
     }
 
-    .live-speed-number {
-      font-family: var(--font-num);
-      font-size: 2.75rem;
-      font-weight: 300;
+    .speed-number {
+      font-size: 4.2rem;
+      font-weight: 900;
       line-height: 1;
-      color: #ffffff;
+      letter-spacing: -2px;
       font-variant-numeric: tabular-nums;
+      background: linear-gradient(to bottom, #ffffff, #d5e6fb);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 4px 16px rgba(0, 242, 254, 0.35));
     }
 
-    .speed-unit-pill {
-      font-size: 0.74rem;
-      font-weight: 600;
+    .speed-unit {
+      font-size: 0.92rem;
+      font-weight: 700;
       color: var(--cyan-neon);
-      margin-top: 2px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      margin-top: 6px;
       cursor: pointer;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 8px;
+      background: rgba(0, 242, 254, 0.1);
+      border: 1px solid rgba(0, 242, 254, 0.22);
+      transition: all 0.2s ease;
+    }
+
+    .speed-unit:hover {
+      background: rgba(0, 242, 254, 0.2);
+      box-shadow: 0 0 12px rgba(0, 242, 254, 0.25);
+    }
+
+    .test-phase-badge {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 5px 16px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-card);
+      color: var(--text-muted);
+      transition: all 0.3s ease;
+    }
+
+    /* Live Graph Sparkline */
+    .graph-wrapper {
+      width: 100%;
+      max-width: 600px;
+      height: 56px;
+      margin-top: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    #speedCanvas {
+      width: 100%;
+      height: 100%;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+    }
+
+    /* Action Buttons Row */
+    .action-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 22px;
+      z-index: 2;
+    }
+
+    .btn-main {
+      position: relative;
+      background: linear-gradient(135deg, var(--cyan-neon) 0%, var(--blue-accent) 50%, var(--purple-neon) 100%);
+      color: #070a12;
+      font-size: 1.08rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 15px 46px;
+      border: none;
+      border-radius: 40px;
+      cursor: pointer;
+      box-shadow: 0 0 30px var(--cyan-glow), 0 8px 24px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
       user-select: none;
     }
 
-    .phase-badge {
-      margin-top: 5px;
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      background: rgba(255, 255, 255, 0.05);
-      padding: 2px 9px;
-      border-radius: 10px;
+    .btn-main:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 0 45px rgba(0, 242, 254, 0.6), 0 12px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .btn-main:active {
+      transform: translateY(1px) scale(0.98);
+    }
+
+    .btn-main svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+      stroke: currentColor;
+      stroke-width: 1.5;
+      stroke-linejoin: round;
     }
 
     .btn-cancel {
-      margin-top: 4px;
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.35);
+      background: rgba(239, 68, 68, 0.14);
+      border: 1px solid rgba(239, 68, 68, 0.4);
       color: #fca5a5;
-      font-size: 0.72rem;
-      font-weight: 600;
-      padding: 4px 14px;
-      border-radius: 16px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 13px 26px;
+      border-radius: 40px;
       cursor: pointer;
       display: none;
+      align-items: center;
+      gap: 7px;
       transition: all 0.2s ease;
     }
 
     .btn-cancel:hover {
-      background: rgba(239, 68, 68, 0.25);
+      background: rgba(239, 68, 68, 0.28);
       color: #ffffff;
     }
 
-    /* Right Column: Big UNDUHAN / UNGGAHAN + Ping Row + 4 Quality Icons */
-    .right-telemetry-zone {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-    }
-
-    .speeds-pair-row {
+    /* ==================== 5 METRIC CARDS GRID (MINIMALIST VECTOR EDITION) ==================== */
+    .metrics-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 36px;
-      width: 100%;
-      max-width: 470px;
-      text-align: center;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
     }
 
-    .speed-metric-block {
+    .metric-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 18px 18px 16px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      padding: 2px 8px;
-      border-radius: 8px;
+      gap: 10px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
 
-    .speed-header {
+    .metric-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      background: var(--bg-card-hover);
+    }
+
+    .metric-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: transparent;
+      transition: background 0.3s ease;
+    }
+
+    .metric-card.active {
+      border-color: var(--border-active);
+      box-shadow: 0 6px 24px rgba(0, 242, 254, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .metric-card.active::before {
+      background: var(--cyan-neon);
+    }
+
+    .metric-card.active-upload {
+      border-color: var(--purple-neon);
+      box-shadow: 0 6px 24px var(--purple-glow);
+      transform: translateY(-2px);
+    }
+
+    .metric-card.active-upload::before {
+      background: var(--purple-neon);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--text-muted);
+    }
+
+    .card-title {
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      margin-bottom: 2px;
+      gap: 6px;
+      color: var(--text-muted);
     }
 
-    .metric-circle-icon {
+    .card-title .vec-icon {
+      width: 15px;
+      height: 15px;
+      opacity: 0.85;
+    }
+
+    /* Minimalist Vector Badge (Replaces Old System Emojis) */
+    .vector-badge {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.03);
+      transition: all 0.25s ease;
+    }
+
+    .vector-badge svg {
+      width: 15px;
+      height: 15px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .vector-badge.ping-vec {
+      color: var(--amber-neon);
+      background: var(--amber-soft);
+      border-color: rgba(245, 158, 11, 0.28);
+    }
+
+    .vector-badge.jitter-vec {
+      color: var(--emerald-neon);
+      background: var(--emerald-soft);
+      border-color: rgba(16, 185, 129, 0.28);
+    }
+
+    .vector-badge.dl-vec {
+      color: var(--cyan-neon);
+      background: var(--cyan-soft);
+      border-color: rgba(0, 242, 254, 0.28);
+    }
+
+    .vector-badge.ul-vec {
+      color: var(--purple-neon);
+      background: var(--purple-soft);
+      border-color: rgba(168, 85, 247, 0.28);
+    }
+
+    .vector-badge.bb-vec {
+      color: var(--pink-neon);
+      background: rgba(236, 72, 153, 0.14);
+      border-color: rgba(236, 72, 153, 0.28);
+    }
+
+    .card-value-wrap {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+      margin: 2px 0;
+    }
+
+    .card-val {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: var(--text-main);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+    }
+
+    .card-unit {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-dim);
+    }
+
+    .card-sub {
+      font-size: 0.74rem;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      margin-top: auto;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card-sub b {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    /* ==================== TELEMETRY & ACTIVITY QUALITY BAR (REFERENCE INTEGRATION) ==================== */
+    .telemetry-quality-bar {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 16px 22px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 24px;
+    }
+
+    /* Left: Loaded Ping Breakdown (Idle, Down Loaded, Up Loaded) */
+    .loaded-ping-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding-right: 18px;
+      border-right: 1px solid var(--border-card);
+    }
+
+    .loaded-ping-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .loaded-ping-label small {
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      text-transform: none;
+    }
+
+    .ping-pills-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ping-mini-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-card);
+      padding: 5px 10px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-secondary);
+    }
+
+    .mini-circle-vec {
       width: 18px;
       height: 18px;
       border-radius: 50%;
@@ -417,314 +679,163 @@
       flex-shrink: 0;
     }
 
-    .metric-circle-icon.dl {
+    .mini-circle-vec svg {
+      width: 10px;
+      height: 10px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .mini-circle-vec.idle {
+      border: 1.5px solid var(--amber-neon);
+      color: var(--amber-neon);
+    }
+
+    .mini-circle-vec.dl {
       border: 1.5px solid var(--cyan-neon);
       color: var(--cyan-neon);
     }
 
-    .metric-circle-icon.ul {
+    .mini-circle-vec.ul {
       border: 1.5px solid var(--purple-neon);
       color: var(--purple-neon);
     }
 
-    .metric-circle-icon.ping-idle {
-      border: 1.5px solid var(--yellow-ping);
-      color: var(--yellow-ping);
-    }
-
-    .metric-circle-icon svg {
-      width: 10px;
-      height: 10px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 2.3;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .speed-title {
-      font-size: 0.86rem;
-      font-weight: 700;
-      letter-spacing: 0.7px;
-      text-transform: uppercase;
-      color: var(--text-main);
-    }
-
-    .speed-unit-label {
-      font-size: 0.86rem;
-      font-weight: 400;
-      color: var(--text-muted);
-    }
-
-    .big-speed-val {
-      font-family: var(--font-num);
-      font-size: 4.25rem;
-      font-weight: 300;
-      line-height: 1.0;
-      letter-spacing: -0.5px;
-      color: var(--text-main);
-      font-variant-numeric: tabular-nums;
-      min-height: 66px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .speed-sub-meta {
-      display: none;
-    }
-
-    /* Subtle Sparkline Canvas (Collapsed when idle so vertical spacing matches screenshot) */
-    .sparkline-holder {
-      width: 100%;
-      max-width: 430px;
-      height: 0;
-      overflow: hidden;
-      opacity: 0;
-      transition: height 0.25s ease, opacity 0.25s ease;
-    }
-
-    .sparkline-holder.active-graph {
-      height: 24px;
-      margin: 4px 0 2px;
-      opacity: 0.85;
-    }
-
-    #speedCanvas {
-      width: 100%;
-      height: 24px;
-      display: block;
-    }
-
-    /* Ping ms Row (Idle, Download Loaded, Upload Loaded) */
-    .ping-strip-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 24px;
-      margin-top: 14px;
-      padding: 4px 10px;
-    }
-
-    .ping-main-label {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      font-weight: 400;
-    }
-
-    .ping-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 0.92rem;
-      color: var(--text-secondary);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .ping-val-num {
-      font-weight: 400;
-      color: var(--text-secondary);
-    }
-
-    /* 4 Category Quality Icons with 5-Dot Bars */
+    /* Center: 4 Activity Quality Categories with Minimalist Vector Icons & 5-Dot Rating */
     .quality-categories-row {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 30px;
-      margin-top: 24px;
+      gap: 26px;
+      flex-wrap: wrap;
     }
 
     .qual-cat-item {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 7px;
-      cursor: default;
+      gap: 10px;
+      padding: 6px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.25s ease;
+    }
+
+    .qual-cat-item.scored {
+      border-color: rgba(0, 242, 254, 0.2);
+      background: rgba(0, 242, 254, 0.04);
     }
 
     .qual-icon-box {
-      width: 44px;
-      height: 30px;
-      border: 1.7px solid #9ca3af;
-      border-radius: 4px;
+      width: 34px;
+      height: 26px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #9ca3af;
-      transition: all 0.3s ease;
-    }
-
-    .qual-icon-box.no-frame {
-      border: none;
-      width: 46px;
-      height: 30px;
+      color: var(--text-muted);
+      transition: color 0.25s ease;
     }
 
     .qual-cat-item.scored .qual-icon-box {
-      border-color: #d1d5db;
-      color: #d1d5db;
+      color: var(--cyan-neon);
     }
 
     .qual-icon-box svg {
       width: 24px;
-      height: 18px;
-      stroke: currentColor;
+      height: 20px;
       fill: none;
-      stroke-width: 1.6;
+      stroke: currentColor;
+      stroke-width: 1.75;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
 
-    .qual-icon-box.no-frame svg {
-      width: 42px;
-      height: 28px;
-      stroke-width: 1.75;
+    .qual-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .qual-name {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
     }
 
     .qual-dots {
       display: flex;
       align-items: center;
-      gap: 3.5px;
+      gap: 4px;
     }
 
     .qual-dot {
-      width: 5px;
-      height: 5px;
+      width: 5.5px;
+      height: 5.5px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.22);
-      transition: background 0.3s ease;
+      background: rgba(255, 255, 255, 0.18);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
     }
 
     .qual-dot.lit {
-      background: #ffffff;
+      background: var(--cyan-neon);
+      box-shadow: 0 0 6px var(--cyan-glow);
     }
 
-    /* ==================== LOWER BOARD: METADATA & PROVIDER RATING ==================== */
-    .board-lower {
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      align-items: center;
-      gap: 36px;
-      margin-top: 42px;
-      padding-left: 38px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .info-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    .info-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 15px;
-    }
-
-    .info-circle-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 1.4px solid var(--border-icon);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #9ca3af;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .info-circle-icon svg {
-      width: 19px;
-      height: 19px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 1.5;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .info-text-col {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .info-primary {
-      font-size: 0.94rem;
-      font-weight: 600;
-      color: var(--text-main);
-    }
-
-    .info-secondary {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-
-    .change-server-link {
-      font-size: 0.86rem;
-      color: var(--cyan-neon);
-      text-decoration: none;
-      font-weight: 500;
-      margin-top: 2px;
-      display: inline-block;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-
-    .change-server-link:hover {
-      opacity: 0.8;
-      text-decoration: underline;
-    }
-
-    /* Provider Rating Block (Bottom Right) */
+    /* Right: Provider Rating & Result ID */
     .provider-rating-zone {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding-top: 18px;
+      align-items: flex-end;
+      gap: 4px;
+      padding-left: 18px;
+      border-left: 1px solid var(--border-card);
     }
 
-    .provider-rating-heading {
-      font-size: 0.78rem;
-      font-weight: 800;
+    .provider-rating-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
-      color: var(--text-main);
+      color: var(--text-muted);
     }
 
-    .provider-rating-sub {
-      font-size: 1.08rem;
-      font-weight: 400;
-      color: var(--text-secondary);
-      margin-top: 4px;
-      margin-bottom: 12px;
+    .result-id-tag {
+      color: var(--cyan-neon);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      cursor: pointer;
+    }
+
+    .result-id-tag:hover {
+      text-decoration: underline;
     }
 
     .stars-row {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 4px;
     }
 
     .star-btn {
       background: transparent;
       border: none;
       cursor: pointer;
-      color: #6b7280;
+      color: rgba(255, 255, 255, 0.22);
       padding: 2px;
       transition: transform 0.15s ease, color 0.2s ease;
     }
 
     .star-btn:hover {
       transform: scale(1.15);
+      color: var(--cyan-neon);
     }
 
     .star-btn.active {
@@ -732,118 +843,174 @@
     }
 
     .star-btn svg {
-      width: 25px;
-      height: 25px;
+      width: 16px;
+      height: 16px;
       fill: currentColor;
+      stroke: currentColor;
+      stroke-width: 1.5;
+      stroke-linejoin: round;
     }
 
-    /* Verdict & Grade Badge (Compact & Subtle below stars) */
+    /* ==================== OVERALL QUALITY VERDICT BOX ==================== */
     .verdict-box {
-      margin-top: 12px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      padding: 6px 12px;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(0, 242, 254, 0.08));
+      border: 1px solid rgba(16, 185, 129, 0.28);
+      border-radius: 18px;
+      padding: 16px 22px;
       display: none;
       align-items: center;
-      gap: 10px;
-      max-width: 320px;
-      text-align: left;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .verdict-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
     }
 
     .grade-badge {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      background: rgba(16, 185, 129, 0.2);
-      border: 1px solid rgba(16, 185, 129, 0.45);
-      color: #34d399;
-      font-size: 0.8rem;
-      font-weight: 800;
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--emerald-neon), #059669);
+      color: #ffffff;
+      font-size: 1.4rem;
+      font-weight: 900;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
       flex-shrink: 0;
     }
 
     .verdict-text h4 {
-      font-size: 0.76rem;
-      font-weight: 600;
-      color: var(--text-secondary);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
     }
 
     .verdict-text p {
-      display: none;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
     }
 
-    /* ==================== COLLAPSIBLE DRAWERS: PENGATURAN & HASIL ==================== */
-    .drawer-panel {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 20px 26px;
-      display: none;
-      flex-direction: column;
-      gap: 16px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-    }
-
-    .drawer-panel.open {
-      display: flex;
-    }
-
-    .drawer-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border-subtle);
-      padding-bottom: 10px;
-    }
-
-    .drawer-header h3 {
-      font-size: 0.92rem;
-      font-weight: 700;
-      color: var(--text-main);
+    .verdict-actions {
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .settings-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    .btn-share {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--border-card);
+      color: var(--text-main);
+      padding: 8px 15px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-share:hover {
+      background: rgba(0, 242, 254, 0.14);
+      border-color: rgba(0, 242, 254, 0.35);
+      color: #ffffff;
+    }
+
+    /* ==================== SETTINGS & PREFERENCES BAR ==================== */
+    .settings-bar {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-card);
+      border-radius: 18px;
+      padding: 16px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
       gap: 14px;
     }
 
     .setting-group {
       display: flex;
-      flex-direction: column;
-      gap: 6px;
+      align-items: center;
+      gap: 9px;
     }
 
     .setting-label {
-      font-size: 0.76rem;
+      font-size: 0.79rem;
       color: var(--text-muted);
       font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .setting-label .vec-icon-sm {
+      color: var(--cyan-neon);
+      opacity: 0.85;
     }
 
     select {
-      background: var(--bg-card-elevated);
-      border: 1px solid var(--border-subtle);
+      background: rgba(0, 0, 0, 0.38);
+      border: 1px solid var(--border-card);
       color: var(--text-main);
-      padding: 8px 12px;
-      border-radius: 7px;
-      font-size: 0.82rem;
-      font-family: var(--font-ui);
+      padding: 7px 12px;
+      border-radius: 10px;
+      font-size: 0.81rem;
       outline: none;
       cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.2s ease;
     }
 
-    select:focus {
-      border-color: var(--cyan-neon);
+    select:focus,
+    select:hover {
+      border-color: rgba(0, 242, 254, 0.45);
     }
 
-    /* History Table */
+    /* ==================== HISTORY TABLE SECTION ==================== */
+    .history-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .history-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .history-head h3 {
+      font-size: 0.98rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--text-main);
+    }
+
+    .history-head h3 .vec-icon {
+      color: var(--cyan-neon);
+    }
+
     .history-actions {
       display: flex;
       gap: 8px;
@@ -851,19 +1018,23 @@
 
     .btn-secondary {
       background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-secondary);
-      padding: 5px 12px;
-      border-radius: 6px;
-      font-size: 0.75rem;
+      border: 1px solid var(--border-card);
+      color: var(--text-muted);
+      padding: 6px 13px;
+      border-radius: 9px;
+      font-size: 0.76rem;
       font-weight: 600;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       transition: all 0.2s ease;
     }
 
     .btn-secondary:hover {
       background: rgba(255, 255, 255, 0.1);
-      color: #ffffff;
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.18);
     }
 
     .table-responsive {
@@ -874,36 +1045,41 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.82rem;
+      font-size: 0.83rem;
       text-align: left;
     }
 
     th {
-      padding: 9px 12px;
-      color: var(--text-muted);
+      padding: 10px 14px;
+      color: var(--text-dim);
       font-weight: 600;
-      border-bottom: 1px solid var(--border-subtle);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       text-transform: uppercase;
-      font-size: 0.7rem;
+      font-size: 0.71rem;
       letter-spacing: 0.5px;
     }
 
     td {
-      padding: 10px 12px;
+      padding: 12px 14px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       color: var(--text-main);
+      font-variant-numeric: tabular-nums;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
     }
 
     .grade-pill {
       display: inline-block;
       padding: 2px 8px;
-      border-radius: 5px;
+      border-radius: 6px;
       font-weight: 700;
-      font-size: 0.72rem;
+      font-size: 0.74rem;
     }
 
     .grade-pill.A { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-    .grade-pill.B { background: rgba(0, 229, 255, 0.2); color: #00e5ff; }
+    .grade-pill.B { background: rgba(79, 172, 254, 0.2); color: #60a5fa; }
     .grade-pill.C { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
     .grade-pill.D { background: rgba(239, 68, 68, 0.2); color: #f87171; }
 
@@ -912,11 +1088,12 @@
       position: fixed;
       bottom: 24px;
       right: 24px;
-      background: #191c29;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
       border: 1px solid var(--cyan-neon);
       color: #ffffff;
       padding: 10px 18px;
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 0.82rem;
       font-weight: 600;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
@@ -934,373 +1111,579 @@
 
     footer {
       text-align: center;
-      padding: 8px 0 4px;
-      font-size: 0.75rem;
+      padding: 12px 0 4px;
+      font-size: 0.79rem;
       color: var(--text-dim);
     }
 
-    @media (max-width: 768px) {
-      .main-board {
-        padding: 28px 20px;
+    @media (max-width: 1024px) {
+      .metrics-grid {
+        grid-template-columns: repeat(3, 1fr);
       }
-      .board-upper {
+      .telemetry-quality-bar {
         grid-template-columns: 1fr;
-        gap: 24px;
+        justify-items: center;
+        text-align: center;
       }
-      .speeds-pair-row {
-        gap: 20px;
+      .loaded-ping-group {
+        border-right: none;
+        padding-right: 0;
       }
-      .big-speed-val {
-        font-size: 3.3rem;
-      }
-      .board-lower {
-        grid-template-columns: 1fr;
+      .provider-rating-zone {
+        border-left: none;
         padding-left: 0;
-        gap: 28px;
+        align-items: center;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .gauge-container {
+        width: 290px;
+        height: 220px;
+      }
+      .gauge-svg {
+        width: 290px;
+        height: 220px;
+      }
+      .speed-number {
+        font-size: 3.4rem;
+      }
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
   </style>
 </head>
 <body>
 
-  <div class="app-shell">
-    <!-- ==================== TOP UTILITY BAR ==================== -->
-    <header class="top-bar">
-      <div class="share-group">
-        <span class="share-label">Sebar</span>
-        <button class="circle-icon-btn" id="btnCopySummary" title="Salin Ringkasan Hasil">
-          <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        </button>
-        <button class="circle-icon-btn" id="btnShareSocial" title="Bagikan ke X / Media Sosial">
-          <svg viewBox="0 0 24 24"><path d="M4 4l11.733 16h4.267l-11.733 -16z"/><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"/></svg>
-        </button>
-        <button class="circle-icon-btn" id="btnQuickExport" title="Unduh Riwayat CSV">
-          <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-        </button>
-        <button class="circle-icon-btn" id="unitToggleBtn" title="Ganti Satuan (Mbps / MB/s)">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-        </button>
+  <div class="container">
+    <!-- ==================== HEADER BAR ==================== -->
+    <header>
+      <div class="brand-wrap">
+        <div class="brand-icon">
+          <!-- Minimalist Vector Bolt Icon -->
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="currentColor" stroke="none"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>ZEN SPEEDTEST PRO</h1>
+          <p>High-Precision Bandwidth &amp; Latency Benchmark</p>
+        </div>
       </div>
 
-      <div class="result-id-wrap">
-        ID Hasil: <span id="resultIdDisplay" title="Klik untuk menyalin ID Hasil">19863800067</span>
-      </div>
+      <div class="net-meta-wrap">
+        <div class="meta-chip interactive" id="btnGantiServer" title="Klik untuk memilih server pengujian">
+          <span class="status-dot"></span>
+          <svg class="vec-icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="2" y="3" width="20" height="7" rx="2"/>
+            <rect x="2" y="14" width="20" height="7" rx="2"/>
+            <line x1="6" y1="6.5" x2="6.01" y2="6.5"/>
+            <line x1="6" y1="17.5" x2="6.01" y2="17.5"/>
+          </svg>
+          <span>Server: <strong id="serverNodeDisplay">Cloudflare Global Edge</strong></span>
+        </div>
 
-      <div class="top-nav-links">
-        <button class="nav-action-btn" id="btnToggleHistory">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>
-          HASIL
-        </button>
-        <button class="nav-action-btn" id="btnToggleSettings">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          PENGATURAN
-        </button>
+        <div class="meta-chip interactive" id="ipChipWrap" title="Klik untuk menyembunyikan/menampilkan IP">
+          <svg class="vec-icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <line x1="3.6" y1="9" x2="20.4" y2="9"/>
+            <line x1="3.6" y1="15" x2="20.4" y2="15"/>
+            <path d="M11.5 3a17 17 0 0 0 0 18"/>
+            <path d="M12.5 3a17 17 0 0 1 0 18"/>
+          </svg>
+          <span><strong id="ispNameDisplay">Telkomsel Indihome</strong> • IP: <strong id="clientIpDisplay">182.10.131.57</strong></span>
+        </div>
+
+        <div class="meta-chip">
+          <svg class="vec-icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          <span>Lokasi: <strong id="clientLocationDisplay">ID (SIN)</strong></span>
+        </div>
+
+        <div class="meta-chip interactive" title="Klik untuk mengganti mode koneksi Multi / Single">
+          <svg class="vec-icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 8h15m0 0l-3-3m3 3l-3 3"/>
+            <path d="M4 16h15m0 0l-3-3m3 3l-3 3"/>
+          </svg>
+          <span>Koneksi: <strong id="connModeToggle">Multi</strong></span>
+        </div>
       </div>
     </header>
 
-    <!-- ==================== MAIN OOKLA SPEEDTEST BOARD ==================== -->
-    <main class="main-board">
+    <!-- ==================== SPEEDOMETER HERO SECTION ==================== -->
+    <section class="speedometer-hero">
       <div class="gauge-glow" id="gaugeGlow"></div>
 
-      <!-- Upper Section -->
-      <div class="board-upper">
-        <!-- Left Dial: Circular MULAI Button & Active Speedometer -->
-        <div class="left-dial-zone">
-          <button class="btn-mulai-circle" id="btnStartTest" aria-label="Mulai Tes Kecepatan">
-            <span class="mulai-label" id="btnStartText">MULAI</span>
-          </button>
+      <div class="gauge-container" id="activeGaugeWrap">
+        <svg class="gauge-svg" viewBox="0 0 340 260">
+          <defs>
+            <linearGradient id="cyan-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#00f2fe" />
+              <stop offset="50%" stop-color="#4facfe" />
+              <stop offset="100%" stop-color="#a855f7" />
+            </linearGradient>
+            <linearGradient id="upload-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#a855f7" />
+              <stop offset="50%" stop-color="#ec4899" />
+              <stop offset="100%" stop-color="#f43f5e" />
+            </linearGradient>
+          </defs>
 
-          <div class="active-gauge-wrap" id="activeGaugeWrap">
-            <svg class="gauge-svg" viewBox="0 0 340 260">
-              <defs>
-                <linearGradient id="cyan-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#00e5ff" />
-                  <stop offset="100%" stop-color="#38bdf8" />
-                </linearGradient>
-                <linearGradient id="upload-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#a855f7" />
-                  <stop offset="100%" stop-color="#ec4899" />
-                </linearGradient>
-              </defs>
-              <path class="gauge-bg-arc" d="M 78.07 246.92 A 130 130 0 1 1 261.92 246.92" />
-              <path class="gauge-active-arc" id="gaugeActiveArc" d="M 78.07 246.92 A 130 130 0 1 1 261.92 246.92" />
-              <circle id="gaugeHeadDot" class="gauge-head-dot" cx="78.07" cy="246.92" r="7" fill="#ffffff" stroke="#00e5ff" stroke-width="2.5" style="opacity: 0;" />
+          <!-- Background Gauge Track: 270 deg Arc -->
+          <path class="gauge-bg-arc" d="M 78.07 246.92 A 130 130 0 1 1 261.92 246.92" />
+          <!-- Active Value Arc -->
+          <path class="gauge-active-arc" id="gaugeActiveArc" d="M 78.07 246.92 A 130 130 0 1 1 261.92 246.92" />
+          <!-- Glowing Needle Head Dot -->
+          <circle id="gaugeHeadDot" class="gauge-head-dot" cx="78.07" cy="246.92" r="7.5" fill="#ffffff" stroke="#00f2fe" stroke-width="2.5" style="opacity: 0; transition: opacity 0.25s ease;" />
+
+          <!-- Speed Ticks & Lines -->
+          <g fill="rgba(255,255,255,0.4)" font-size="9" font-weight="600" text-anchor="middle">
+            <line x1="83.7" y1="241.3" x2="78.1" y2="246.9" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
+            <text x="96.5" y="232.5">0</text>
+            <line x1="49.5" y1="135.9" x2="41.6" y2="134.7" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
+            <text x="67.3" y="142.7">5</text>
+            <line x1="86.5" y1="66.1" x2="81.0" y2="60.2" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
+            <text x="98.8" y="83.2">15</text>
+            <line x1="192.9" y1="35.2" x2="194.4" y2="27.3" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
+            <text x="189.5" y="56.8">50</text>
+            <line x1="261.5" y1="74.3" x2="267.5" y2="69.0" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
+            <text x="248.0" y="90.2">100</text>
+            <line x1="290.5" y1="135.9" x2="298.4" y2="134.7" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
+            <text x="272.7" y="142.7">250</text>
+            <line x1="286.0" y1="192.7" x2="293.6" y2="195.2" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
+            <text x="268.9" y="191.1">500</text>
+            <line x1="256.3" y1="241.3" x2="261.9" y2="246.9" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
+            <text x="243.5" y="232.5">1000+</text>
+          </g>
+        </svg>
+
+        <div class="gauge-center-content">
+          <div class="speed-number" id="liveSpeedNumber">0.0</div>
+          <div class="speed-unit" id="unitToggleBtn" title="Klik untuk mengubah satuan (Mbps / MB/s)">
+            <span id="speedUnitText">Mbps</span>
+            <svg class="vec-icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"/>
             </svg>
-
-            <div class="gauge-center-readout">
-              <div class="live-speed-number" id="liveSpeedNumber">0.00</div>
-              <div class="speed-unit-pill"><span id="speedUnitText">Mbps</span></div>
-              <div class="phase-badge" id="phaseBadge">STANDBY</div>
-            </div>
-
-            <button class="btn-cancel" id="btnCancelTest">Batalkan</button>
           </div>
-        </div>
-
-        <!-- Right Telemetry: UNDUHAN / UNGGAHAN, Ping ms, 4 Category Quality Icons -->
-        <div class="right-telemetry-zone">
-          <div class="speeds-pair-row">
-            <!-- UNDUHAN -->
-            <div class="speed-metric-block" id="cardDownload">
-              <div class="speed-header">
-                <span class="metric-circle-icon dl">
-                  <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
-                </span>
-                <span class="speed-title">UNDUHAN</span>
-                <span class="speed-unit-label" id="unitDl">Mbps</span>
-              </div>
-              <div class="big-speed-val" id="valDownload">167.53</div>
-              <div class="speed-sub-meta">Puncak: <b id="subDlPeak">167.53 Mbps</b> • <b id="subDlTotal">--</b></div>
-            </div>
-
-            <!-- UNGGAHAN -->
-            <div class="speed-metric-block" id="cardUpload">
-              <div class="speed-header">
-                <span class="metric-circle-icon ul">
-                  <svg viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
-                </span>
-                <span class="speed-title">UNGGAHAN</span>
-                <span class="speed-unit-label" id="unitUl">Mbps</span>
-              </div>
-              <div class="big-speed-val" id="valUpload">53.08</div>
-              <div class="speed-sub-meta">Puncak: <b id="subUlPeak">53.08 Mbps</b> • <b id="subUlTotal">--</b></div>
-            </div>
-          </div>
-
-          <!-- Subtle Live Waveform Sparkline -->
-          <div class="sparkline-holder" id="sparklineHolder">
-            <canvas id="speedCanvas"></canvas>
-          </div>
-
-          <!-- Ping ms Row (Idle, Download Loaded, Upload Loaded) -->
-          <div class="ping-strip-row" id="cardPing">
-            <span class="ping-main-label">Ping ms</span>
-
-            <!-- Idle Ping -->
-            <div class="ping-item" title="Idle Ping (Unloaded Latency)">
-              <span class="metric-circle-icon ping-idle">
-                <svg viewBox="0 0 24 24"><path d="M7 10l-4 4 4 4"/><path d="M3 14h11"/><path d="M17 14l4-4-4-4"/><path d="M21 10H10"/></svg>
-              </span>
-              <span class="ping-val-num" id="valPing">2</span>
-            </div>
-
-            <!-- Download Loaded Ping -->
-            <div class="ping-item" id="cardBufferbloat" title="Download Loaded Ping">
-              <span class="metric-circle-icon dl">
-                <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
-              </span>
-              <span class="ping-val-num" id="valPingDown">2</span>
-            </div>
-
-            <!-- Upload Loaded Ping -->
-            <div class="ping-item" id="cardJitter" title="Upload Loaded Ping">
-              <span class="metric-circle-icon ul">
-                <svg viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
-              </span>
-              <span class="ping-val-num" id="valPingUp">179</span>
-            </div>
-
-            <!-- Hidden/Auxiliary Diagnostics for Compatibility -->
-            <span style="display:none">
-              <b id="subPingMin">2 ms</b>
-              <b id="subPingAvg">2 ms</b>
-              <b id="valJitter">1.0</b>
-              <b id="subJitterQual">Sangat Stabil</b>
-              <b id="valBufferbloat">+0</b>
-              <b id="subLoadedPing">2 ms</b>
-            </span>
-          </div>
-
-          <!-- 4 Category Quality Icons (Web Browsing, Gaming, Streaming, Video Call) -->
-          <div class="quality-categories-row">
-            <!-- 1. Web Browsing -->
-            <div class="qual-cat-item scored" id="qualCatBrowsing" title="Kualitas Web Browsing">
-              <div class="qual-icon-box">
-                <svg viewBox="0 0 28 20">
-                  <line x1="2" y1="5" x2="26" y2="5"/>
-                  <rect x="4" y="8" width="6" height="4" rx="0.6" fill="currentColor" stroke="none" opacity="0.5"/>
-                  <rect x="4" y="13.5" width="6" height="3" rx="0.6" fill="currentColor" stroke="none" opacity="0.5"/>
-                  <path d="M14 8.5l6.5 2.5-2.6 1.6 2.3 2.8-1.6 1.1-2.3-2.8-1.8 2.1z" fill="currentColor" stroke="none"/>
-                </svg>
-              </div>
-              <div class="qual-dots" id="dotsBrowsing">
-                <span class="qual-dot lit"></span><span class="qual-dot lit"></span><span class="qual-dot lit"></span><span class="qual-dot lit"></span><span class="qual-dot lit"></span>
-              </div>
-            </div>
-
-            <!-- 2. Gaming (Standalone Gamepad Silhouette without outer box, matching reference) -->
-            <div class="qual-cat-item scored" id="qualCatGaming" title="Kualitas Gaming Online">
-              <div class="qual-icon-box no-frame">
-                <svg viewBox="0 0 36 24">
-                  <path d="M8.5 4.5h19a4.5 4.5 0 0 1 4.3 5.6l-1.7 7.6a3.4 3.4 0 0 1-5.8 1.5l-3.4-3.7h-5.8l-3.4 3.7a3.4 3.4 0 0 1-5.8-1.5L4.2 10.1A4.5 4.5 0 0 1 8.5 4.5z"/>
-                  <line x1="10" y1="10.5" x2="14" y2="10.5"/>
-                  <line x1="12" y1="8.5" x2="12" y2="12.5"/>
-                  <circle cx="23.5" cy="9.5" r="1.1" fill="currentColor" stroke="none"/>
-                  <circle cx="26" cy="11.5" r="1.1" fill="currentColor" stroke="none"/>
-                </svg>
-              </div>
-              <div class="qual-dots" id="dotsGaming">
-                <span class="qual-dot lit"></span><span class="qual-dot lit"></span><span class="qual-dot lit"></span><span class="qual-dot lit"></span><span class="qual-dot lit"></span>
-              </div>
-            </div>
-
-            <!-- 3. Video Streaming -->
-            <div class="qual-cat-item scored" id="qualCatStreaming" title="Kualitas Video Streaming 4K">
-              <div class="qual-icon-box">
-                <svg viewBox="0 0 28 20">
-                  <polygon points="11.5,4.5 18.5,8.8 11.5,13.1" fill="currentColor" stroke="none"/>
-                  <line x1="3" y1="16" x2="25" y2="16"/>
-                  <circle cx="9" cy="16" r="1.4" fill="currentColor" stroke="none"/>
-                </svg>
-              </div>
-              <div class="qual-dots" id="dotsStreaming">
-                <span class="qual-dot lit"></span><span class="qual-dot lit"></span><span class="qual-dot lit"></span><span class="qual-dot lit"></span><span class="qual-dot lit"></span>
-              </div>
-            </div>
-
-            <!-- 4. Video Conference / Call -->
-            <div class="qual-cat-item scored" id="qualCatVideoCall" title="Kualitas Video Call & Konferensi">
-              <div class="qual-icon-box">
-                <svg viewBox="0 0 28 20">
-                  <circle cx="11.5" cy="8.5" r="2.6" fill="currentColor" stroke="none"/>
-                  <path d="M6 16.5c0-2.6 2.4-4.4 5.5-4.4s5.5 1.8 5.5 4.4" fill="currentColor" stroke="none"/>
-                  <rect x="18.5" y="3.5" width="6" height="4.8" rx="0.8"/>
-                </svg>
-              </div>
-              <div class="qual-dots" id="dotsVideoCall">
-                <span class="qual-dot lit"></span><span class="qual-dot lit"></span><span class="qual-dot lit"></span><span class="qual-dot lit"></span><span class="qual-dot lit"></span>
-              </div>
-            </div>
+          <div>
+            <span class="test-phase-badge" id="phaseBadge">STANDBY</span>
           </div>
         </div>
       </div>
 
-      <!-- Lower Section: Connection/ISP/Server Info (Left) & Nilai Provider Anda (Right) -->
-      <div class="board-lower">
-        <div class="info-stack">
-          <!-- Row 1: Koneksi -->
-          <div class="info-row">
-            <div class="info-circle-icon">
-              <svg viewBox="0 0 24 24">
-                <path d="M5 8h13m0 0l-2.5-2.5M18 8l-2.5 2.5" stroke-dasharray="2 1"/>
-                <path d="M5 12h13m0 0l-2.5-2.5M18 12l-2.5 2.5"/>
-                <path d="M5 16h13m0 0l-2.5-2.5M18 16l-2.5 2.5" stroke-dasharray="2 1"/>
-              </svg>
-            </div>
-            <div class="info-text-col">
-              <span class="info-primary">Koneksi</span>
-              <span class="info-secondary" id="connModeToggle" title="Klik untuk mengganti Multi / Single">Multi</span>
-            </div>
-          </div>
+      <!-- Live Sparkline Graph -->
+      <div class="graph-wrapper" id="sparklineHolder">
+        <canvas id="speedCanvas"></canvas>
+      </div>
 
-          <!-- Row 2: Provider & IP -->
-          <div class="info-row">
-            <div class="info-circle-icon">
-              <svg viewBox="0 0 24 24">
-                <circle cx="12" cy="8" r="4"/>
-                <path d="M5.5 20a6.5 6.5 0 0 1 13 0"/>
-              </svg>
-            </div>
-            <div class="info-text-col">
-              <span class="info-primary" id="ispNameDisplay">Telkomsel Indihome</span>
-              <span class="info-secondary" id="clientIpDisplay" title="Klik untuk menyembunyikan/menampilkan IP">182.10.131.57</span>
-            </div>
-          </div>
+      <!-- Action Buttons -->
+      <div class="action-row">
+        <button class="btn-main" id="btnStartTest">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="7 4 20 12 7 20 7 4"/></svg>
+          <span id="btnStartText">MULAI TES</span>
+        </button>
+        <button class="btn-cancel" id="btnCancelTest">
+          <svg class="vec-icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+          Batalkan
+        </button>
+      </div>
+    </section>
 
-          <!-- Row 3: Server & Lokasi -->
-          <div class="info-row">
-            <div class="info-circle-icon">
-              <svg viewBox="0 0 24 24">
-                <rect x="9" y="4" width="6" height="4" rx="1"/>
-                <rect x="4" y="15" width="6" height="4" rx="1"/>
-                <rect x="14" y="15" width="6" height="4" rx="1"/>
-                <path d="M12 8v4m-5 3v-3h10v3"/>
-              </svg>
-            </div>
-            <div class="info-text-col">
-              <span class="info-primary" id="serverNodeDisplay">UnPad</span>
-              <span class="info-secondary" id="clientLocationDisplay">Bandung</span>
-              <a class="change-server-link" id="btnGantiServer">Ganti Server</a>
-            </div>
-          </div>
+    <!-- ==================== 5 METRIC CARDS GRID (MINIMALIST VECTOR ICONS) ==================== -->
+    <section class="metrics-grid">
+      <!-- 1. Ping (Latency) Card -->
+      <div class="metric-card" id="cardPing">
+        <div class="card-top">
+          <span class="card-title">
+            <!-- Minimalist Vector Target/Latency Icon -->
+            <svg class="vec-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9"/>
+              <polyline points="12 7 12 12 15.5 14"/>
+            </svg>
+            Ping (Latency)
+          </span>
+          <!-- Minimalist Vector Bidirectional Pulse Badge -->
+          <span class="vector-badge ping-vec" id="pingIndicator" title="Unloaded Round-Trip Latency">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 10l-4 4 4 4"/>
+              <path d="M3 14h11"/>
+              <path d="M17 14l4-4-4-4"/>
+              <path d="M21 10H10"/>
+            </svg>
+          </span>
         </div>
-
-        <!-- Bottom Right: NILAI PROVIDER ANDA -->
-        <div class="provider-rating-zone">
-          <div class="provider-rating-heading">NILAI PROVIDER ANDA</div>
-          <div class="provider-rating-sub" id="ratingIspLabel">Telkomsel Indihome</div>
-          <div class="stars-row" id="starRatingRow">
-            <button class="star-btn" data-star="1" aria-label="Beri nilai 1 bintang"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
-            <button class="star-btn" data-star="2" aria-label="Beri nilai 2 bintang"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
-            <button class="star-btn" data-star="3" aria-label="Beri nilai 3 bintang"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
-            <button class="star-btn" data-star="4" aria-label="Beri nilai 4 bintang"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
-            <button class="star-btn" data-star="5" aria-label="Beri nilai 5 bintang"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
-          </div>
+        <div class="card-value-wrap">
+          <span class="card-val" id="valPing">--</span>
+          <span class="card-unit">ms</span>
+        </div>
+        <div class="card-sub">
+          <span>Min: <b id="subPingMin">--</b></span>
+          <span>Avg: <b id="subPingAvg">--</b></span>
         </div>
       </div>
-    </main>
 
-    <!-- ==================== PENGATURAN DRAWER ==================== -->
-    <section class="drawer-panel" id="settingsDrawer">
-      <div class="drawer-header">
-        <h3>⚙️ Pengaturan Server & Kestabilan Pengujian</h3>
-        <button class="btn-secondary" id="btnCloseSettings">Tutup</button>
+      <!-- 2. Jitter Card -->
+      <div class="metric-card" id="cardJitter">
+        <div class="card-top">
+          <span class="card-title">
+            <!-- Minimalist Vector Pulse Wave Icon -->
+            <svg class="vec-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <polyline points="22 12 18 12 15 20 9 4 6 12 2 12"/>
+            </svg>
+            Jitter
+          </span>
+          <!-- Minimalist Vector Harmonic Sine-Wave Badge -->
+          <span class="vector-badge jitter-vec" id="jitterIndicator" title="Fluktuasi Latency (RFC 3550)">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M2 12c2.5-5 5-5 7.5 0s5 5 7.5 0 3.5-3.5 5 0"/>
+              <path d="M2 17c2.5-3 5-3 7.5 0s5 3 7.5 0 3.5-2 5 0" opacity="0.45"/>
+            </svg>
+          </span>
+        </div>
+        <div class="card-value-wrap">
+          <span class="card-val" id="valJitter">--</span>
+          <span class="card-unit">ms</span>
+        </div>
+        <div class="card-sub">
+          <span>Stabilitas: <b id="subJitterQual">--</b></span>
+        </div>
       </div>
-      <div class="settings-grid">
-        <div class="setting-group">
-          <span class="setting-label">Lokasi / Server Uji:</span>
-          <select id="serverModeSelect">
-            <option value="unpad" selected>UnPad — Bandung (Cloudflare Edge)</option>
-            <option value="jakarta">Telkom IIX — Jakarta (Cloudflare Edge)</option>
-            <option value="cloudflare">Cloudflare Global Edge (Otomatis)</option>
-            <option value="local">Local Python Server (LAN / Loopback)</option>
-            <option value="auto">Otomatis (Deteksi Server Lokal / WAN)</option>
-          </select>
-        </div>
 
-        <div class="setting-group">
-          <span class="setting-label">Mode Koneksi Stream:</span>
-          <select id="streamCountSelect">
-            <option value="2" selected>Multi Stabil (2 Stream - Direkomendasikan)</option>
-            <option value="1">Single (1 Stream - Konservatif)</option>
-            <option value="4">Multi Maksimal (4 Stream - Fiber Cepat)</option>
-          </select>
+      <!-- 3. Download Card -->
+      <div class="metric-card" id="cardDownload">
+        <div class="card-top">
+          <span class="card-title">
+            <!-- Minimalist Vector Cloud-Download Icon -->
+            <svg class="vec-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/>
+              <path d="M12 12v9"/>
+              <path d="M8.5 17.5L12 21l3.5-3.5"/>
+            </svg>
+            Download
+          </span>
+          <!-- Minimalist Vector Downward Arrow Badge -->
+          <span class="vector-badge dl-vec" id="dlIndicator" title="Kecepatan Unduhan">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 4v12"/>
+              <path d="M7 11l5 5 5-5"/>
+              <path d="M5 20h14"/>
+            </svg>
+          </span>
         </div>
-
-        <div class="setting-group">
-          <span class="setting-label">Durasi & Kalibrasi Uji:</span>
-          <select id="durationSelect">
-            <option value="8">Cepat & Halus (8 Detik)</option>
-            <option value="11" selected>Standar Stabil (11 Detik)</option>
-            <option value="15">Komprehensif (15 Detik)</option>
-          </select>
+        <div class="card-value-wrap">
+          <span class="card-val" id="valDownload">--</span>
+          <span class="card-unit" id="unitDl">Mbps</span>
         </div>
+        <div class="card-sub">
+          <span>Puncak: <b id="subDlPeak">--</b></span>
+          <span>Data: <b id="subDlTotal">--</b></span>
+        </div>
+      </div>
 
-        <div class="setting-group">
-          <span class="setting-label">Efek Suara:</span>
-          <select id="soundEffectSelect">
-            <option value="on" selected>Aktif (Lembut)</option>
-            <option value="off">Mati</option>
-          </select>
+      <!-- 4. Upload Card -->
+      <div class="metric-card" id="cardUpload">
+        <div class="card-top">
+          <span class="card-title">
+            <!-- Minimalist Vector Cloud-Upload Icon -->
+            <svg class="vec-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/>
+              <path d="M12 21v-9"/>
+              <path d="M8.5 15.5L12 12l3.5 3.5"/>
+            </svg>
+            Upload
+          </span>
+          <!-- Minimalist Vector Upward Arrow Badge -->
+          <span class="vector-badge ul-vec" id="ulIndicator" title="Kecepatan Unggahan">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 16V4"/>
+              <path d="M7 9l5-5 5 5"/>
+              <path d="M5 20h14"/>
+            </svg>
+          </span>
+        </div>
+        <div class="card-value-wrap">
+          <span class="card-val" id="valUpload">--</span>
+          <span class="card-unit" id="unitUl">Mbps</span>
+        </div>
+        <div class="card-sub">
+          <span>Puncak: <b id="subUlPeak">--</b></span>
+          <span>Data: <b id="subUlTotal">--</b></span>
+        </div>
+      </div>
+
+      <!-- 5. Bufferbloat Card -->
+      <div class="metric-card" id="cardBufferbloat">
+        <div class="card-top">
+          <span class="card-title">
+            <!-- Minimalist Vector Network Queue Layers Icon -->
+            <svg class="vec-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+              <polyline points="2 12 12 17 22 12"/>
+              <polyline points="2 17 12 22 22 17"/>
+            </svg>
+            Bufferbloat
+          </span>
+          <!-- Minimalist Vector Signal Telemetry Bars Badge -->
+          <span class="vector-badge bb-vec" id="bbIndicator" title="Tambahan Latency Saat Beban Penuh">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <line x1="5" y1="19" x2="5" y2="14"/>
+              <line x1="10" y1="19" x2="10" y2="11"/>
+              <line x1="15" y1="19" x2="15" y2="8"/>
+              <line x1="20" y1="19" x2="20" y2="5"/>
+            </svg>
+          </span>
+        </div>
+        <div class="card-value-wrap">
+          <span class="card-val" id="valBufferbloat">--</span>
+          <span class="card-unit">ms</span>
+        </div>
+        <div class="card-sub">
+          <span>Ping Terbebani: <b id="subLoadedPing">--</b></span>
         </div>
       </div>
     </section>
 
-    <!-- ==================== RIWAYAT HASIL DRAWER ==================== -->
-    <section class="drawer-panel" id="historyDrawer">
-      <div class="drawer-header">
-        <h3>📊 Riwayat Hasil Pengujian</h3>
-        <div class="history-actions">
-          <button class="btn-secondary" id="btnExportCsv">Unduh CSV</button>
-          <button class="btn-secondary" id="btnClearHistory">Hapus Riwayat</button>
+    <!-- ==================== TELEMETRY & ACTIVITY QUALITY BENCHMARK BAR ==================== -->
+    <section class="telemetry-quality-bar">
+      <!-- Left: Loaded Ping Breakdown (Idle / Down / Up) -->
+      <div class="loaded-ping-group">
+        <div class="loaded-ping-label">
+          <span>Detail Ping</span>
+          <small>Idle • Down • Up</small>
+        </div>
+        <div class="ping-pills-row">
+          <div class="ping-mini-pill" title="Idle Ping (Unloaded)">
+            <span class="mini-circle-vec idle">
+              <svg viewBox="0 0 24 24"><path d="M7 10l-4 4 4 4"/><path d="M3 14h11"/><path d="M17 14l4-4-4-4"/><path d="M21 10H10"/></svg>
+            </span>
+            <span id="valPingIdle">--</span> <small>ms</small>
+          </div>
+          <div class="ping-mini-pill" title="Download Loaded Ping">
+            <span class="mini-circle-vec dl">
+              <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
+            </span>
+            <span id="valPingDown">--</span> <small>ms</small>
+          </div>
+          <div class="ping-mini-pill" title="Upload Loaded Ping">
+            <span class="mini-circle-vec ul">
+              <svg viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+            </span>
+            <span id="valPingUp">--</span> <small>ms</small>
+          </div>
         </div>
       </div>
 
-      <div class="verdict-box" id="verdictBox">
+      <!-- Center: 4 Minimalist Vector Activity Quality Indicators -->
+      <div class="quality-categories-row">
+        <!-- 1. Web Browsing -->
+        <div class="qual-cat-item" id="qualCatBrowsing" title="Kualitas Web Browsing">
+          <div class="qual-icon-box">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="2" y="4" width="20" height="16" rx="2.5"/>
+              <line x1="2" y1="9" x2="22" y2="9"/>
+              <path d="M11 12.5l5 2-2 1.2 1.7 2.2-1.2.8-1.7-2.2-1.4 1.5z" fill="currentColor" stroke="none"/>
+            </svg>
+          </div>
+          <div class="qual-meta">
+            <span class="qual-name">Browsing</span>
+            <div class="qual-dots" id="dotsBrowsing">
+              <span class="qual-dot"></span><span class="qual-dot"></span><span class="qual-dot"></span><span class="qual-dot"></span><span class="qual-dot"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Gaming Online -->
+        <div class="qual-cat-item" id="qualCatGaming" title="Kualitas Gaming Kompetitif">
+          <div class="qual-icon-box">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 7h12a3.5 3.5 0 0 1 3.4 4.3l-1.2 5.4a2.6 2.6 0 0 1-4.5 1.1L13.2 15h-2.4l-2.5 2.8a2.6 2.6 0 0 1-4.5-1.1L2.6 11.3A3.5 3.5 0 0 1 6 7z"/>
+              <line x1="7.5" y1="11.5" x2="10.5" y2="11.5"/>
+              <line x1="9" y1="10" x2="9" y2="13"/>
+              <circle cx="15.5" cy="10.8" r="0.9" fill="currentColor" stroke="none"/>
+              <circle cx="17.5" cy="12.2" r="0.9" fill="currentColor" stroke="none"/>
+            </svg>
+          </div>
+          <div class="qual-meta">
+            <span class="qual-name">Gaming</span>
+            <div class="qual-dots" id="dotsGaming">
+              <span class="qual-dot"></span><span class="qual-dot"></span><span class="qual-dot"></span><span class="qual-dot"></span><span class="qual-dot"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Video Streaming 4K -->
+        <div class="qual-cat-item" id="qualCatStreaming" title="Kualitas Streaming 4K UHD">
+          <div class="qual-icon-box">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="2" y="4" width="20" height="16" rx="2.5"/>
+              <polygon points="10 8.5 16 12 10 15.5" fill="currentColor" stroke="none"/>
+            </svg>
+          </div>
+          <div class="qual-meta">
+            <span class="qual-name">Streaming</span>
+            <div class="qual-dots" id="dotsStreaming">
+              <span class="qual-dot"></span><span class="qual-dot"></span><span class="qual-dot"></span><span class="qual-dot"></span><span class="qual-dot"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Video Call -->
+        <div class="qual-cat-item" id="qualCatVideoCall" title="Kualitas Video Call &amp; Konferensi">
+          <div class="qual-icon-box">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="2" y="5" width="14" height="14" rx="2.5"/>
+              <polygon points="16 10.5 22 7 22 17 16 13.5"/>
+            </svg>
+          </div>
+          <div class="qual-meta">
+            <span class="qual-name">Video Call</span>
+            <div class="qual-dots" id="dotsVideoCall">
+              <span class="qual-dot"></span><span class="qual-dot"></span><span class="qual-dot"></span><span class="qual-dot"></span><span class="qual-dot"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Provider Rating & Result ID -->
+      <div class="provider-rating-zone">
+        <div class="provider-rating-top">
+          <span id="ratingIspLabel">Nilai Provider</span>
+          <span>•</span>
+          <span class="result-id-tag" id="resultIdDisplay" title="Klik untuk menyalin ID Hasil">#19863800067</span>
+        </div>
+        <div class="stars-row" id="starRatingRow">
+          <button class="star-btn" data-star="1" aria-label="Beri nilai 1 bintang"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+          <button class="star-btn" data-star="2" aria-label="Beri nilai 2 bintang"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+          <button class="star-btn" data-star="3" aria-label="Beri nilai 3 bintang"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+          <button class="star-btn" data-star="4" aria-label="Beri nilai 4 bintang"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+          <button class="star-btn" data-star="5" aria-label="Beri nilai 5 bintang"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== OVERALL QUALITY VERDICT BOX ==================== -->
+    <div class="verdict-box" id="verdictBox">
+      <div class="verdict-left">
         <div class="grade-badge" id="gradeBadge">A+</div>
         <div class="verdict-text">
-          <h4 id="verdictTitle">Koneksi Sangat Stabil</h4>
-          <p id="verdictDesc">Latency rendah & kecepatan stabil untuk aktivitas harian dan gaming.</p>
+          <h4 id="verdictTitle">Koneksi Sangat Luar Biasa</h4>
+          <p id="verdictDesc">Latency sangat rendah dan jitter stabil. Sempurna untuk game kompetitif, Discord, dan streaming 4K tanpa buffering.</p>
+        </div>
+      </div>
+      <div class="verdict-actions">
+        <button class="btn-share" id="btnCopySummary">
+          <svg class="vec-icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="9" y="9" width="13" height="13" rx="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          <span id="btnCopyText">Salin Ringkasan</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== PREFERENCES & ADVANCED SETTINGS BAR ==================== -->
+    <section class="settings-bar" id="settingsDrawer">
+      <div class="setting-group">
+        <span class="setting-label">
+          <svg class="vec-icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <line x1="2.5" y1="12" x2="21.5" y2="12"/>
+            <path d="M12 3a15 15 0 0 1 0 18"/>
+            <path d="M12 3a15 15 0 0 0 0 18"/>
+          </svg>
+          Server Sumber:
+        </span>
+        <select id="serverModeSelect">
+          <option value="cloudflare" selected>Cloudflare Global CDN (Internet WAN)</option>
+          <option value="unpad">UnPad — Bandung (Cloudflare Edge)</option>
+          <option value="jakarta">Telkom IIX — Jakarta (Cloudflare Edge)</option>
+          <option value="local">Local Python Server (LAN / Loopback)</option>
+          <option value="auto">Otomatis (Pilih yang tercepat)</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <span class="setting-label">
+          <svg class="vec-icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+            <polyline points="16 3 21 3 21 8"/>
+            <line x1="4" y1="20" x2="21" y2="3"/>
+            <polyline points="21 16 21 21 16 21"/>
+            <line x1="15" y1="15" x2="21" y2="21"/>
+            <line x1="4" y1="4" x2="9" y2="9"/>
+          </svg>
+          Koneksi Stream:
+        </span>
+        <select id="streamCountSelect">
+          <option value="1">1 Stream (Konservatif)</option>
+          <option value="3" selected>3 Stream (Standar Broadband)</option>
+          <option value="6">6 Stream (Gigabit Fiber Saturation)</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <span class="setting-label">
+          <svg class="vec-icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Durasi Uji:
+        </span>
+        <select id="durationSelect">
+          <option value="6">Cepat (6 Detik)</option>
+          <option value="10" selected>Standar (10 Detik)</option>
+          <option value="15">Komprehensif (15 Detik)</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <span class="setting-label">
+          <svg class="vec-icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+          </svg>
+          Efek Suara:
+        </span>
+        <select id="soundEffectSelect">
+          <option value="on" selected>Aktif (Audio Synth)</option>
+          <option value="off">Mati</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- ==================== TEST HISTORY SECTION ==================== -->
+    <section class="history-card" id="historyDrawer">
+      <div class="history-head">
+        <h3>
+          <svg class="vec-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <polyline points="3 3 3 8 8 8"/>
+            <polyline points="12 7 12 12 15.5 14"/>
+          </svg>
+          Riwayat Pengujian
+        </h3>
+        <div class="history-actions">
+          <button class="btn-secondary" id="btnExportCsv">
+            <svg class="vec-icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Unduh CSV
+          </button>
+          <button class="btn-secondary" id="btnClearHistory">
+            <svg class="vec-icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+            Hapus Riwayat
+          </button>
         </div>
       </div>
 
@@ -1308,24 +1691,26 @@
         <table id="historyTable">
           <thead>
             <tr>
-              <th>ID Hasil</th>
               <th>Waktu</th>
               <th>Server</th>
               <th>Ping</th>
-              <th>Unduhan</th>
-              <th>Unggahan</th>
+              <th>Jitter</th>
+              <th>Download</th>
+              <th>Upload</th>
+              <th>Bufferbloat</th>
               <th>Grade</th>
             </tr>
           </thead>
           <tbody id="historyTableBody">
             <tr>
-              <td colspan="7" style="text-align: center; color: var(--text-dim); padding: 20px;">Belum ada riwayat pengujian. Klik "MULAI" untuk menguji koneksi.</td>
+              <td colspan="8" style="text-align: center; color: var(--text-dim); padding: 24px;">Belum ada riwayat pengujian. Klik "MULAI TES" untuk memulai.</td>
             </tr>
           </tbody>
         </table>
       </div>
     </section>
 
+    <!-- Footer -->
     <footer>
       Dibuat khusus untuk kenyamanan <strong>Master Zay</strong> oleh <strong>Pelayan Ancellia</strong>.
     </footer>
@@ -1349,33 +1734,33 @@
 
       function getServerCatalog() {
         return {
+          cloudflare: {
+            name: "Cloudflare Global Edge",
+            city: "ID (SIN)",
+            type: "cloudflare",
+            ping: "https://speed.cloudflare.com/__down?bytes=0",
+            down: "https://speed.cloudflare.com/__down",
+            up: "https://speed.cloudflare.com/__up"
+          },
           unpad: {
-            name: "UnPad",
-            city: "Bandung",
+            name: "UnPad Bandung",
+            city: "Bandung (ID)",
             type: "cloudflare",
             ping: "https://speed.cloudflare.com/__down?bytes=0",
             down: "https://speed.cloudflare.com/__down",
             up: "https://speed.cloudflare.com/__up"
           },
           jakarta: {
-            name: "Telkom IIX",
-            city: "Jakarta",
-            type: "cloudflare",
-            ping: "https://speed.cloudflare.com/__down?bytes=0",
-            down: "https://speed.cloudflare.com/__down",
-            up: "https://speed.cloudflare.com/__up"
-          },
-          cloudflare: {
-            name: "Cloudflare Edge",
-            city: "Singapore / ID",
+            name: "Telkom IIX Jakarta",
+            city: "Jakarta (ID)",
             type: "cloudflare",
             ping: "https://speed.cloudflare.com/__down?bytes=0",
             down: "https://speed.cloudflare.com/__down",
             up: "https://speed.cloudflare.com/__up"
           },
           local: {
-            name: "Local Server",
-            city: "LAN / Loopback",
+            name: "Local Python Server",
+            city: "Localhost LAN",
             type: "local",
             ping: `${detectedLocalOrigin}/api/ping`,
             down: `${detectedLocalOrigin}/api/download`,
@@ -1389,27 +1774,27 @@
         phase: "idle",
         abortController: null,
         unit: "Mbps",
-        serverKey: "unpad",
-        currentEndpoint: getServerCatalog().unpad,
+        serverKey: "cloudflare",
+        currentEndpoint: getServerCatalog().cloudflare,
         clientIp: "182.10.131.57",
         ipMasked: false,
         ispName: "Telkomsel Indihome",
         resultId: "19863800067",
         userRating: 0,
         results: {
-          ping: 2,
-          pingMin: 2,
-          pingAvg: 2,
-          pingDown: 2,
-          pingUp: 179,
-          jitter: 1.0,
-          download: 167.53,
-          downloadPeak: 167.53,
+          ping: 0,
+          pingMin: 0,
+          pingAvg: 0,
+          pingDown: 0,
+          pingUp: 0,
+          jitter: 0,
+          download: 0,
+          downloadPeak: 0,
           downloadBytes: 0,
-          upload: 53.08,
-          uploadPeak: 53.08,
+          upload: 0,
+          uploadPeak: 0,
           uploadBytes: 0,
-          loadedPing: 2,
+          loadedPing: 0,
           bufferbloat: 0,
           grade: "A+"
         },
@@ -1417,10 +1802,6 @@
       };
 
       const dom = {
-        btnStartTest: document.getElementById("btnStartTest"),
-        btnStartText: document.getElementById("btnStartText"),
-        activeGaugeWrap: document.getElementById("activeGaugeWrap"),
-        sparklineHolder: document.getElementById("sparklineHolder"),
         liveSpeedNumber: document.getElementById("liveSpeedNumber"),
         unitToggleBtn: document.getElementById("unitToggleBtn"),
         speedUnitText: document.getElementById("speedUnitText"),
@@ -1428,11 +1809,16 @@
         gaugeActiveArc: document.getElementById("gaugeActiveArc"),
         gaugeHeadDot: document.getElementById("gaugeHeadDot"),
         gaugeGlow: document.getElementById("gaugeGlow"),
+        activeGaugeWrap: document.getElementById("activeGaugeWrap"),
+        sparklineHolder: document.getElementById("sparklineHolder"),
+        btnStartTest: document.getElementById("btnStartTest"),
+        btnStartText: document.getElementById("btnStartText"),
         btnCancelTest: document.getElementById("btnCancelTest"),
 
         serverNodeDisplay: document.getElementById("serverNodeDisplay"),
-        clientLocationDisplay: document.getElementById("clientLocationDisplay"),
         clientIpDisplay: document.getElementById("clientIpDisplay"),
+        ipChipWrap: document.getElementById("ipChipWrap"),
+        clientLocationDisplay: document.getElementById("clientLocationDisplay"),
         ispNameDisplay: document.getElementById("ispNameDisplay"),
         ratingIspLabel: document.getElementById("ratingIspLabel"),
         connModeToggle: document.getElementById("connModeToggle"),
@@ -1441,6 +1827,7 @@
 
         cardPing: document.getElementById("cardPing"),
         valPing: document.getElementById("valPing"),
+        valPingIdle: document.getElementById("valPingIdle"),
         valPingDown: document.getElementById("valPingDown"),
         valPingUp: document.getElementById("valPingUp"),
         subPingMin: document.getElementById("subPingMin"),
@@ -1480,16 +1867,11 @@
         gradeBadge: document.getElementById("gradeBadge"),
         verdictTitle: document.getElementById("verdictTitle"),
         verdictDesc: document.getElementById("verdictDesc"),
-
         btnCopySummary: document.getElementById("btnCopySummary"),
-        btnShareSocial: document.getElementById("btnShareSocial"),
-        btnQuickExport: document.getElementById("btnQuickExport"),
-        btnToggleHistory: document.getElementById("btnToggleHistory"),
-        btnToggleSettings: document.getElementById("btnToggleSettings"),
-        btnCloseSettings: document.getElementById("btnCloseSettings"),
+        btnCopyText: document.getElementById("btnCopyText"),
+
         settingsDrawer: document.getElementById("settingsDrawer"),
         historyDrawer: document.getElementById("historyDrawer"),
-
         serverModeSelect: document.getElementById("serverModeSelect"),
         streamCountSelect: document.getElementById("streamCountSelect"),
         durationSelect: document.getElementById("durationSelect"),
@@ -1503,6 +1885,7 @@
       };
 
       function showToast(msg) {
+        if (!dom.toastMsg) return;
         dom.toastMsg.textContent = msg;
         dom.toastMsg.classList.add("show");
         setTimeout(() => dom.toastMsg.classList.remove("show"), 2200);
@@ -1524,7 +1907,7 @@
         });
       }
 
-      // --- WEB AUDIO SYNTHESIZER (GENTLE & SUBTLE) ---
+      // --- WEB AUDIO SYNTHESIZER ---
       const audio = {
         ctx: null,
         init() {
@@ -1533,7 +1916,7 @@
             this.ctx = new AudioCtx();
           }
         },
-        playBlip(freq = 540, duration = 0.06) {
+        playBlip(freq = 560, duration = 0.06) {
           if (dom.soundEffectSelect.value !== "on") return;
           try {
             this.init();
@@ -1542,7 +1925,7 @@
             const gain = this.ctx.createGain();
             osc.type = "sine";
             osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-            gain.gain.setValueAtTime(0.035, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
             osc.connect(gain);
             gain.connect(this.ctx.destination);
@@ -1562,7 +1945,7 @@
                 const gain = this.ctx.createGain();
                 osc.type = "triangle";
                 osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.055, this.ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.35);
                 osc.connect(gain);
                 gain.connect(this.ctx.destination);
@@ -1574,7 +1957,7 @@
         }
       };
 
-      // --- CALM, NON-AGGRESSIVE RENDER ENGINE ---
+      // --- CALM, NON-AGGRESSIVE 60-165 FPS RENDER ENGINE ---
       const TOTAL_ARC_LENGTH = 612.6;
       const anim = {
         currentSpeed: 0,
@@ -1599,10 +1982,10 @@
         return 1.0;
       }
 
-      function formatSpeedValue(mbpsVal) {
+      function formatSpeedValue(mbpsVal, decimals = 1) {
         const val = state.unit === "MB/s" ? (mbpsVal / 8) : mbpsVal;
-        if (val < 0.01) return "0.00";
-        return val.toFixed(2);
+        if (val < 0.05) return "0.0";
+        return val.toFixed(decimals);
       }
 
       function updateGauge(mbps, phaseColor = "cyan") {
@@ -1611,10 +1994,10 @@
 
         if (phaseColor === "purple") {
           dom.gaugeActiveArc.setAttribute("stroke", "url(#upload-gradient)");
-          dom.gaugeGlow.style.background = "radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, transparent 70%)";
+          dom.gaugeGlow.style.background = "radial-gradient(circle, var(--purple-glow) 0%, transparent 70%)";
         } else {
           dom.gaugeActiveArc.setAttribute("stroke", "url(#cyan-gradient)");
-          dom.gaugeGlow.style.background = "radial-gradient(circle, rgba(0, 210, 255, 0.08) 0%, transparent 70%)";
+          dom.gaugeGlow.style.background = "radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%)";
         }
       }
 
@@ -1625,7 +2008,7 @@
         anim.currentRatio = 0;
         anim.lastTimestamp = performance.now();
         anim.lastTextUpdate = 0;
-        dom.liveSpeedNumber.textContent = "0.00";
+        dom.liveSpeedNumber.textContent = "0.0";
         dom.gaugeActiveArc.style.strokeDashoffset = TOTAL_ARC_LENGTH.toFixed(2);
         if (dom.gaugeHeadDot) {
           dom.gaugeHeadDot.style.opacity = "0";
@@ -1633,7 +2016,6 @@
         updateGauge(0, phaseColor);
       }
 
-      // Single-stage smooth interpolation + 110ms throttled text refresh for rock-steady digits
       function renderEngineLoop(now) {
         const dt = Math.min(0.08, Math.max(0.001, (now - anim.lastTimestamp) / 1000));
         anim.lastTimestamp = now;
@@ -1649,23 +2031,29 @@
         dom.gaugeActiveArc.style.strokeDashoffset = offset.toFixed(2);
 
         if (dom.gaugeHeadDot) {
-          if (anim.currentRatio > 0.003) {
+          if (anim.currentRatio > 0.002) {
             const angleRad = (135 + anim.currentRatio * 270) * (Math.PI / 180);
             const hx = 170 + 130 * Math.cos(angleRad);
             const hy = 155 + 130 * Math.sin(angleRad);
             dom.gaugeHeadDot.setAttribute("cx", hx.toFixed(2));
             dom.gaugeHeadDot.setAttribute("cy", hy.toFixed(2));
             dom.gaugeHeadDot.style.opacity = "1";
-            dom.gaugeHeadDot.setAttribute("stroke", anim.phaseColor === "purple" ? "#ec4899" : "#00d2ff");
+            if (anim.phaseColor === "purple") {
+              dom.gaugeHeadDot.setAttribute("stroke", "#ec4899");
+              dom.gaugeHeadDot.style.filter = "drop-shadow(0 0 8px #ec4899) drop-shadow(0 0 16px rgba(236,72,153,0.9))";
+            } else {
+              dom.gaugeHeadDot.setAttribute("stroke", "#00f2fe");
+              dom.gaugeHeadDot.style.filter = "drop-shadow(0 0 8px #00f2fe) drop-shadow(0 0 16px rgba(0,242,254,0.9))";
+            }
           } else {
             dom.gaugeHeadDot.style.opacity = "0";
           }
         }
 
-        // Throttled text update (~9 Hz) so 2-decimal numbers glide calmly without flickering
-        if (now - anim.lastTextUpdate >= 110) {
+        // Throttled digital readout update (~9 Hz) so numbers glide calmly without flickering
+        if (now - anim.lastTextUpdate >= 105) {
           anim.lastTextUpdate = now;
-          const formatted = formatSpeedValue(anim.displayedNumber);
+          const formatted = formatSpeedValue(anim.displayedNumber, 1);
           dom.liveSpeedNumber.textContent = formatted;
 
           if (state.testing) {
@@ -1689,8 +2077,8 @@
       function initCanvas() {
         const dpr = window.devicePixelRatio || 1;
         const rect = dom.speedCanvas.getBoundingClientRect();
-        const w = Math.max(200, rect.width || 430);
-        const h = 24;
+        const w = Math.max(240, rect.width || 600);
+        const h = Math.max(40, rect.height || 56);
         dom.speedCanvas.width = w * dpr;
         dom.speedCanvas.height = h * dpr;
         canvasCtx = dom.speedCanvas.getContext("2d");
@@ -1707,19 +2095,20 @@
       function resetGraph() {
         graphSamples = [];
         if (canvasCtx) {
-          canvasCtx.clearRect(0, 0, 500, 30);
+          const rect = dom.speedCanvas.getBoundingClientRect();
+          canvasCtx.clearRect(0, 0, rect.width || 600, rect.height || 60);
         }
       }
 
       function drawGraph() {
         if (!canvasCtx || graphSamples.length < 2) return;
         const rect = dom.speedCanvas.getBoundingClientRect();
-        const width = rect.width || 430;
-        const height = 24;
+        const width = rect.width || 600;
+        const height = rect.height || 56;
 
         canvasCtx.clearRect(0, 0, width, height);
 
-        const maxVal = Math.max(10, ...graphSamples, anim.currentSpeed) * 1.2;
+        const maxVal = Math.max(10, ...graphSamples, anim.currentSpeed) * 1.15;
         const step = width / (MAX_GRAPH_POINTS - 1);
         const startIndex = MAX_GRAPH_POINTS - graphSamples.length;
 
@@ -1728,7 +2117,7 @@
           const val = (i === graphSamples.length - 1) ? anim.currentSpeed : graphSamples[i];
           points.push({
             x: (startIndex + i) * step,
-            y: height - (val / maxVal) * (height - 6) - 3
+            y: height - (val / maxVal) * (height - 10) - 5
           });
         }
 
@@ -1744,9 +2133,24 @@
         canvasCtx.lineTo(last.x, last.y);
 
         const isUpload = state.phase === "upload";
-        canvasCtx.strokeStyle = isUpload ? "#a855f7" : "#00d2ff";
-        canvasCtx.lineWidth = 1.8;
+        canvasCtx.strokeStyle = isUpload ? "#ec4899" : "#00f2fe";
+        canvasCtx.lineWidth = 2.2;
         canvasCtx.stroke();
+
+        canvasCtx.lineTo(last.x, height);
+        canvasCtx.lineTo(points[0].x, height);
+        canvasCtx.closePath();
+
+        const grad = canvasCtx.createLinearGradient(0, 0, 0, height);
+        if (isUpload) {
+          grad.addColorStop(0, "rgba(236, 72, 153, 0.28)");
+          grad.addColorStop(1, "rgba(236, 72, 153, 0.0)");
+        } else {
+          grad.addColorStop(0, "rgba(0, 242, 254, 0.28)");
+          grad.addColorStop(1, "rgba(0, 242, 254, 0.0)");
+        }
+        canvasCtx.fillStyle = grad;
+        canvasCtx.fill();
       }
 
       // --- NETWORK METADATA & ISP DETECTION ---
@@ -1805,7 +2209,7 @@
           return;
         }
 
-        const chosenKey = updatedCatalog[selected] ? selected : "unpad";
+        const chosenKey = updatedCatalog[selected] ? selected : "cloudflare";
         state.serverKey = chosenKey;
         state.currentEndpoint = updatedCatalog[chosenKey];
         dom.serverNodeDisplay.textContent = state.currentEndpoint.name;
@@ -1825,8 +2229,10 @@
               dom.ispNameDisplay.textContent = state.ispName;
               dom.ratingIspLabel.textContent = state.ispName;
             }
-            if (chosenKey === "cloudflare" && meta.city) {
-              dom.clientLocationDisplay.textContent = meta.city;
+            if (chosenKey === "cloudflare") {
+              const country = meta.country || "ID";
+              const colo = meta.colo || "SIN";
+              dom.clientLocationDisplay.textContent = `${country} (${colo})`;
             }
             renderClientIp();
             return;
@@ -1851,12 +2257,14 @@
       async function measurePingAndJitter(signal) {
         if (signal.aborted) throw new Error("ABORTED");
         state.phase = "ping";
-        dom.phaseBadge.textContent = "PING...";
+        dom.phaseBadge.textContent = "MENGUKUR PING & JITTER...";
+        dom.cardPing.classList.add("active");
+        dom.cardJitter.classList.add("active");
 
         const pingUrl = state.currentEndpoint.ping;
         const sep = pingUrl.includes("?") ? "&" : "?";
 
-        // 1. Warmup connection (socket + TLS handshake) so first sample never spikes
+        // 1. Warmup socket + TLS handshake so initial latency sample never spikes
         try {
           await fetch(`${pingUrl}${sep}warm=${Date.now()}`, { cache: "no-store", mode: "cors", signal });
         } catch (e) {
@@ -1879,21 +2287,23 @@
             const rtt = Math.max(1, performance.now() - t0);
             rtts.push(rtt);
 
-            // Display calm running median instead of raw jittery samples
             const sortedSoFar = [...rtts].sort((a, b) => a - b);
-            const med = sortedSoFar[Math.floor(sortedSoFar.length / 2)];
-            dom.valPing.textContent = Math.round(med);
+            const med = Math.round(sortedSoFar[Math.floor(sortedSoFar.length / 2)]);
+            dom.valPing.textContent = med;
+            if (dom.valPingIdle) dom.valPingIdle.textContent = med;
             audio.playBlip(680, 0.04);
           } catch (e) {
             if (signal.aborted) throw new Error("ABORTED");
           }
-          await abortableSleep(85, signal);
+          await abortableSleep(80, signal);
         }
+
+        dom.cardPing.classList.remove("active");
+        dom.cardJitter.classList.remove("active");
 
         if (signal.aborted) throw new Error("ABORTED");
         if (rtts.length === 0) throw new Error("Gagal mengukur latency jaringan.");
 
-        // Trim highest single outlier if >= 5 samples for stable ping
         const sorted = [...rtts].sort((a, b) => a - b);
         const trimmed = sorted.length >= 5 ? sorted.slice(0, sorted.length - 1) : sorted;
 
@@ -1912,6 +2322,7 @@
         state.results.jitter = Math.round(jitter * 10) / 10;
 
         dom.valPing.textContent = state.results.ping;
+        if (dom.valPingIdle) dom.valPingIdle.textContent = state.results.ping;
         dom.subPingMin.textContent = `${state.results.pingMin} ms`;
         dom.subPingAvg.textContent = `${state.results.pingAvg} ms`;
         dom.valJitter.textContent = state.results.jitter;
@@ -1922,7 +2333,7 @@
       async function measureDownload(signal, durationSeconds, streamCount) {
         if (signal.aborted) throw new Error("ABORTED");
         state.phase = "download";
-        dom.phaseBadge.textContent = "UNDUHAN...";
+        dom.phaseBadge.textContent = "MENGUJI DOWNLOAD...";
         dom.cardDownload.classList.add("active");
         resetGaugeImmediate("cyan");
         resetGraph();
@@ -1933,7 +2344,7 @@
 
         const startTime = performance.now();
         const endTime = startTime + (durationSeconds * 1000);
-        const warmupDuration = 1800; // 1.8s smooth S-curve ramp
+        const warmupDuration = 1800;
         let firstByteTime = -1;
         let warmupBytes = 0;
         let warmupTime = startTime + warmupDuration;
@@ -1950,14 +2361,15 @@
           if (workerId > 0) {
             await abortableSleep(workerId * 220, signal);
           }
-          let chunkSize = 1024 * 1024;
+          // Cloudflare safe max is 5MB to guarantee 0 HTTP 429 rate limit errors
+          let chunkSize = 2 * 1024 * 1024;
           while (performance.now() < endTime && !signal.aborted && !isDone) {
             const downUrl = `${state.currentEndpoint.down}?bytes=${chunkSize}&w=${workerId}&t=${Date.now()}_${Math.random()}`;
             try {
               const res = await fetch(downUrl, { mode: "cors", cache: "no-store", signal });
               if (!res.ok) {
                 chunkSize = 1024 * 1024;
-                await abortableSleep(150, signal);
+                await abortableSleep(140, signal);
                 continue;
               }
               if (!res.body) {
@@ -1979,11 +2391,11 @@
                 }
               }
               if (state.currentEndpoint.type === "local") {
-                if (smoothSpeed > 80) chunkSize = 8 * 1024 * 1024;
-                else if (smoothSpeed > 20) chunkSize = 4 * 1024 * 1024;
+                if (smoothSpeed > 80) chunkSize = 10 * 1024 * 1024;
+                else if (smoothSpeed > 25) chunkSize = 5 * 1024 * 1024;
               } else {
-                if (smoothSpeed > 45) chunkSize = 4 * 1024 * 1024;
-                else if (smoothSpeed > 12) chunkSize = 2 * 1024 * 1024;
+                if (smoothSpeed > 40) chunkSize = 5 * 1024 * 1024;
+                else if (smoothSpeed > 15) chunkSize = 3 * 1024 * 1024;
               }
             } catch (err) {
               if (signal.aborted || isDone) break;
@@ -2059,7 +2471,7 @@
           updateGauge(smoothSpeed, "cyan");
           pushGraphSample(smoothSpeed);
 
-          if (now - lastPingCheck > 1400 && elapsed > 1200) {
+          if (now - lastPingCheck > 1300 && elapsed > 1200) {
             lastPingCheck = now;
             (async () => {
               const pt0 = performance.now();
@@ -2073,6 +2485,9 @@
                 const medP = Math.round(sortedP[Math.floor(sortedP.length / 2)]);
                 state.results.pingDown = medP;
                 dom.valPingDown.textContent = medP;
+                const liveBb = Math.max(0, medP - state.results.ping);
+                dom.valBufferbloat.textContent = `+${liveBb}`;
+                dom.subLoadedPing.textContent = `${medP} ms`;
               } catch (e) {}
             })();
           }
@@ -2092,12 +2507,12 @@
           : (totalBytes * 8) / (Math.max(1, (performance.now() - startTime) / 1000) * 1e6);
 
         const totalMb = totalBytes / (1024 * 1024);
-        state.results.download = Math.round(finalSpeed * 100) / 100;
-        state.results.downloadPeak = Math.round(peakSpeed * 100) / 100;
+        state.results.download = Math.round(finalSpeed * 10) / 10;
+        state.results.downloadPeak = Math.round(peakSpeed * 10) / 10;
         state.results.downloadBytes = totalMb;
 
-        dom.valDownload.textContent = formatSpeedValue(state.results.download);
-        dom.subDlPeak.textContent = `${formatSpeedValue(state.results.downloadPeak)} ${state.unit}`;
+        dom.valDownload.textContent = formatSpeedValue(state.results.download, 1);
+        dom.subDlPeak.textContent = `${formatSpeedValue(state.results.downloadPeak, 1)} ${state.unit}`;
         dom.subDlTotal.textContent = `${totalMb.toFixed(1)} MB`;
 
         if (loadedPings.length > 0) {
@@ -2120,7 +2535,7 @@
       async function measureUpload(signal, durationSeconds, streamCount) {
         if (signal.aborted) throw new Error("ABORTED");
         state.phase = "upload";
-        dom.phaseBadge.textContent = "UNGGAHAN...";
+        dom.phaseBadge.textContent = "MENGUJI UPLOAD...";
         dom.cardUpload.classList.add("active-upload");
         resetGaugeImmediate("purple");
         resetGraph();
@@ -2277,7 +2692,7 @@
           updateGauge(smoothSpeed, "purple");
           pushGraphSample(smoothSpeed);
 
-          if (now - lastPingCheck > 1400 && elapsed > 1200) {
+          if (now - lastPingCheck > 1300 && elapsed > 1200) {
             lastPingCheck = now;
             (async () => {
               const pt0 = performance.now();
@@ -2310,12 +2725,12 @@
           : (totalBytes * 8) / (Math.max(1, (performance.now() - startTime) / 1000) * 1e6);
 
         const totalMb = totalBytes / (1024 * 1024);
-        state.results.upload = Math.round(finalSpeed * 100) / 100;
-        state.results.uploadPeak = Math.round(peakSpeed * 100) / 100;
+        state.results.upload = Math.round(finalSpeed * 10) / 10;
+        state.results.uploadPeak = Math.round(peakSpeed * 10) / 10;
         state.results.uploadBytes = totalMb;
 
-        dom.valUpload.textContent = formatSpeedValue(state.results.upload);
-        dom.subUlPeak.textContent = `${formatSpeedValue(state.results.uploadPeak)} ${state.unit}`;
+        dom.valUpload.textContent = formatSpeedValue(state.results.upload, 1);
+        dom.subUlPeak.textContent = `${formatSpeedValue(state.results.uploadPeak, 1)} ${state.unit}`;
         dom.subUlTotal.textContent = `${totalMb.toFixed(1)} MB`;
 
         if (upLoadedPings.length > 0) {
@@ -2329,6 +2744,7 @@
 
       // --- 4 CATEGORY QUALITY DOTS & NETWORK GRADE ---
       function setCategoryDots(containerEl, catBoxEl, score) {
+        if (!containerEl || !catBoxEl) return;
         const dots = containerEl.querySelectorAll(".qual-dot");
         catBoxEl.classList.toggle("scored", score > 0);
         dots.forEach((dot, idx) => {
@@ -2337,7 +2753,7 @@
       }
 
       function evaluateNetworkGrade() {
-        const { ping, jitter, download, upload } = state.results;
+        const { ping, jitter, download, upload, bufferbloat } = state.results;
 
         let browseDots = 3;
         if (download >= 20 && ping <= 60) browseDots = 5;
@@ -2369,24 +2785,28 @@
         setCategoryDots(dom.dotsVideoCall, dom.qualCatVideoCall, callDots);
 
         let grade = "A+";
-        let title = "Koneksi Sangat Stabil (Grade A+)";
-        let desc = "Sempurna untuk Browsing, Gaming Kompetitif, Streaming 4K, dan Video Call.";
+        let title = "Koneksi Kelas Turnamen (Grade A+)";
+        let desc = "Koneksi internet sangat stabil. Latency responsif untuk gaming kompetitif, Discord, dan streaming 4K tanpa buffering.";
 
-        if (ping <= 30 && jitter <= 5 && download >= 40) {
+        if (ping <= 30 && jitter <= 5 && download >= 40 && bufferbloat <= 25) {
           grade = "A+";
-          title = "Koneksi Kelas Utama (Grade A+)";
+          title = "Koneksi Kelas Turnamen (Grade A+)";
         } else if (ping <= 55 && download >= 20) {
           grade = "A";
-          title = "Koneksi Sangat Baik (Grade A)";
-        } else if (ping <= 85 && download >= 8) {
+          title = "Koneksi Sangat Bagus (Grade A)";
+          desc = "Sangat lancar untuk video call HD, streaming resolusi tinggi, dan unduhan file besar.";
+        } else if (ping <= 85 && download >= 10) {
           grade = "B";
           title = "Koneksi Cukup Baik (Grade B)";
+          desc = "Bagus untuk browsing dan YouTube, namun mungkin terasa sedikit latency pada game online sensitif.";
         } else if (download >= 3) {
           grade = "C";
           title = "Koneksi Sedang (Grade C)";
+          desc = "Cukup untuk kebutuhan dasar, namun unduhan besar dan streaming multi-perangkat akan sedikit terbatas.";
         } else {
           grade = "D";
           title = "Koneksi Terbatas (Grade D)";
+          desc = "Bandwidth atau kestabilan jaringan rendah. Disarankan memeriksa router atau saluran Wi-Fi.";
         }
 
         state.results.grade = grade;
@@ -2396,19 +2816,19 @@
         dom.verdictBox.style.display = "flex";
       }
 
-      // --- RIWAYAT PENGUJIAN (LOCALSTORAGE) ---
+      // --- SIMPAN RIWAYAT KE LOCALSTORAGE ---
       function saveTestHistory() {
         const item = {
           id: state.resultId,
-          time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+          time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
           date: new Date().toLocaleDateString("id-ID"),
-          server: `${state.currentEndpoint.name} (${state.currentEndpoint.city})`,
+          server: state.currentEndpoint.name,
           ping: state.results.ping,
           pingDown: state.results.pingDown,
           pingUp: state.results.pingUp,
           jitter: state.results.jitter,
-          download: state.results.download.toFixed(2),
-          upload: state.results.upload.toFixed(2),
+          download: state.results.download,
+          upload: state.results.upload,
           bufferbloat: state.results.bufferbloat,
           grade: state.results.grade
         };
@@ -2429,54 +2849,59 @@
           if (raw) {
             state.history = JSON.parse(raw);
             renderHistoryTable();
-
-            // Populate last result into telemetry view on load
-            if (state.history.length > 0) {
-              const last = state.history[0];
-              if (last.id) {
-                state.resultId = String(last.id);
-                dom.resultIdDisplay.textContent = state.resultId;
-              }
-              state.results.download = parseFloat(last.download) || 0;
-              state.results.upload = parseFloat(last.upload) || 0;
-              state.results.ping = parseInt(last.ping, 10) || 0;
-              state.results.pingDown = parseInt(last.pingDown || last.ping, 10) || 0;
-              state.results.pingUp = parseInt(last.pingUp || last.ping, 10) || 0;
-              state.results.jitter = parseFloat(last.jitter) || 1;
-
-              if (state.results.download > 0) {
-                dom.valDownload.textContent = formatSpeedValue(state.results.download);
-                dom.valUpload.textContent = formatSpeedValue(state.results.upload);
-                dom.valPing.textContent = state.results.ping;
-                dom.valPingDown.textContent = state.results.pingDown;
-                dom.valPingUp.textContent = state.results.pingUp;
-                evaluateNetworkGrade();
-              }
-            }
           }
         } catch (e) {}
       }
 
       function renderHistoryTable() {
         if (!state.history.length) {
-          dom.historyTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-dim); padding: 20px;">Belum ada riwayat pengujian. Klik "MULAI" untuk menguji koneksi.</td></tr>`;
+          dom.historyTableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-dim); padding: 24px;">Belum ada riwayat pengujian. Klik "MULAI TES" untuk memulai.</td></tr>`;
           return;
         }
 
         dom.historyTableBody.innerHTML = state.history.map(item => `
           <tr>
-            <td style="color:var(--cyan-neon); font-weight:600">${item.id || "19863800067"}</td>
             <td><strong>${item.time}</strong> <small style="color:var(--text-dim)">(${item.date})</small></td>
             <td>${item.server}</td>
             <td>${item.ping} ms</td>
+            <td>${item.jitter} ms</td>
             <td><strong style="color:var(--cyan-neon)">${item.download}</strong> Mbps</td>
             <td><strong style="color:var(--purple-neon)">${item.upload}</strong> Mbps</td>
+            <td>+${item.bufferbloat || 0} ms</td>
             <td><span class="grade-pill ${(item.grade || "A").charAt(0)}">${item.grade || "A"}</span></td>
           </tr>
         `).join("");
       }
 
-      // --- MAIN EXECUTION FLOW ---
+      function restoreCardDisplay(res) {
+        if (res && res.download > 0) {
+          dom.valPing.textContent = res.ping;
+          if (dom.valPingIdle) dom.valPingIdle.textContent = res.ping;
+          dom.subPingMin.textContent = `${res.pingMin} ms`;
+          dom.subPingAvg.textContent = `${res.pingAvg} ms`;
+          dom.valJitter.textContent = res.jitter;
+          dom.valDownload.textContent = formatSpeedValue(res.download, 1);
+          dom.subDlPeak.textContent = `${formatSpeedValue(res.downloadPeak, 1)} ${state.unit}`;
+          dom.valUpload.textContent = formatSpeedValue(res.upload, 1);
+          dom.subUlPeak.textContent = `${formatSpeedValue(res.uploadPeak, 1)} ${state.unit}`;
+          dom.valBufferbloat.textContent = `+${res.bufferbloat}`;
+          dom.subLoadedPing.textContent = `${res.loadedPing} ms`;
+          dom.valPingDown.textContent = res.pingDown;
+          dom.valPingUp.textContent = res.pingUp;
+          evaluateNetworkGrade();
+        } else {
+          dom.valPing.textContent = "--";
+          if (dom.valPingIdle) dom.valPingIdle.textContent = "--";
+          dom.valPingDown.textContent = "--";
+          dom.valPingUp.textContent = "--";
+          dom.valJitter.textContent = "--";
+          dom.valDownload.textContent = "--";
+          dom.valUpload.textContent = "--";
+          dom.valBufferbloat.textContent = "--";
+        }
+      }
+
+      // --- FLOW EKSEKUSI TES LENGKAP ---
       async function startCompleteSpeedTest() {
         if (state.testing) return;
         state.testing = true;
@@ -2486,22 +2911,25 @@
         const prevResultId = state.resultId;
 
         state.resultId = String(19860000000 + Math.floor(Math.random() * 9999999));
-        dom.resultIdDisplay.textContent = state.resultId;
+        dom.resultIdDisplay.textContent = `#${state.resultId}`;
 
         dom.btnStartTest.style.display = "none";
+        dom.btnCancelTest.style.display = "inline-flex";
         dom.activeGaugeWrap.classList.add("testing-active");
         dom.sparklineHolder.classList.add("active-graph");
-        dom.btnCancelTest.style.display = "inline-block";
-        dom.gaugeGlow.style.opacity = "1";
+        dom.verdictBox.style.display = "none";
         initCanvas();
         resetGaugeImmediate("cyan");
         resetGraph();
 
         dom.valPing.textContent = "--";
+        if (dom.valPingIdle) dom.valPingIdle.textContent = "--";
         dom.valPingDown.textContent = "--";
         dom.valPingUp.textContent = "--";
+        dom.valJitter.textContent = "--";
         dom.valDownload.textContent = "--";
         dom.valUpload.textContent = "--";
+        dom.valBufferbloat.textContent = "--";
 
         setCategoryDots(dom.dotsBrowsing, dom.qualCatBrowsing, 0);
         setCategoryDots(dom.dotsGaming, dom.qualCatGaming, 0);
@@ -2510,8 +2938,8 @@
 
         audio.playBlip(520, 0.08);
 
-        const duration = parseInt(dom.durationSelect.value, 10) || 11;
-        const streams = parseInt(dom.streamCountSelect.value, 10) || 2;
+        const duration = parseInt(dom.durationSelect.value, 10) || 10;
+        const streams = parseInt(dom.streamCountSelect.value, 10) || 3;
         const signal = state.abortController.signal;
 
         try {
@@ -2526,51 +2954,49 @@
           await measureDownload(signal, duration, streams);
           if (signal.aborted) throw new Error("ABORTED");
 
-          // Calm transition pause before Upload so gauge resets cleanly to 0.00
+          // Calm transition pause before Upload so gauge resets cleanly to 0.0
           resetGaugeImmediate("purple");
           await abortableSleep(160, signal);
           if (signal.aborted) throw new Error("ABORTED");
 
           // Phase 3: Upload
-          await measureUpload(signal, Math.max(7, Math.round(duration * 0.85)), Math.min(streams, 3));
+          await measureUpload(signal, Math.max(6, Math.round(duration * 0.85)), Math.min(streams, 4));
           if (signal.aborted) throw new Error("ABORTED");
 
-          // Final Evaluation
+          // Evaluasi Akhir
           evaluateNetworkGrade();
           saveTestHistory();
           audio.playSuccessChime();
 
           state.phase = "completed";
-          dom.phaseBadge.textContent = "SELESAI";
-          resetGaugeImmediate("cyan");
+          dom.phaseBadge.textContent = "PENGUJIAN SELESAI";
+          updateGauge(state.results.download, "cyan");
 
         } catch (err) {
+          dom.cardPing.classList.remove("active");
+          dom.cardJitter.classList.remove("active");
+          dom.cardDownload.classList.remove("active");
+          dom.cardUpload.classList.remove("active-upload");
+
           if (signal.aborted || (err && err.message === "ABORTED")) {
             state.phase = "idle";
             dom.phaseBadge.textContent = "DIBATALKAN";
             state.results = prevResults;
             state.resultId = prevResultId;
-            dom.resultIdDisplay.textContent = prevResultId;
-            if (prevResults.download > 0) {
-              dom.valDownload.textContent = formatSpeedValue(prevResults.download);
-              dom.valUpload.textContent = formatSpeedValue(prevResults.upload);
-              dom.valPing.textContent = prevResults.ping;
-              dom.valPingDown.textContent = prevResults.pingDown;
-              dom.valPingUp.textContent = prevResults.pingUp;
-              evaluateNetworkGrade();
-            }
+            dom.resultIdDisplay.textContent = `#${prevResultId}`;
+            restoreCardDisplay(prevResults);
           } else {
             console.error("[SpeedTest] Error:", err);
-            showToast("Koneksi server terputus, silakan coba kembali.");
+            dom.phaseBadge.textContent = "KENDALA KONEKSI";
+            showToast("Gagal menghubungi server uji, silakan coba kembali.");
           }
           resetGaugeImmediate("cyan");
         } finally {
           state.testing = false;
           dom.activeGaugeWrap.classList.remove("testing-active");
           dom.sparklineHolder.classList.remove("active-graph");
-          dom.btnStartTest.style.display = "flex";
+          dom.btnStartTest.style.display = "inline-flex";
           dom.btnCancelTest.style.display = "none";
-          dom.gaugeGlow.style.opacity = "0";
         }
       }
 
@@ -2580,17 +3006,18 @@
         }
       }
 
-      // --- INTERACTIVE HANDLERS ---
+      // --- EVENT HANDLERS ---
       dom.btnStartTest.addEventListener("click", startCompleteSpeedTest);
       dom.btnCancelTest.addEventListener("click", cancelSpeedTest);
 
+      // Toggle Multi <-> Single connection streams
       dom.connModeToggle.addEventListener("click", () => {
         if (state.testing) return;
         const current = dom.streamCountSelect.value;
         if (current === "1") {
-          dom.streamCountSelect.value = "2";
+          dom.streamCountSelect.value = "3";
           dom.connModeToggle.textContent = "Multi";
-          showToast("Mode Koneksi: Multi (Stabil)");
+          showToast("Mode Koneksi: Multi (3 Stream)");
         } else {
           dom.streamCountSelect.value = "1";
           dom.connModeToggle.textContent = "Single";
@@ -2602,55 +3029,45 @@
         dom.connModeToggle.textContent = dom.streamCountSelect.value === "1" ? "Single" : "Multi";
       });
 
-      dom.clientIpDisplay.addEventListener("click", () => {
+      // IP Privacy Masking
+      function toggleIpMask(e) {
+        if (e && typeof e.stopPropagation === "function") {
+          e.stopPropagation();
+        }
         state.ipMasked = !state.ipMasked;
         renderClientIp();
-      });
+      }
+      dom.clientIpDisplay.addEventListener("click", toggleIpMask);
+      if (dom.ipChipWrap) {
+        dom.ipChipWrap.addEventListener("click", toggleIpMask);
+      }
 
+      // Quick jump to Server Selector
       dom.btnGantiServer.addEventListener("click", () => {
-        dom.settingsDrawer.classList.add("open");
-        dom.btnToggleSettings.classList.add("active");
         dom.settingsDrawer.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        dom.serverModeSelect.focus();
       });
 
-      dom.btnToggleSettings.addEventListener("click", () => {
-        const isOpen = dom.settingsDrawer.classList.toggle("open");
-        dom.btnToggleSettings.classList.toggle("active", isOpen);
-      });
-
-      dom.btnCloseSettings.addEventListener("click", () => {
-        dom.settingsDrawer.classList.remove("open");
-        dom.btnToggleSettings.classList.remove("active");
-      });
-
-      dom.btnToggleHistory.addEventListener("click", () => {
-        const isOpen = dom.historyDrawer.classList.toggle("open");
-        dom.btnToggleHistory.classList.toggle("active", isOpen);
-        if (isOpen) {
-          dom.historyDrawer.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        }
-      });
-
-      dom.serverModeSelect.addEventListener("change", () => {
-        detectNetworkMetadata();
-        showToast(`Server dipilih: ${dom.serverNodeDisplay.textContent}`);
-      });
-
+      // Unit toggle (Mbps <-> MB/s)
       dom.unitToggleBtn.addEventListener("click", () => {
         state.unit = state.unit === "Mbps" ? "MB/s" : "Mbps";
         dom.speedUnitText.textContent = state.unit;
         dom.unitDl.textContent = state.unit;
         dom.unitUl.textContent = state.unit;
+        dom.liveSpeedNumber.textContent = formatSpeedValue(anim.displayedNumber, 1);
 
         if (state.results.download > 0) {
-          dom.valDownload.textContent = formatSpeedValue(state.results.download);
+          dom.valDownload.textContent = formatSpeedValue(state.results.download, 1);
+          dom.subDlPeak.textContent = `${formatSpeedValue(state.results.downloadPeak, 1)} ${state.unit}`;
         }
         if (state.results.upload > 0) {
-          dom.valUpload.textContent = formatSpeedValue(state.results.upload);
+          dom.valUpload.textContent = formatSpeedValue(state.results.upload, 1);
+          dom.subUlPeak.textContent = `${formatSpeedValue(state.results.uploadPeak, 1)} ${state.unit}`;
         }
         showToast(`Satuan diubah ke ${state.unit}`);
       });
 
+      // Star Rating
       const starBtns = dom.starRatingRow.querySelectorAll(".star-btn");
       function renderStars(count) {
         starBtns.forEach(btn => {
@@ -2665,55 +3082,73 @@
           state.userRating = val;
           renderStars(val);
           try { localStorage.setItem("zen_provider_rating", String(val)); } catch (e) {}
-          showToast(`Terima kasih! Penilaian ${val} bintang disimpan.`);
+          showToast(`Penilaian ${val} bintang untuk ${state.ispName} disimpan.`);
         });
       });
 
+      // Salin Ringkasan ke Clipboard
       function copyResultSummary() {
-        const text = `SPEEDTEST HASIL #${state.resultId}
-Provider: ${state.ispName} (${state.clientIp})
-Server: ${dom.serverNodeDisplay.textContent} - ${dom.clientLocationDisplay.textContent}
-- Unduhan: ${state.results.download.toFixed(2)} Mbps
-- Unggahan: ${state.results.upload.toFixed(2)} Mbps
-- Ping: ${state.results.ping} ms (Down: ${state.results.pingDown} ms | Up: ${state.results.pingUp} ms)`;
+        const text = `ZEN SPEEDTEST PRO — LAPORAN KECEPATAN (#${state.resultId})
+Waktu: ${new Date().toLocaleString("id-ID")}
+Provider: ${state.ispName} (${ dom.clientIpDisplay.textContent })
+Server: ${dom.serverNodeDisplay.textContent} (${dom.clientLocationDisplay.textContent})
+
+- Ping: ${state.results.ping} ms (Min: ${state.results.pingMin} ms | Down: ${state.results.pingDown} ms | Up: ${state.results.pingUp} ms)
+- Jitter: ${state.results.jitter} ms
+- Download: ${state.results.download} Mbps (Puncak: ${state.results.downloadPeak} Mbps)
+- Upload: ${state.results.upload} Mbps (Puncak: ${state.results.uploadPeak} Mbps)
+- Bufferbloat: +${state.results.bufferbloat} ms
+- Kualitas Jaringan: ${state.results.grade} (${dom.verdictTitle.textContent})`;
 
         navigator.clipboard.writeText(text).then(() => {
+          if (dom.btnCopyText) {
+            dom.btnCopyText.textContent = "Berhasil Disalin!";
+            setTimeout(() => { dom.btnCopyText.textContent = "Salin Ringkasan"; }, 2000);
+          }
           showToast("Ringkasan hasil berhasil disalin!");
         });
       }
 
       dom.btnCopySummary.addEventListener("click", copyResultSummary);
       dom.resultIdDisplay.addEventListener("click", copyResultSummary);
-      dom.btnShareSocial.addEventListener("click", copyResultSummary);
 
-      function exportHistoryCsv() {
+      // Unduh Riwayat CSV
+      dom.btnExportCsv.addEventListener("click", () => {
         if (!state.history.length) {
-          showToast("Belum ada riwayat untuk diunduh.");
+          showToast("Belum ada data riwayat untuk diunduh.");
           return;
         }
+
         const headers = ["ID_Hasil", "Waktu", "Tanggal", "Server", "Ping_ms", "Jitter_ms", "Download_Mbps", "Upload_Mbps", "Bufferbloat_ms", "Grade"];
         const rows = state.history.map(h => [
-          h.id || state.resultId, h.time, h.date, `"${h.server}"`, h.ping, h.jitter, h.download, h.upload, h.bufferbloat, h.grade
+          h.id || state.resultId, h.time, h.date, `"${h.server}"`, h.ping, h.jitter, h.download, h.upload, h.bufferbloat || 0, h.grade
         ]);
+
         const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+        const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
-        link.setAttribute("href", encodeURI(csvContent));
+        link.setAttribute("href", encodedUri);
         link.setAttribute("download", `speedtest_history_${Date.now()}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-      }
+      });
 
-      dom.btnExportCsv.addEventListener("click", exportHistoryCsv);
-      dom.btnQuickExport.addEventListener("click", exportHistoryCsv);
-
+      // Hapus Riwayat
       dom.btnClearHistory.addEventListener("click", () => {
         state.history = [];
         try { localStorage.removeItem("zen_speedtest_history"); } catch (e) {}
         renderHistoryTable();
-        showToast("Riwayat pengujian dihapus.");
+        showToast("Riwayat pengujian berhasil dihapus.");
       });
 
+      // Switch server mode
+      dom.serverModeSelect.addEventListener("change", () => {
+        detectNetworkMetadata();
+        showToast(`Server Sumber: ${dom.serverNodeDisplay.textContent}`);
+      });
+
+      // Inisialisasi awal
       window.addEventListener("DOMContentLoaded", () => {
         initCanvas();
         window.addEventListener("resize", initCanvas);
@@ -2725,6 +3160,7 @@ Server: ${dom.serverNodeDisplay.textContent} - ${dom.clientLocationDisplay.textC
         detectNetworkMetadata();
         requestAnimationFrame(renderEngineLoop);
       });
+
     })();
   </script>
 </body>

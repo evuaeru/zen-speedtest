@@ -1,7 +1,8 @@
 """
 Test Suite untuk Zen SpeedTest Pro
 Memvalidasi integritas berkas, server lokal, endpoint CORS (termasuk Private Network Access),
-ketahanan penanganan error, subprocess launcher, dan kelengkapan elemen DOM HTML.
+ketahanan penanganan error, subprocess launcher, kelengkapan elemen DOM HTML,
+sistem ikon vektor minimalis (bebas emoji sistem kaku), serta kestabilan algoritma Slew-Rate Limiter.
 Dibuat khusus untuk Master Zay oleh Pelayan Ancellia.
 """
 
@@ -34,7 +35,7 @@ sys.path.insert(0, BASE_DIR)
 from speedtest_server import SpeedTestHandler, find_available_port
 
 def test_file_integrity():
-    print("[1/6] Memeriksa integritas berkas proyek...")
+    print("[1/7] Memeriksa integritas berkas proyek...")
     required_files = [
         "index.html",
         "speedtest_server.py",
@@ -49,7 +50,7 @@ def test_file_integrity():
         print(f"  [OK] {rf} ({size:,} bytes)")
 
 def test_html_dom_and_syntax():
-    print("[2/6] Memvalidasi elemen DOM HTML & sintaks JavaScript...")
+    print("[2/7] Memvalidasi elemen DOM HTML & sintaks JavaScript...")
     html_path = os.path.join(BASE_DIR, "index.html")
     with open(html_path, "r", encoding="utf-8") as f:
         html = f.read()
@@ -90,9 +91,8 @@ def test_html_dom_and_syntax():
         print("  [INFO] Node.js tidak tersedia untuk syntax check, dilewati.")
 
 def test_subprocess_server_launch():
-    print("[3/6] Menguji startup subprocess speedtest_server.py (Windows console encoding safety)...")
+    print("[3/7] Menguji startup subprocess speedtest_server.py (Windows console encoding safety)...")
     server_py = os.path.join(BASE_DIR, "speedtest_server.py")
-    # Simulasikan eksekusi Python pada Windows console tanpa UTF-8 paksa
     env = os.environ.copy()
     env["PYTHONIOENCODING"] = "cp1252"
     p = subprocess.Popen([sys.executable, server_py], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
@@ -104,7 +104,7 @@ def test_subprocess_server_launch():
     print("  [OK] Subprocess speedtest_server.py berhasil dijalankan tanpa Unicode crash.")
 
 def test_local_server_endpoints_and_cors():
-    print("[4/6] Menguji endpoint server lokal, PNA header, dan ketahanan input...")
+    print("[4/7] Menguji endpoint server lokal, PNA header, dan ketahanan input...")
     port = find_available_port(8300)
     server = ThreadingHTTPServer(("127.0.0.1", port), SpeedTestHandler)
     t = threading.Thread(target=server.serve_forever, daemon=True)
@@ -169,7 +169,7 @@ def test_local_server_endpoints_and_cors():
     server.shutdown()
 
 def test_cloudflare_wan_reachability():
-    print("[5/6] Menguji konektivitas WAN Cloudflare Edge...")
+    print("[5/7] Menguji konektivitas WAN Cloudflare Edge...")
     try:
         req = urllib.request.Request("https://speed.cloudflare.com/__down?bytes=1000", headers={"User-Agent": "Mozilla/5.0"})
         t0 = time.time()
@@ -192,18 +192,31 @@ def test_batch_launcher_script():
     assert "%LOCALAPPDATA%" in bat, "Batch launcher harus menggunakan %LOCALAPPDATA% dinamis"
     print("  [OK] Jalankan_SpeedTest.bat terstruktur aman dan fleksibel.")
 
-def test_ookla_ui_and_stability_engine():
-    print("[7/7] Menguji UI Ookla Reference, interaksi DOM, & kestabilan algoritma (Non-Aggressive Slew Limiter)...")
+def test_zen_theme_vector_icons_and_stability_engine():
+    print("[7/7] Menguji Tema Zen SpeedTest Pro, Ikon Vektor Minimalis, & Kestabilan Algoritma (Non-Aggressive Slew Limiter)...")
     html_path = os.path.join(BASE_DIR, "index.html")
     with open(html_path, "r", encoding="utf-8") as f:
         html = f.read()
 
-    # 1. Pastikan seluruh elemen referensi Ookla tersedia
-    ookla_elements = [
-        "resultIdDisplay",
-        "btnToggleHistory",
-        "btnToggleSettings",
-        "activeGaugeWrap",
+    # 1. Pastikan Tema Zen SpeedTest Pro & Komponen Vektor Minimalis tersedia
+    zen_elements = [
+        "ZEN SPEEDTEST PRO",
+        "High-Precision Bandwidth &amp; Latency Benchmark",
+        "speedometer-hero",
+        "MULAI TES",
+        "metrics-grid",
+        "pingIndicator",
+        "jitterIndicator",
+        "dlIndicator",
+        "ulIndicator",
+        "bbIndicator",
+        "vector-badge ping-vec",
+        "vector-badge jitter-vec",
+        "vector-badge dl-vec",
+        "vector-badge ul-vec",
+        "vector-badge bb-vec",
+        "telemetry-quality-bar",
+        "valPingIdle",
         "valPingDown",
         "valPingUp",
         "qualCatBrowsing",
@@ -218,23 +231,25 @@ def test_ookla_ui_and_stability_engine():
         "ispNameDisplay",
         "btnGantiServer",
         "starRatingRow",
-        "settingsDrawer",
-        "historyDrawer",
-        "UNDUHAN",
-        "UNGGAHAN",
-        "NILAI PROVIDER ANDA",
-        "MULAI",
-        "Ganti Server",
-        "qual-icon-box no-frame",
-        "167.53",
-        "53.08",
-        "179"
+        "resultIdDisplay",
+        "settings-bar",
+        "history-card"
     ]
-    for elem in ookla_elements:
-        assert elem in html, f"Elemen/teks referensi Ookla '{elem}' tidak ditemukan di index.html"
-    print(f"  [OK] Seluruh {len(ookla_elements)} komponen UI referensi Ookla terverifikasi.")
+    for elem in zen_elements:
+        assert elem in html, f"Elemen Zen SpeedTest Pro / Vector '{elem}' tidak ditemukan di index.html"
 
-    # 2. Simulasi matematis & behavioral di Node.js untuk menguji kestabilan angka pada jaringan bursty, delayed handshake, & TCP slow-start
+    # 2. Pastikan emoji sistem lama (⚡, 〰, ⬇️, ⬆️, 📶, 📋) dan path SVG keliru (pause / music note) sudah bersih 100%
+    banned_legacy_artifacts = [
+        "⚡", "〰", "⬇️", "⬆️", "📶", "📋", "✅",
+        "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z", # pause icon
+        "M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" # music note icon
+    ]
+    for banned in banned_legacy_artifacts:
+        assert banned not in html, f"Artefak emoji/ikon lama yang tidak diinginkan '{banned}' masih ditemukan di index.html"
+
+    print(f"  [OK] Tema Zen SpeedTest Pro & {len(zen_elements)} komponen Ikon Vektor Minimalis terverifikasi (0 emoji sistem).")
+
+    # 3. Simulasi matematis & behavioral di Node.js untuk menguji kestabilan angka pada jaringan bursty, delayed handshake, & TCP slow-start
     node_test_script = r"""
 function runAlgo(ticks, getBytesForTick) {
   const startTime = 0, warmupDuration = 1800, WINDOW_MS = 2200;
@@ -303,18 +318,18 @@ function runAlgo(ticks, getBytesForTick) {
   return { finalSpeed: smoothSpeed, maxJumpPct: maxPostWarmupJumpPct };
 }
 
-// Case A: Bursty traffic around 167.53 Mbps
+// Case A: Bursty traffic around 167.5 Mbps
 const bursty = runAlgo(110, (step) => {
   const m = step % 4 === 0 ? 0.05 : step % 4 === 1 ? 2.40 : step % 4 === 2 ? 0.65 : 0.90;
-  return Math.round((167.53 * 1e6 / 8) * 0.1 * m);
+  return Math.round((167.5 * 1e6 / 8) * 0.1 * m);
 });
-if (bursty.maxJumpPct > 3.0 || Math.abs(bursty.finalSpeed - 167.53) > 3.0) {
+if (bursty.maxJumpPct > 3.0 || Math.abs(bursty.finalSpeed - 167.5) > 3.0) {
   console.error("FAIL Case A (Bursty):", bursty); process.exit(1);
 }
 
-// Case B: 900ms initial handshake delay in 7s test (167.53 Mbps)
-const delayed = runAlgo(70, (step) => step <= 9 ? 0 : Math.round((167.53 * 1e6 / 8) * 0.1));
-if (Math.abs(delayed.finalSpeed - 167.53) > 3.0) {
+// Case B: 900ms initial handshake delay in 7s test (167.5 Mbps)
+const delayed = runAlgo(70, (step) => step <= 9 ? 0 : Math.round((167.5 * 1e6 / 8) * 0.1));
+if (Math.abs(delayed.finalSpeed - 167.5) > 3.0) {
   console.error("FAIL Case B (Handshake Delay):", delayed); process.exit(1);
 }
 
@@ -325,17 +340,17 @@ if (Math.abs(slowStart.finalSpeed - 300) > 5.0) {
 }
 
 console.log(JSON.stringify({
-  finalSpeed: bursty.finalSpeed.toFixed(2),
+  finalSpeed: bursty.finalSpeed.toFixed(1),
   maxJumpPct: bursty.maxJumpPct.toFixed(2),
-  slowStartSpeed: slowStart.finalSpeed.toFixed(2)
+  slowStartSpeed: slowStart.finalSpeed.toFixed(1)
 }));
 """
     proc = subprocess.run(["node", "-e", node_test_script, html_path], capture_output=True, text=True)
     assert proc.returncode == 0, f"Uji kestabilan algoritma gagal:\n{proc.stderr}"
     res = json.loads(proc.stdout.strip())
-    print(f"  [OK] Uji Slew-Rate Limiter: Bursty={res['finalSpeed']} Mbps (Max jump {res['maxJumpPct']}%), TCP Slow-Start={res['slowStartSpeed']}/300 Mbps.")
+    print(f"  [OK] Uji Slew-Rate Limiter: Bursty={res['finalSpeed']} Mbps (Max jump {res['maxJumpPct']}%), TCP Slow-Start={res['slowStartSpeed']}/300.0 Mbps.")
 
-    # 3. Eksekusi langsung blok <script> asli dari index.html di dalam Node VM (Behavioral, Mid-Test Cancel, & Cross-Phase Bleed Test)
+    # 4. Eksekusi langsung blok <script> asli dari index.html di dalam Node VM (Behavioral, Mid-Test Cancel, & Unit Conversion)
     vm_harness_script = r"""
 const fs = require('fs');
 const vm = require('vm');
@@ -349,19 +364,19 @@ function makeEl(id) {
   const listeners = {};
   const classSet = new Set();
   const dots = Array.from({ length: 5 }, () => makeSimpleDot());
-  let initialText = "";
-  if (id === "valDownload") initialText = "167.53";
-  else if (id === "valUpload") initialText = "53.08";
-  else if (id === "valPing") initialText = "2";
-  else if (id === "valPingDown") initialText = "2";
-  else if (id === "valPingUp") initialText = "179";
-  else if (id === "resultIdDisplay") initialText = "19863800067";
+  let initialText = "--";
+  if (id === "liveSpeedNumber") initialText = "0.0";
+  else if (id === "speedUnitText" || id === "unitDl" || id === "unitUl") initialText = "Mbps";
+  else if (id === "phaseBadge") initialText = "STANDBY";
+  else if (id === "connModeToggle") initialText = "Multi";
+  else if (id === "clientIpDisplay") initialText = "182.10.131.57";
+  else if (id === "resultIdDisplay") initialText = "#19863800067";
   return {
     id,
     textContent: initialText,
     innerHTML: "",
-    value: id === "serverModeSelect" ? "unpad" : id === "streamCountSelect" ? "2" : id === "durationSelect" ? "8" : "on",
-    style: { display: "", opacity: "0", background: "", strokeDashoffset: "612.6" },
+    value: id === "serverModeSelect" ? "cloudflare" : id === "streamCountSelect" ? "3" : id === "durationSelect" ? "6" : "on",
+    style: { display: "", opacity: "0", background: "", strokeDashoffset: "612.6", filter: "" },
     classList: {
       add: (c) => classSet.add(c),
       remove: (c) => classSet.delete(c),
@@ -378,8 +393,8 @@ function makeEl(id) {
     setAttribute: function(k, v) { this[k] = v; },
     getAttribute: function(k) { return this[k] || "1"; },
     addEventListener: (ev, fn) => { listeners[ev] = listeners[ev] || []; listeners[ev].push(fn); },
-    trigger: (ev) => { (listeners[ev] || []).forEach(fn => fn()); },
-    getBoundingClientRect: () => ({ width: 430, height: 24 }),
+    trigger: (ev, arg) => { (listeners[ev] || []).forEach(fn => fn(arg)); },
+    getBoundingClientRect: () => ({ width: 600, height: 56 }),
     getContext: () => ({
       scale: () => {}, clearRect: () => {}, beginPath: () => {}, moveTo: () => {},
       quadraticCurveTo: () => {}, lineTo: () => {}, stroke: () => {}, closePath: () => {},
@@ -394,7 +409,8 @@ function makeEl(id) {
       });
       return [];
     },
-    scrollIntoView: () => {}
+    scrollIntoView: () => {},
+    focus: () => {}
   };
 }
 function makeSimpleDot() {
@@ -412,6 +428,8 @@ function makeSimpleDot() {
 
 const storage = {};
 const docListeners = {};
+let fastForwardMode = false;
+let virtualNow = Date.now();
 const sandbox = {
   window: {
     location: { protocol: "https:", origin: "https://evuaeru.github.io" },
@@ -434,7 +452,15 @@ const sandbox = {
   navigator: {
     clipboard: { writeText: async (t) => { storage._clipboard = t; } }
   },
-  performance: { now: () => Date.now() },
+  performance: {
+    now: () => {
+      if (fastForwardMode) {
+        virtualNow += 4;
+        return virtualNow;
+      }
+      return Date.now();
+    }
+  },
   requestAnimationFrame: () => {},
   AbortController: class {
     constructor() {
@@ -450,12 +476,20 @@ const sandbox = {
     }
   },
   AbortSignal: { timeout: () => ({}) },
-  Uint8Array, Math, Date, console, setTimeout, clearTimeout, Promise, Array, Object, String, Number, JSON, parseInt, parseFloat, encodeURI,
+  Uint8Array, Math, Date, console,
+  setTimeout: (fn, ms) => {
+    if (fastForwardMode && ms <= 500) {
+      virtualNow += ms;
+      return setTimeout(fn, 1);
+    }
+    return setTimeout(fn, ms);
+  },
+  clearTimeout, Promise, Array, Object, String, Number, JSON, parseInt, parseFloat, encodeURI,
   fetch: async (url) => ({
     ok: true,
     status: 200,
     headers: { get: (h) => h === "cf-meta-ip" ? "182.10.131.57" : null },
-    json: async () => ({ clientIp: "182.10.131.57", asOrganization: "PT Telekomunikasi Indonesia", city: "Bandung" }),
+    json: async () => ({ clientIp: "182.10.131.57", asOrganization: "PT Telekomunikasi Indonesia", country: "ID", colo: "SIN" }),
     blob: async () => ({ size: 1048576 })
   }),
   XMLHttpRequest: class {
@@ -463,8 +497,8 @@ const sandbox = {
     open() {}
     setRequestHeader() {}
     send() {
-      if (this.upload.onprogress) this.upload.onprogress({ loaded: 384000 });
-      if (this.onload) setTimeout(() => this.onload(), 5);
+      if (this.upload.onprogress) this.upload.onprogress({ loaded: 524288 });
+      if (this.onload) setTimeout(() => this.onload(), 2);
     }
     abort() { if (this.onabort) this.onabort(); }
   }
@@ -480,14 +514,15 @@ if (elements.connModeToggle.textContent !== "Single" || elements.streamCountSele
   console.error("FAIL: connModeToggle Single gagal"); process.exit(1);
 }
 elements.connModeToggle.trigger("click");
-if (elements.connModeToggle.textContent !== "Multi" || elements.streamCountSelect.value !== "2") {
+if (elements.connModeToggle.textContent !== "Multi" || elements.streamCountSelect.value !== "3") {
   console.error("FAIL: connModeToggle Multi gagal"); process.exit(1);
 }
 
-// 2. Toggle IP Privacy Masking
+// 2. Toggle IP Privacy Masking (including stopPropagation check)
 elements.clientIpDisplay.textContent = "182.10.131.57";
-elements.clientIpDisplay.trigger("click");
-if (elements.clientIpDisplay.textContent !== "182.10.***.***") {
+let propStopped = false;
+elements.clientIpDisplay.trigger("click", { stopPropagation: () => { propStopped = true; } });
+if (!propStopped || elements.clientIpDisplay.textContent !== "182.10.***.***") {
   console.error("FAIL: IP masking gagal:", elements.clientIpDisplay.textContent); process.exit(1);
 }
 elements.clientIpDisplay.trigger("click");
@@ -495,42 +530,28 @@ if (elements.clientIpDisplay.textContent !== "182.10.131.57") {
   console.error("FAIL: IP unmasking gagal"); process.exit(1);
 }
 
-// 3. Toggle Unit Mbps <-> MB/s (termasuk konversi nilai default 167.53 -> 20.94)
+// 3. Toggle Unit Mbps <-> MB/s
 elements.unitToggleBtn.trigger("click");
-if (elements.unitDl.textContent !== "MB/s" || elements.valDownload.textContent !== "20.94") {
-  console.error("FAIL: Unit toggle MB/s gagal:", elements.valDownload.textContent); process.exit(1);
+if (elements.unitDl.textContent !== "MB/s" || elements.speedUnitText.textContent !== "MB/s") {
+  console.error("FAIL: Unit toggle MB/s gagal"); process.exit(1);
 }
 elements.unitToggleBtn.trigger("click");
-if (elements.unitDl.textContent !== "Mbps" || elements.valDownload.textContent !== "167.53") {
+if (elements.unitDl.textContent !== "Mbps" || elements.speedUnitText.textContent !== "Mbps") {
   console.error("FAIL: Unit toggle Mbps gagal"); process.exit(1);
 }
 
-// 4. Toggle Drawers (Ganti Server, Settings, History)
-elements.btnGantiServer.trigger("click");
-if (!elements.settingsDrawer.classList.contains("open")) {
-  console.error("FAIL: btnGantiServer tidak membuka settingsDrawer"); process.exit(1);
-}
-elements.btnCloseSettings.trigger("click");
-if (elements.settingsDrawer.classList.contains("open")) {
-  console.error("FAIL: btnCloseSettings tidak menutup settingsDrawer"); process.exit(1);
-}
-elements.btnToggleHistory.trigger("click");
-if (!elements.historyDrawer.classList.contains("open")) {
-  console.error("FAIL: btnToggleHistory tidak membuka historyDrawer"); process.exit(1);
-}
-
-// 5. Uji Pembatalan (Cancel) di tengah tes aktif (setelah 150ms saat Ping/Download sudah berjalan)
+// 4. Uji Pembatalan (Cancel) di tengah tes aktif (setelah 150ms saat Ping/Download sudah berjalan)
 elements.btnStartTest.trigger("click");
-if (elements.btnStartTest.style.display !== "none" || !elements.activeGaugeWrap.classList.contains("testing-active")) {
-  console.error("FAIL: State saat tes mulai tidak menampilkan activeGaugeWrap"); process.exit(1);
+if (elements.btnStartTest.style.display !== "none" || elements.btnCancelTest.style.display !== "inline-flex") {
+  console.error("FAIL: State saat tes mulai tidak menampilkan tombol Batalkan"); process.exit(1);
 }
 setTimeout(() => {
   elements.btnCancelTest.trigger("click");
 }, 150);
 
 setTimeout(() => {
-  if (elements.btnStartTest.style.display !== "flex" || elements.activeGaugeWrap.classList.contains("testing-active")) {
-    console.error("FAIL: State setelah cancel tidak kembali ke tombol MULAI"); process.exit(1);
+  if (elements.btnStartTest.style.display !== "inline-flex" || elements.btnCancelTest.style.display !== "none") {
+    console.error("FAIL: State setelah cancel tidak kembali ke tombol MULAI TES"); process.exit(1);
   }
   if (elements.phaseBadge.textContent !== "DIBATALKAN") {
     console.error("FAIL: phaseBadge setelah mid-test cancel bukan DIBATALKAN:", elements.phaseBadge.textContent); process.exit(1);
@@ -538,15 +559,66 @@ setTimeout(() => {
   if (storage.zen_speedtest_history !== undefined) {
     console.error("FAIL: Mid-test cancel menyimpan riwayat palsu ke localStorage:", storage.zen_speedtest_history); process.exit(1);
   }
-  if (elements.valDownload.textContent !== "167.53" || elements.valUpload.textContent !== "53.08") {
-    console.error("FAIL: Mid-test cancel tidak memulihkan nilai hasil sebelumnya:", elements.valDownload.textContent, elements.valUpload.textContent); process.exit(1);
+  if (elements.valPing.textContent !== "--" || elements.valDownload.textContent !== "--") {
+    console.error("FAIL: Mid-test cancel tidak mengembalikan nilai standby '--':", elements.valPing.textContent, elements.valDownload.textContent); process.exit(1);
   }
-  console.log("VM_HARNESS_OK");
-}, 350);
+
+  // 5. Uji Full End-to-End SpeedTest Completion (Ping -> Download -> Upload -> Verdict -> History -> Copy/CSV)
+  virtualNow = Date.now();
+  fastForwardMode = true;
+  elements.btnStartTest.trigger("click");
+
+  const pollDone = setInterval(() => {
+    if (elements.phaseBadge.textContent === "PENGUJIAN SELESAI") {
+      clearInterval(pollDone);
+      fastForwardMode = false;
+
+      const dlVal = parseFloat(elements.valDownload.textContent);
+      const ulVal = parseFloat(elements.valUpload.textContent);
+      const pingVal = parseInt(elements.valPing.textContent, 10);
+      if (!(dlVal > 0) || !(ulVal > 0) || !(pingVal > 0)) {
+        console.error("FAIL: Hasil full test tidak valid:", { dlVal, ulVal, pingVal });
+        process.exit(1);
+      }
+      if (elements.verdictBox.style.display !== "flex") {
+        console.error("FAIL: verdictBox tidak tampil setelah selesai");
+        process.exit(1);
+      }
+      if (!storage.zen_speedtest_history) {
+        console.error("FAIL: Riwayat tidak tersimpan ke localStorage setelah selesai");
+        process.exit(1);
+      }
+      const hist = JSON.parse(storage.zen_speedtest_history);
+      if (!Array.isArray(hist) || hist.length !== 1) {
+        console.error("FAIL: Panjang riwayat tidak tepat:", hist);
+        process.exit(1);
+      }
+
+      // Test unit conversion on completed values (Mbps -> MB/s)
+      elements.unitToggleBtn.trigger("click");
+      const mbpsToMbs = parseFloat(elements.valDownload.textContent);
+      if (Math.abs(mbpsToMbs - (dlVal / 8)) > 0.2) {
+        console.error("FAIL: Konversi Mbps -> MB/s tidak akurat:", { dlVal, mbpsToMbs });
+        process.exit(1);
+      }
+      elements.unitToggleBtn.trigger("click");
+
+      // Test Copy Summary & Clear History
+      elements.btnCopySummary.trigger("click");
+      elements.btnClearHistory.trigger("click");
+      if (storage.zen_speedtest_history !== undefined) {
+        console.error("FAIL: btnClearHistory gagal menghapus localStorage");
+        process.exit(1);
+      }
+
+      console.log("VM_HARNESS_OK");
+    }
+  }, 20);
+}, 320);
 """
     proc_vm = subprocess.run(["node", "-e", vm_harness_script, html_path], capture_output=True, text=True)
     assert proc_vm.returncode == 0 and "VM_HARNESS_OK" in proc_vm.stdout, f"Uji VM Harness gagal:\n{proc_vm.stderr}\n{proc_vm.stdout}"
-    print("  [OK] Eksekusi VM <script> asli: Toggle Multi/Single, IP Masking, Satuan Mbps/MB/s, Drawers, & Mid-Test Cancel Recovery lolos 100%.")
+    print("  [OK] Eksekusi VM <script> asli: Toggle Multi/Single, IP Masking (Anti-Bubble), Satuan Mbps/MB/s, Mid-Test Cancel, & Full E2E Completion lolos 100%.")
 
 def main():
     print("=" * 60)
@@ -559,12 +631,10 @@ def main():
     test_local_server_endpoints_and_cors()
     test_cloudflare_wan_reachability()
     test_batch_launcher_script()
-    test_ookla_ui_and_stability_engine()
+    test_zen_theme_vector_icons_and_stability_engine()
     print("=" * 60)
     print("  [BERHASIL] Seluruh 7 fase pengujian lolos 100% tanpa celah!")
     print("=" * 60)
 
 if __name__ == "__main__":
     main()
-
-
