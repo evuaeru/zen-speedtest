@@ -631,8 +631,9 @@ const waitDownloadPhase = setInterval(() => {
           const ulVal = parseFloat(elements.valUpload.textContent);
           const pingVal = parseInt(elements.valPing.textContent, 10);
           const gaugeVal = parseFloat(elements.liveSpeedNumber.textContent);
-          if (!(dlVal > 0) || !(ulVal > 0) || !(pingVal > 0) || dlVal !== gaugeVal) {
-            console.error("FAIL: Hasil full test tidak valid atau valDownload tidak sinkron dengan gauge:", { dlVal, ulVal, pingVal, gaugeVal });
+          const arcOffset = parseFloat(elements.gaugeActiveArc.style.strokeDashoffset);
+          if (!(dlVal > 0) || !(ulVal > 0) || !(pingVal > 0) || dlVal !== gaugeVal || !(arcOffset < 600) || elements.gaugeHeadDot.style.opacity !== "1") {
+            console.error("FAIL: Hasil full test tidak valid atau gauge arc/angka tidak sinkron:", { dlVal, ulVal, pingVal, gaugeVal, arcOffset, dotOpacity: elements.gaugeHeadDot.style.opacity });
             process.exit(1);
           }
 
@@ -676,9 +677,9 @@ const waitDownloadPhase = setInterval(() => {
               fastForwardMode = false;
               simulateUploadDrop = false;
 
-              // Pastikan hasil tes sebelumnya dipulihkan utuh & riwayat tidak tertimpa data 0.0 Mbps
-              if (parseFloat(elements.valDownload.textContent) !== dlVal || parseFloat(elements.valUpload.textContent) !== ulVal) {
-                console.error("FAIL: Hasil sebelumnya tidak dipulihkan saat koneksi upload terputus:", elements.valDownload.textContent, elements.valUpload.textContent);
+              // Pastikan hasil tes sebelumnya (kartu & gauge tengah) dipulihkan utuh & riwayat tidak tertimpa data 0.0 Mbps
+              if (parseFloat(elements.valDownload.textContent) !== dlVal || parseFloat(elements.valUpload.textContent) !== ulVal || parseFloat(elements.liveSpeedNumber.textContent) !== dlVal) {
+                console.error("FAIL: Hasil sebelumnya tidak dipulihkan saat koneksi upload terputus:", elements.valDownload.textContent, elements.valUpload.textContent, elements.liveSpeedNumber.textContent);
                 process.exit(1);
               }
               if (storage.zen_speedtest_history !== savedHistoryBeforeDrop) {

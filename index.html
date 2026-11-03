@@ -298,7 +298,7 @@
       position: relative;
       z-index: 2;
       text-align: center;
-      margin-bottom: 34px;
+      margin-bottom: 22px;
     }
 
     .speed-number {
@@ -319,7 +319,7 @@
       color: var(--cyan-neon);
       letter-spacing: 1.4px;
       text-transform: uppercase;
-      margin-top: 6px;
+      margin-top: 5px;
       cursor: pointer;
       user-select: none;
       display: inline-flex;
@@ -339,7 +339,7 @@
 
     .test-phase-badge {
       display: inline-block;
-      margin-top: 8px;
+      margin-top: 7px;
       font-size: 0.78rem;
       font-weight: 600;
       text-transform: uppercase;
@@ -448,7 +448,7 @@
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--border-card);
       border-radius: 20px;
-      padding: 18px 18px 16px;
+      padding: 18px 13px 15px;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -594,14 +594,21 @@
     }
 
     .card-sub {
-      font-size: 0.74rem;
+      font-size: 0.66rem;
+      letter-spacing: -0.15px;
       color: var(--text-dim);
       display: flex;
       justify-content: space-between;
-      gap: 6px;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
       margin-top: auto;
       padding-top: 8px;
       border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card-sub span {
+      white-space: nowrap;
     }
 
     .card-sub b {
@@ -629,7 +636,7 @@
       flex-wrap: wrap;
       gap: 16px;
       padding-bottom: 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     /* Left: Loaded Ping Breakdown (Idle, Down Loaded, Up Loaded) */
@@ -641,7 +648,7 @@
     }
 
     .loaded-ping-label {
-      font-size: 0.88rem;
+      font-size: 0.92rem;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.6px;
@@ -669,45 +676,46 @@
     .ping-mini-pill {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      background: rgba(255, 255, 255, 0.035);
+      gap: 9px;
+      background: rgba(255, 255, 255, 0.038);
       border: 1px solid var(--border-card);
-      padding: 8px 14px;
+      padding: 9px 15px;
       border-radius: 13px;
-      font-size: 0.92rem;
+      font-size: 0.94rem;
       font-variant-numeric: tabular-nums;
       color: var(--text-secondary);
       white-space: nowrap;
-      transition: border-color 0.25s ease, background 0.25s ease;
+      transition: border-color 0.25s ease, background 0.25s ease, transform 0.2s ease;
     }
 
     .ping-mini-pill:hover {
-      border-color: rgba(255, 255, 255, 0.16);
-      background: rgba(255, 255, 255, 0.055);
+      border-color: rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.06);
+      transform: translateY(-1px);
     }
 
     .pill-stage-label {
-      font-size: 0.78rem;
-      font-weight: 600;
+      font-size: 0.8rem;
+      font-weight: 700;
       color: var(--text-muted);
-      letter-spacing: 0.2px;
+      letter-spacing: 0.25px;
     }
 
     .pill-ping-val {
-      font-size: 1.06rem;
+      font-size: 1.12rem;
       font-weight: 800;
       color: var(--text-main);
     }
 
     .ping-mini-pill small {
-      font-size: 0.78rem;
+      font-size: 0.79rem;
       font-weight: 600;
       color: var(--text-dim);
     }
 
     .mini-circle-vec {
-      width: 26px;
-      height: 26px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       display: inline-flex;
       align-items: center;
@@ -754,25 +762,25 @@
     .qual-cat-item {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.028);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      gap: 13px;
+      padding: 13px 18px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
       transition: all 0.25s ease;
     }
 
     .qual-cat-item.scored {
-      border-color: rgba(0, 242, 254, 0.24);
-      background: rgba(0, 242, 254, 0.045);
+      border-color: rgba(0, 242, 254, 0.26);
+      background: rgba(0, 242, 254, 0.05);
     }
 
     .qual-icon-box {
-      width: 40px;
-      height: 40px;
-      border-radius: 11px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.07);
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -783,8 +791,8 @@
 
     .qual-cat-item.scored .qual-icon-box {
       color: var(--cyan-neon);
-      background: rgba(0, 242, 254, 0.1);
-      border-color: rgba(0, 242, 254, 0.28);
+      background: rgba(0, 242, 254, 0.12);
+      border-color: rgba(0, 242, 254, 0.3);
     }
 
     .qual-icon-box svg {
@@ -792,7 +800,7 @@
       height: 22px;
       fill: none;
       stroke: currentColor;
-      stroke-width: 1.75;
+      stroke-width: 1.8;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
@@ -800,11 +808,11 @@
     .qual-meta {
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 8px;
     }
 
     .qual-name {
-      font-size: 0.84rem;
+      font-size: 0.88rem;
       font-weight: 700;
       letter-spacing: 0.5px;
       color: var(--text-main);
@@ -815,12 +823,12 @@
     .qual-dots {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 6.5px;
     }
 
     .qual-dot {
-      width: 8px;
-      height: 8px;
+      width: 8.5px;
+      height: 8.5px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.18);
       transition: background 0.3s ease, box-shadow 0.3s ease;
@@ -836,7 +844,7 @@
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 6px;
+      gap: 7px;
       white-space: nowrap;
     }
 
@@ -844,7 +852,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 0.82rem;
+      font-size: 0.86rem;
       font-weight: 700;
       letter-spacing: 0.4px;
       text-transform: uppercase;
@@ -852,7 +860,7 @@
     }
 
     #ratingIspLabel {
-      max-width: 260px;
+      max-width: 280px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -860,7 +868,7 @@
 
     #ispNameDisplay {
       display: inline-block;
-      max-width: 220px;
+      max-width: 240px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -870,8 +878,8 @@
     .result-id-tag {
       color: var(--cyan-neon);
       font-family: var(--font-mono);
-      font-size: 0.8rem;
-      padding: 2px 9px;
+      font-size: 0.83rem;
+      padding: 3px 10px;
       border-radius: 8px;
       background: rgba(0, 242, 254, 0.08);
       border: 1px solid rgba(0, 242, 254, 0.22);
@@ -909,8 +917,8 @@
     }
 
     .star-btn svg {
-      width: 19px;
-      height: 19px;
+      width: 20px;
+      height: 20px;
       fill: currentColor;
       stroke: currentColor;
       stroke-width: 1.5;
@@ -1325,7 +1333,7 @@
           <!-- Speed Ticks & Lines -->
           <g fill="rgba(255,255,255,0.4)" font-size="9" font-weight="600" text-anchor="middle">
             <line x1="83.7" y1="241.3" x2="78.1" y2="246.9" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
-            <text x="64" y="253">0</text>
+            <text x="60" y="254">0</text>
             <line x1="49.5" y1="135.9" x2="41.6" y2="134.7" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
             <text x="67.3" y="142.7">5</text>
             <line x1="86.5" y1="66.1" x2="81.0" y2="60.2" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
@@ -1339,7 +1347,7 @@
             <line x1="286.0" y1="192.7" x2="293.6" y2="195.2" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
             <text x="268.9" y="191.1">500</text>
             <line x1="256.3" y1="241.3" x2="261.9" y2="246.9" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" />
-            <text x="280" y="253">1000+</text>
+            <text x="282" y="254">1000+</text>
           </g>
         </svg>
 
@@ -1569,7 +1577,7 @@
         <!-- Right: Provider Rating & Result ID -->
         <div class="provider-rating-zone">
           <div class="provider-rating-top">
-            <span id="ratingIspLabel">Nilai Provider</span>
+            <span id="ratingIspLabel">Telkomsel Indihome</span>
             <span>•</span>
             <span class="result-id-tag" id="resultIdDisplay" title="Klik untuk menyalin ID Hasil">#19863800067</span>
           </div>
@@ -2096,35 +2104,7 @@
         }
       }
 
-      function resetGaugeImmediate(phaseColor = "cyan") {
-        anim.targetSpeed = 0;
-        anim.currentSpeed = 0;
-        anim.displayedNumber = 0;
-        anim.currentRatio = 0;
-        anim.lastTimestamp = performance.now();
-        anim.lastTextUpdate = 0;
-        dom.liveSpeedNumber.textContent = "0.0";
-        dom.gaugeActiveArc.style.strokeDashoffset = TOTAL_ARC_LENGTH.toFixed(2);
-        if (dom.gaugeHeadDot) {
-          dom.gaugeHeadDot.style.opacity = "0";
-        }
-        updateGauge(0, phaseColor);
-      }
-
-      function renderEngineLoop(now) {
-        const dt = Math.min(0.08, Math.max(0.001, (now - anim.lastTimestamp) / 1000));
-        anim.lastTimestamp = now;
-
-        const decay = 1 - Math.exp(-8.5 * dt);
-        anim.currentSpeed += (anim.targetSpeed - anim.currentSpeed) * decay;
-        if (Math.abs(anim.targetSpeed - anim.currentSpeed) < 0.04) {
-          anim.currentSpeed = anim.targetSpeed;
-        }
-        anim.displayedNumber = state.phase === "completed" ? state.results.download : anim.currentSpeed;
-
-        const targetRatio = speedToRatio(anim.currentSpeed);
-        anim.currentRatio += (targetRatio - anim.currentRatio) * decay;
-
+      function applyGaugeArcPosition() {
         const offset = Math.max(0, Math.min(TOTAL_ARC_LENGTH, TOTAL_ARC_LENGTH * (1 - anim.currentRatio)));
         dom.gaugeActiveArc.style.strokeDashoffset = offset.toFixed(2);
 
@@ -2147,6 +2127,46 @@
             dom.gaugeHeadDot.style.opacity = "0";
           }
         }
+      }
+
+      function setGaugeFinalSpeed(mbps, phaseColor = "cyan") {
+        const cleanMbps = Math.max(0, mbps);
+        updateGauge(cleanMbps, phaseColor);
+        anim.currentSpeed = cleanMbps;
+        anim.displayedNumber = cleanMbps;
+        anim.currentRatio = speedToRatio(cleanMbps);
+        dom.liveSpeedNumber.textContent = formatSpeedValue(cleanMbps, 1);
+        applyGaugeArcPosition();
+        drawGraph();
+      }
+
+      function resetGaugeImmediate(phaseColor = "cyan") {
+        anim.targetSpeed = 0;
+        anim.currentSpeed = 0;
+        anim.displayedNumber = 0;
+        anim.currentRatio = 0;
+        anim.lastTimestamp = performance.now();
+        anim.lastTextUpdate = 0;
+        dom.liveSpeedNumber.textContent = "0.0";
+        updateGauge(0, phaseColor);
+        applyGaugeArcPosition();
+      }
+
+      function renderEngineLoop(now) {
+        const dt = Math.min(0.08, Math.max(0.001, (now - anim.lastTimestamp) / 1000));
+        anim.lastTimestamp = now;
+
+        const decay = 1 - Math.exp(-8.5 * dt);
+        anim.currentSpeed += (anim.targetSpeed - anim.currentSpeed) * decay;
+        if (Math.abs(anim.targetSpeed - anim.currentSpeed) < 0.04) {
+          anim.currentSpeed = anim.targetSpeed;
+        }
+        anim.displayedNumber = state.phase === "completed" ? state.results.download : anim.currentSpeed;
+
+        const targetRatio = speedToRatio(anim.currentSpeed);
+        anim.currentRatio += (targetRatio - anim.currentRatio) * decay;
+
+        applyGaugeArcPosition();
 
         // Throttled digital readout update (~9 Hz) so numbers glide calmly without flickering
         if (now - anim.lastTextUpdate >= 105) {
@@ -2332,6 +2352,8 @@
         state.currentEndpoint = updatedCatalog[chosenKey];
         dom.serverNodeDisplay.textContent = state.currentEndpoint.name;
         dom.clientLocationDisplay.textContent = state.currentEndpoint.city;
+        dom.ispNameDisplay.textContent = state.ispName;
+        dom.ratingIspLabel.textContent = state.ispName;
 
         try {
           const metaRes = await fetch("https://speed.cloudflare.com/meta", {
@@ -2363,6 +2385,13 @@
           });
           const ip = res.headers.get("cf-meta-ip");
           if (ip) state.clientIp = ip;
+          if (chosenKey === "cloudflare") {
+            const hdrCountry = res.headers.get("cf-meta-country") || res.headers.get("country");
+            const hdrColo = res.headers.get("cf-meta-colo") || res.headers.get("colo");
+            if (hdrCountry || hdrColo) {
+              dom.clientLocationDisplay.textContent = `${hdrCountry || "ID"} (${hdrColo || "SIN"})`;
+            }
+          }
           renderClientIp();
         } catch (err) {
           renderClientIp();
@@ -3150,10 +3179,7 @@
           dom.phaseBadge.textContent = "PENGUJIAN SELESAI";
           dom.valDownload.textContent = formatSpeedValue(state.results.download, 1);
           dom.valUpload.textContent = formatSpeedValue(state.results.upload, 1);
-          dom.liveSpeedNumber.textContent = formatSpeedValue(state.results.download, 1);
-          anim.currentSpeed = state.results.download;
-          anim.displayedNumber = state.results.download;
-          updateGauge(state.results.download, "cyan");
+          setGaugeFinalSpeed(state.results.download, "cyan");
 
         } catch (err) {
           dom.cardPing.classList.remove("active");
@@ -3161,7 +3187,6 @@
           dom.cardDownload.classList.remove("active");
           dom.cardUpload.classList.remove("active-upload");
 
-          state.phase = "idle";
           state.results = prevResults;
           state.resultId = prevResultId;
           dom.resultIdDisplay.textContent = `#${prevResultId}`;
@@ -3174,7 +3199,14 @@
             dom.phaseBadge.textContent = "KENDALA KONEKSI";
             showToast("Gagal menghubungi server uji, silakan coba kembali.");
           }
-          resetGaugeImmediate("cyan");
+
+          if (prevResults && prevResults.download > 0) {
+            state.phase = "completed";
+            setGaugeFinalSpeed(prevResults.download, "cyan");
+          } else {
+            state.phase = "idle";
+            resetGaugeImmediate("cyan");
+          }
         } finally {
           state.testing = false;
           dom.activeGaugeWrap.classList.remove("testing-active");
