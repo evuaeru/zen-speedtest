@@ -19,7 +19,10 @@ Dibuat khusus untuk kenyamanan **Master Zay** oleh **Pelayan Ancellia**.
    - **2.2-Second First-Byte Sliding Window**: Menghitung *throughput* pada jendela waktu bergulir 2,2 detik sejak *byte* pertama diterima untuk meredam lonjakan paket *burst* TCP/HTTP.
    - **Sinusoidal Warmup Ramp & Steady-State Anchor**: Pergerakan angka naik secara halus di awal pengujian (1,8 detik pertama) lalu terkunci pada rata-rata *steady-state* (70% *steady-state* + 30% *sliding window*).
    - **Slew-Rate Limiter & ~9 Hz Digital Cadence**: Membatasi perubahan maksimum per siklus (maks ±2,8% per 100ms setelah *warmup*) dengan penyegaran angka digital setiap 105ms sehingga angka bergerak tenang, stabil, dan tidak melompat-lompat.
-3. **Dual-Mode Benchmark Engine**:
+3. **Zen Tactile Acoustic Sound Engine (Bebas Suara Synth Kaku)**:
+   - **Physical Taptic Switch & Kalimba/Droplet Resonance**: Menggunakan pemodelan akustik fisik (*pink-noise micro-transient* + *low-pass BiquadFilter* + *DynamicsCompressor* master bus) untuk klik tombol mekanis yang hangat dan pantulan *ping* berkarakter *kalimba/water-drop* pada tangga nada Lydian.
+   - **Sample-Accurate Dmaj9 Vibraphone/Glass Bloom**: Penjadwalan *hardware clock* Web Audio API presisi tinggi (`ctx.currentTime`) dengan *stereo panning* dan 4 pilihan profil suara (*Tactile Acoustic*, *Zen Ambient*, *Minimalis Taptic Click*, dan *Mati*).
+4. **Dual-Mode Benchmark Engine**:
    - **Mode Internet WAN (Cloudflare Global CDN / UnPad Bandung / Telkom Jakarta)**: Mengukur kecepatan internet sesungguhnya tanpa kendala CORS atau *rate-limit* HTTP 429 (ukuran *chunk* dibatasi aman hingga 5MB).
    - **Mode Local Python Server (LAN / Loopback)**: Menguji *throughput* perangkat keras lokal atau router Wi-Fi/Ethernet secara *offline*.
 

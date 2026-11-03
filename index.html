@@ -1754,8 +1754,10 @@
           Efek Suara:
         </span>
         <select id="soundEffectSelect">
-          <option value="on" selected>Aktif (Audio Synth)</option>
-          <option value="off">Mati</option>
+          <option value="on" selected>Aktif (Tactile Acoustic)</option>
+          <option value="zen">Zen Ambient (Warm Glass)</option>
+          <option value="minimal">Minimalis (Taptic Click)</option>
+          <option value="off">Mati (Senyap)</option>
         </select>
       </div>
     </section>
@@ -2010,53 +2012,354 @@
         });
       }
 
-      // --- WEB AUDIO SYNTHESIZER ---
+      // --- ZEN TACTILE ACOUSTIC SOUND ENGINE (PHYSICAL MODELING & FILTERED HARMONICS) ---
       const audio = {
         ctx: null,
+        masterBus: null,
+        noiseBuffer: null,
+        getMode() {
+          return (dom.soundEffectSelect && dom.soundEffectSelect.value) ? dom.soundEffectSelect.value : "on";
+        },
         init() {
           if (!this.ctx && (window.AudioContext || window.webkitAudioContext)) {
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
             this.ctx = new AudioCtx();
           }
+          if (!this.ctx) return false;
+          if (this.ctx.state === "suspended" && typeof this.ctx.resume === "function") {
+            try { this.ctx.resume(); } catch (e) {}
+          }
+          if (!this.masterBus) {
+            const masterGain = this.ctx.createGain();
+            masterGain.gain.setValueAtTime(0.85, this.ctx.currentTime);
+
+            if (typeof this.ctx.createBiquadFilter === "function" && typeof this.ctx.createDynamicsCompressor === "function") {
+              const masterFilter = this.ctx.createBiquadFilter();
+              masterFilter.type = "lowpass";
+              masterFilter.frequency.setValueAtTime(5200, this.ctx.currentTime);
+              masterFilter.Q.setValueAtTime(0.707, this.ctx.currentTime);
+
+              const comp = this.ctx.createDynamicsCompressor();
+              comp.threshold.setValueAtTime(-18, this.ctx.currentTime);
+              comp.knee.setValueAtTime(12, this.ctx.currentTime);
+              comp.ratio.setValueAtTime(3, this.ctx.currentTime);
+              comp.attack.setValueAtTime(0.003, this.ctx.currentTime);
+              comp.release.setValueAtTime(0.15, this.ctx.currentTime);
+
+              masterFilter.connect(comp);
+              comp.connect(masterGain);
+              masterGain.connect(this.ctx.destination);
+              this.masterBus = masterFilter;
+            } else {
+              masterGain.connect(this.ctx.destination);
+              this.masterBus = masterGain;
+            }
+          }
+          if (!this.noiseBuffer && typeof this.ctx.createBuffer === "function") {
+            const sampleRate = this.ctx.sampleRate || 44100;
+            const length = Math.floor(sampleRate * 0.06);
+            const buf = this.ctx.createBuffer(1, length, sampleRate);
+            const data = buf.getChannelData(0);
+            let b0 = 0, b1 = 0, b2 = 0;
+            for (let i = 0; i < length; i++) {
+              const white = ((i * 16807) % 2147483647) / 1073741823.5 - 1.0;
+              b0 = 0.99765 * b0 + white * 0.0990460;
+              b1 = 0.96300 * b1 + white * 0.2965164;
+              b2 = 0.57000 * b2 + white * 1.0526913;
+              data[i] = (b0 + b1 + b2 + white * 0.1848) * 0.12;
+            }
+            this.noiseBuffer = buf;
+          }
+          return true;
         },
-        playBlip(freq = 560, duration = 0.06) {
-          if (dom.soundEffectSelect.value !== "on") return;
+        disconnectAfter(sourceNode, busInputNode) {
+          if (!sourceNode || !busInputNode) return;
+          sourceNode.onended = () => {
+            try {
+              if (typeof busInputNode.disconnect === "function") busInputNode.disconnect();
+            } catch (e) {}
+          };
+        },
+        playTactileClick(accent = 1.0, startTimeOffset = 0) {
+          const mode = this.getMode();
+          if (mode === "off") return;
           try {
-            this.init();
-            if (!this.ctx) return;
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.type = "sine";
-            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-            gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
-            osc.start();
-            osc.stop(this.ctx.currentTime + duration);
+            if (!this.init()) return;
+            const safeAccent = (Number.isFinite(accent) && accent > 0) ? Math.max(0.4, Math.min(2.0, accent)) : 1.0;
+            const safeOffset = Number.isFinite(startTimeOffset) ? Math.max(0, startTimeOffset) : 0;
+            const t0 = this.ctx.currentTime + safeOffset;
+
+            // 1. Physical membrane thump (rapid pitch drop 185Hz -> 46Hz in 18ms)
+            const bodyOsc = this.ctx.createOscillator();
+            const bodyGain = this.ctx.createGain();
+            bodyOsc.type = "sine";
+            bodyOsc.frequency.setValueAtTime(185 * safeAccent, t0);
+            bodyOsc.frequency.exponentialRampToValueAtTime(46, t0 + 0.018);
+
+            bodyGain.gain.setValueAtTime(0.0001, t0);
+            bodyGain.gain.linearRampToValueAtTime(0.048, t0 + 0.0018);
+            bodyGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.022);
+
+            if (typeof this.ctx.createBiquadFilter === "function") {
+              const lp = this.ctx.createBiquadFilter();
+              lp.type = "lowpass";
+              lp.frequency.setValueAtTime(680, t0);
+              bodyOsc.connect(lp);
+              lp.connect(bodyGain);
+            } else {
+              bodyOsc.connect(bodyGain);
+            }
+            bodyGain.connect(this.masterBus);
+            this.disconnectAfter(bodyOsc, bodyGain);
+            bodyOsc.start(t0);
+            bodyOsc.stop(t0 + 0.024);
+
+            // 2. Micro-texture transient (band-passed pink noise snap)
+            if (this.noiseBuffer && typeof this.ctx.createBufferSource === "function" && typeof this.ctx.createBiquadFilter === "function") {
+              const noiseSrc = this.ctx.createBufferSource();
+              noiseSrc.buffer = this.noiseBuffer;
+              const bp = this.ctx.createBiquadFilter();
+              bp.type = "bandpass";
+              bp.frequency.setValueAtTime(1950 * safeAccent, t0);
+              bp.Q.setValueAtTime(2.4, t0);
+              const nGain = this.ctx.createGain();
+              nGain.gain.setValueAtTime(0.0001, t0);
+              nGain.gain.linearRampToValueAtTime(0.014, t0 + 0.0012);
+              nGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.009);
+              noiseSrc.connect(bp);
+              bp.connect(nGain);
+              nGain.connect(this.masterBus);
+              this.disconnectAfter(noiseSrc, nGain);
+              noiseSrc.start(t0);
+              noiseSrc.stop(t0 + 0.010);
+            }
           } catch (e) {}
         },
-        playSuccessChime() {
-          if (dom.soundEffectSelect.value !== "on") return;
+        playPingPulse(stepIndex = 0, rttMs = 20) {
+          const mode = this.getMode();
+          if (mode === "off") return;
+          if (mode === "minimal") {
+            this.playTactileClick(0.78);
+            return;
+          }
           try {
-            this.init();
-            if (!this.ctx) return;
-            const notes = [523.25, 659.25, 783.99, 1046.50];
-            notes.forEach((freq, idx) => {
-              setTimeout(() => {
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = "triangle";
-                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                gain.gain.setValueAtTime(0.055, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.35);
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.35);
-              }, idx * 85);
+            if (!this.init()) return;
+            const t0 = this.ctx.currentTime;
+            // Warm Lydian/Maj9 acoustic scale (D4, E4, F#4, A4, B4, C#5, D5, E5)
+            const scale = [293.66, 329.63, 369.99, 440.00, 493.88, 554.37, 587.33, 659.25];
+            const safeIdx = Number.isFinite(stepIndex) ? Math.abs(Math.round(stepIndex)) : 0;
+            const safeRtt = Number.isFinite(rttMs) ? Math.max(1, rttMs) : 20;
+            const baseFreq = scale[safeIdx % scale.length];
+            const rttFactor = Math.max(0.985, Math.min(1.015, 1 + (25 - Math.min(80, safeRtt)) * 0.0003));
+            const freq = baseFreq * rttFactor;
+            const decayTime = mode === "zen" ? 0.135 : 0.085;
+            const peakLevel = mode === "zen" ? 0.026 : 0.032;
+
+            const voiceGain = this.ctx.createGain();
+            voiceGain.gain.setValueAtTime(0.0001, t0);
+            voiceGain.gain.linearRampToValueAtTime(peakLevel, t0 + 0.003);
+            voiceGain.gain.exponentialRampToValueAtTime(0.0001, t0 + decayTime);
+
+            let targetNode = voiceGain;
+            if (typeof this.ctx.createBiquadFilter === "function") {
+              const filter = this.ctx.createBiquadFilter();
+              filter.type = "lowpass";
+              filter.frequency.setValueAtTime(freq * 4.5, t0);
+              filter.frequency.exponentialRampToValueAtTime(freq * 1.2, t0 + 0.065);
+              filter.Q.setValueAtTime(1.4, t0);
+              filter.connect(voiceGain);
+              targetNode = filter;
+            }
+            voiceGain.connect(this.masterBus);
+
+            // Fundamental acoustic body with subtle droplet pitch envelope
+            const fundOsc = this.ctx.createOscillator();
+            fundOsc.type = "sine";
+            fundOsc.frequency.setValueAtTime(freq * 1.035, t0);
+            fundOsc.frequency.exponentialRampToValueAtTime(freq, t0 + 0.012);
+            fundOsc.connect(targetNode);
+            this.disconnectAfter(fundOsc, voiceGain);
+            fundOsc.start(t0);
+            fundOsc.stop(t0 + decayTime + 0.005);
+
+            // 2nd harmonic wooden/mallet overtone (decays faster than fundamental)
+            const overOsc = this.ctx.createOscillator();
+            const overGain = this.ctx.createGain();
+            overOsc.type = "sine";
+            overOsc.frequency.setValueAtTime(freq * 2.0, t0);
+            overGain.gain.setValueAtTime(0.0001, t0);
+            overGain.gain.linearRampToValueAtTime(peakLevel * 0.22, t0 + 0.002);
+            overGain.gain.exponentialRampToValueAtTime(0.0001, t0 + decayTime * 0.42);
+            overOsc.connect(overGain);
+            overGain.connect(targetNode);
+            overOsc.start(t0);
+            overOsc.stop(t0 + decayTime * 0.45);
+          } catch (e) {}
+        },
+        playPhaseShift(phase = "download") {
+          const mode = this.getMode();
+          if (mode === "off") return;
+          if (mode === "minimal") {
+            this.playTactileClick(0.92);
+            return;
+          }
+          try {
+            if (!this.init()) return;
+            const t0 = this.ctx.currentTime;
+            const intervals = phase === "upload" ? [196.00, 293.66] : [146.83, 220.00];
+            const swellGain = this.ctx.createGain();
+            swellGain.gain.setValueAtTime(0.0001, t0);
+            swellGain.gain.linearRampToValueAtTime(0.020, t0 + 0.032);
+            swellGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.24);
+
+            let inputNode = swellGain;
+            if (typeof this.ctx.createBiquadFilter === "function") {
+              const lp = this.ctx.createBiquadFilter();
+              lp.type = "lowpass";
+              lp.frequency.setValueAtTime(280, t0);
+              lp.frequency.exponentialRampToValueAtTime(980, t0 + 0.06);
+              lp.frequency.exponentialRampToValueAtTime(320, t0 + 0.24);
+              lp.connect(swellGain);
+              inputNode = lp;
+            }
+            swellGain.connect(this.masterBus);
+
+            intervals.forEach((f, idx) => {
+              const osc = this.ctx.createOscillator();
+              osc.type = "sine";
+              osc.frequency.setValueAtTime(f * 0.992, t0);
+              osc.frequency.exponentialRampToValueAtTime(f, t0 + 0.045);
+              osc.connect(inputNode);
+              if (idx === intervals.length - 1) this.disconnectAfter(osc, swellGain);
+              osc.start(t0);
+              osc.stop(t0 + 0.25);
             });
           } catch (e) {}
+        },
+        playSuccessChime(grade = "A+") {
+          const mode = this.getMode();
+          if (mode === "off") return;
+          if (mode === "minimal") {
+            this.playTactileClick(0.95, 0);
+            this.playTactileClick(1.18, 0.068);
+            return;
+          }
+          try {
+            if (!this.init()) return;
+            const t0 = this.ctx.currentTime;
+            // Warm Dmaj9 acoustic vibraphone/glass voicing (D4, A4, C#5, E5, A5) — scheduled on Web Audio clock
+            const chord = (grade === "C" || grade === "D")
+              ? [246.94, 369.99, 440.00, 587.33]
+              : [293.66, 440.00, 554.37, 659.25, 880.00];
+            const panPositions = [-0.22, -0.10, 0.0, 0.12, 0.22];
+            const noteDuration = mode === "zen" ? 0.82 : 0.64;
+
+            chord.forEach((freq, idx) => {
+              const startAt = t0 + idx * 0.068;
+              const noteGain = this.ctx.createGain();
+              const peak = (mode === "zen" ? 0.028 : 0.034) * (1 - idx * 0.08);
+              noteGain.gain.setValueAtTime(0.0001, startAt);
+              noteGain.gain.linearRampToValueAtTime(peak, startAt + 0.006);
+              noteGain.gain.exponentialRampToValueAtTime(0.0001, startAt + noteDuration);
+
+              let destNode = this.masterBus;
+              let busConnector = noteGain;
+              if (typeof this.ctx.createStereoPanner === "function") {
+                const panner = this.ctx.createStereoPanner();
+                panner.pan.setValueAtTime(panPositions[idx % panPositions.length], startAt);
+                panner.connect(this.masterBus);
+                destNode = panner;
+                busConnector = panner;
+              }
+
+              let voiceInput = noteGain;
+              if (typeof this.ctx.createBiquadFilter === "function") {
+                const lp = this.ctx.createBiquadFilter();
+                lp.type = "lowpass";
+                lp.frequency.setValueAtTime(3200, startAt);
+                lp.frequency.exponentialRampToValueAtTime(780, startAt + noteDuration * 0.85);
+                lp.Q.setValueAtTime(0.9, startAt);
+                lp.connect(noteGain);
+                voiceInput = lp;
+              }
+              noteGain.connect(destNode);
+
+              // Fundamental warm bar
+              const osc1 = this.ctx.createOscillator();
+              osc1.type = "sine";
+              osc1.frequency.setValueAtTime(freq, startAt);
+              osc1.connect(voiceInput);
+              this.disconnectAfter(osc1, busConnector);
+              osc1.start(startAt);
+              osc1.stop(startAt + noteDuration + 0.01);
+
+              // Subtle detuned harmonic shimmer companion
+              const osc2 = this.ctx.createOscillator();
+              const shimmerGain = this.ctx.createGain();
+              osc2.type = "sine";
+              osc2.frequency.setValueAtTime(freq * 1.0022, startAt);
+              shimmerGain.gain.setValueAtTime(0.32, startAt);
+              osc2.connect(shimmerGain);
+              shimmerGain.connect(voiceInput);
+              osc2.start(startAt);
+              osc2.stop(startAt + noteDuration + 0.01);
+
+              // Crystalline mallet/glass strike transient (3rd harmonic, fast decay)
+              const bellOsc = this.ctx.createOscillator();
+              const bellGain = this.ctx.createGain();
+              bellOsc.type = "sine";
+              bellOsc.frequency.setValueAtTime(freq * 3.0, startAt);
+              bellGain.gain.setValueAtTime(0.0001, startAt);
+              bellGain.gain.linearRampToValueAtTime(peak * 0.16, startAt + 0.002);
+              bellGain.gain.exponentialRampToValueAtTime(0.0001, startAt + 0.075);
+              bellOsc.connect(bellGain);
+              bellGain.connect(voiceInput);
+              bellOsc.start(startAt);
+              bellOsc.stop(startAt + 0.08);
+            });
+          } catch (e) {}
+        },
+        playCancelTone() {
+          const mode = this.getMode();
+          if (mode === "off") return;
+          if (mode === "minimal") {
+            this.playTactileClick(0.72, 0);
+            this.playTactileClick(0.58, 0.065);
+            return;
+          }
+          try {
+            if (!this.init()) return;
+            const t0 = this.ctx.currentTime;
+            const notes = [246.94, 185.00];
+            notes.forEach((freq, idx) => {
+              const startAt = t0 + idx * 0.072;
+              const osc = this.ctx.createOscillator();
+              const gain = this.ctx.createGain();
+              osc.type = "sine";
+              osc.frequency.setValueAtTime(freq, startAt);
+              gain.gain.setValueAtTime(0.0001, startAt);
+              gain.gain.linearRampToValueAtTime(0.028, startAt + 0.004);
+              gain.gain.exponentialRampToValueAtTime(0.0001, startAt + 0.11);
+              if (typeof this.ctx.createBiquadFilter === "function") {
+                const lp = this.ctx.createBiquadFilter();
+                lp.type = "lowpass";
+                lp.frequency.setValueAtTime(560, startAt);
+                osc.connect(lp);
+                lp.connect(gain);
+              } else {
+                osc.connect(gain);
+              }
+              gain.connect(this.masterBus);
+              this.disconnectAfter(osc, gain);
+              osc.start(startAt);
+              osc.stop(startAt + 0.115);
+            });
+          } catch (e) {}
+        },
+        playBlip(freq = 440) {
+          const safeFreq = Number.isFinite(freq) ? freq : 440;
+          const step = Math.max(0, Math.round((safeFreq - 290) / 45));
+          this.playPingPulse(step, 20);
         }
       };
 
@@ -2436,7 +2739,7 @@
             const med = Math.round(sortedSoFar[Math.floor(sortedSoFar.length / 2)]);
             dom.valPing.textContent = med;
             if (dom.valPingIdle) dom.valPingIdle.textContent = med;
-            audio.playBlip(680, 0.04);
+            audio.playPingPulse(i, rtt);
           } catch (e) {
             if (signal.aborted) throw new Error("ABORTED");
           }
@@ -2490,6 +2793,7 @@
         dom.cardDownload.classList.add("active");
         resetGaugeImmediate("cyan");
         resetGraph();
+        audio.playPhaseShift("download");
 
         let totalBytes = 0;
         let peakSpeed = 0;
@@ -2705,6 +3009,7 @@
         dom.cardUpload.classList.add("active-upload");
         resetGaugeImmediate("purple");
         resetGraph();
+        audio.playPhaseShift("upload");
 
         let totalBytes = 0;
         let peakSpeed = 0;
@@ -3142,7 +3447,7 @@
         resetGraph();
         resetAllCardsToStandby();
 
-        audio.playBlip(520, 0.08);
+        audio.playTactileClick(1.08);
 
         const duration = parseInt(dom.durationSelect.value, 10) || 10;
         const streams = parseInt(dom.streamCountSelect.value, 10) || 3;
@@ -3173,7 +3478,7 @@
           // Evaluasi Akhir
           evaluateNetworkGrade();
           saveTestHistory();
-          audio.playSuccessChime();
+          audio.playSuccessChime(state.results.grade);
 
           state.phase = "completed";
           dom.phaseBadge.textContent = "PENGUJIAN SELESAI";
@@ -3191,6 +3496,7 @@
           state.resultId = prevResultId;
           dom.resultIdDisplay.textContent = `#${prevResultId}`;
           restoreCardDisplay(prevResults);
+          audio.playCancelTone();
 
           if (signal.aborted || (err && err.message === "ABORTED")) {
             dom.phaseBadge.textContent = "DIBATALKAN";
@@ -3229,6 +3535,7 @@
       // Toggle Multi <-> Single connection streams
       dom.connModeToggle.addEventListener("click", () => {
         if (state.testing) return;
+        audio.playTactileClick(0.95);
         const current = dom.streamCountSelect.value;
         if (current === "1") {
           dom.streamCountSelect.value = "3";
@@ -3242,6 +3549,7 @@
       });
 
       dom.streamCountSelect.addEventListener("change", () => {
+        audio.playTactileClick(0.9);
         dom.connModeToggle.textContent = dom.streamCountSelect.value === "1" ? "Single" : "Multi";
       });
 
@@ -3250,6 +3558,7 @@
         if (e && typeof e.stopPropagation === "function") {
           e.stopPropagation();
         }
+        audio.playTactileClick(0.88);
         state.ipMasked = !state.ipMasked;
         renderClientIp();
       }
@@ -3260,12 +3569,14 @@
 
       // Quick jump to Server Selector
       dom.btnGantiServer.addEventListener("click", () => {
+        audio.playTactileClick(0.92);
         dom.settingsDrawer.scrollIntoView({ behavior: "smooth", block: "nearest" });
         dom.serverModeSelect.focus();
       });
 
       // Unit toggle (Mbps <-> MB/s)
       dom.unitToggleBtn.addEventListener("click", () => {
+        audio.playTactileClick(1.02);
         state.unit = state.unit === "Mbps" ? "MB/s" : "Mbps";
         dom.speedUnitText.textContent = state.unit;
         dom.unitDl.textContent = state.unit;
@@ -3295,6 +3606,7 @@
       starBtns.forEach(btn => {
         btn.addEventListener("click", () => {
           const val = parseInt(btn.getAttribute("data-star"), 10);
+          audio.playTactileClick(0.85 + val * 0.06);
           state.userRating = val;
           renderStars(val);
           try { localStorage.setItem("zen_provider_rating", String(val)); } catch (e) {}
@@ -3304,6 +3616,7 @@
 
       // Salin Ringkasan ke Clipboard
       function copyResultSummary() {
+        audio.playTactileClick(1.05);
         const text = `ZEN SPEEDTEST PRO — LAPORAN KECEPATAN (#${state.resultId})
 Waktu: ${new Date().toLocaleString("id-ID")}
 Provider: ${state.ispName} (${ dom.clientIpDisplay.textContent })
@@ -3330,6 +3643,7 @@ Server: ${dom.serverNodeDisplay.textContent} (${dom.clientLocationDisplay.textCo
 
       // Unduh Riwayat CSV
       dom.btnExportCsv.addEventListener("click", () => {
+        audio.playTactileClick(0.96);
         if (!state.history.length) {
           showToast("Belum ada data riwayat untuk diunduh.");
           return;
@@ -3352,6 +3666,7 @@ Server: ${dom.serverNodeDisplay.textContent} (${dom.clientLocationDisplay.textCo
 
       // Hapus Riwayat
       dom.btnClearHistory.addEventListener("click", () => {
+        audio.playTactileClick(0.84);
         state.history = [];
         try { localStorage.removeItem("zen_speedtest_history"); } catch (e) {}
         renderHistoryTable();
@@ -3360,9 +3675,30 @@ Server: ${dom.serverNodeDisplay.textContent} (${dom.clientLocationDisplay.textCo
 
       // Switch server mode
       dom.serverModeSelect.addEventListener("change", () => {
+        audio.playTactileClick(0.95);
         detectNetworkMetadata();
         showToast(`Server Sumber: ${dom.serverNodeDisplay.textContent}`);
       });
+
+      // Switch sound profile mode
+      if (dom.soundEffectSelect) {
+        dom.soundEffectSelect.addEventListener("change", () => {
+          const mode = dom.soundEffectSelect.value;
+          try { localStorage.setItem("zen_sound_mode", mode); } catch (e) {}
+          if (mode === "minimal") {
+            audio.playTactileClick(1.0);
+          } else if (mode !== "off") {
+            audio.playPingPulse(3, 18);
+          }
+          const labels = {
+            on: "Tactile Acoustic",
+            zen: "Zen Ambient (Warm Glass)",
+            minimal: "Minimalis (Taptic Click)",
+            off: "Mati (Senyap)"
+          };
+          showToast(`Efek Suara: ${labels[mode] || mode}`);
+        });
+      }
 
       // Inisialisasi awal
       window.addEventListener("DOMContentLoaded", () => {
@@ -3372,6 +3708,10 @@ Server: ${dom.serverNodeDisplay.textContent} (${dom.clientLocationDisplay.textCo
         try {
           const savedRating = parseInt(localStorage.getItem("zen_provider_rating") || "0", 10);
           if (savedRating > 0) renderStars(savedRating);
+          const savedSound = localStorage.getItem("zen_sound_mode");
+          if (savedSound && ["on", "zen", "minimal", "off"].includes(savedSound) && dom.soundEffectSelect) {
+            dom.soundEffectSelect.value = savedSound;
+          }
         } catch (e) {}
         detectNetworkMetadata();
         requestAnimationFrame(renderEngineLoop);

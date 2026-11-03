@@ -236,26 +236,41 @@ def test_zen_theme_vector_icons_and_stability_engine():
         "starRatingRow",
         "resultIdDisplay",
         "settings-bar",
-        "history-card"
+        "history-card",
+        "Aktif (Tactile Acoustic)",
+        "Zen Ambient (Warm Glass)",
+        "Minimalis (Taptic Click)",
+        "Mati (Senyap)",
+        "playTactileClick",
+        "playPingPulse",
+        "playPhaseShift",
+        "playSuccessChime",
+        "playCancelTone",
+        "createBiquadFilter",
+        "createDynamicsCompressor",
+        "createStereoPanner"
     ]
     for elem in zen_elements:
-        assert elem in html, f"Elemen Zen SpeedTest Pro / Vector '{elem}' tidak ditemukan di index.html"
+        assert elem in html, f"Elemen Zen SpeedTest Pro / Vector / Acoustic '{elem}' tidak ditemukan di index.html"
 
-    # 2. Pastikan emoji sistem lama (⚡, 〰, ⬇️, ⬆️, 📶, 📋) dan path SVG keliru (pause / music note / panah bertabrakan) sudah bersih 100%
+    # 2. Pastikan emoji sistem lama, path SVG keliru, dan artefak AI-slop synth (C-major triangle arpeggio) sudah bersih 100%
     banned_legacy_artifacts = [
         "⚡", "〰", "⬇️", "⬆️", "📶", "📋", "✅",
         "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z", # pause icon
         "M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z", # music note icon
-        "M7 10l-4 4 4 4" # old colliding bidirectional arrow path
+        "M7 10l-4 4 4 4", # old colliding bidirectional arrow path
+        "Aktif (Audio Synth)", # legacy AI-slop synth label
+        "523.25, 659.25, 783.99, 1046.50", # legacy C-E-G-C AI-slop arpeggio
+        'osc.type = "triangle"' # legacy unfiltered triangle buzzer
     ]
     for banned in banned_legacy_artifacts:
-        assert banned not in html, f"Artefak emoji/ikon lama yang tidak diinginkan '{banned}' masih ditemukan di index.html"
+        assert banned not in html, f"Artefak emoji/ikon/audio lama yang tidak diinginkan '{banned}' masih ditemukan di index.html"
 
     # Pastikan aturan responsif <480px dan koordinat panah vektor baru tersedia
     assert "@media (max-width: 480px)" in html, "Aturan responsif mobile @media (max-width: 480px) belum tersedia"
     assert "M17 5l4 3-4 3" in html and "M7 13l-4 3 4 3" in html, "Path SVG panah dua arah terpisah pada #pingIndicator belum terpasang"
 
-    print(f"  [OK] Tema Zen SpeedTest Pro & {len(zen_elements)} komponen Ikon Vektor Minimalis terverifikasi (0 emoji sistem, proporsi responsif 100%-125% & <480px).")
+    print(f"  [OK] Tema Zen SpeedTest Pro, {len(zen_elements)} komponen Vektor & Tactile Acoustic Engine terverifikasi (bebas AI-slop synth & emoji sistem).")
 
     # 3. Simulasi matematis & behavioral di Node.js untuk menguji kestabilan angka pada jaringan bursty, delayed handshake, & TCP slow-start
     node_test_script = r"""
@@ -358,7 +373,7 @@ console.log(JSON.stringify({
     res = json.loads(proc.stdout.strip())
     print(f"  [OK] Uji Slew-Rate Limiter: Bursty={res['finalSpeed']} Mbps (Max jump {res['maxJumpPct']}%), TCP Slow-Start={res['slowStartSpeed']}/300.0 Mbps.")
 
-    # 4. Eksekusi langsung blok <script> asli dari index.html di dalam Node VM
+    # 4. Eksekusi langsung blok <script> asli dari index.html di dalam Node VM (termasuk instrumentasi Web Audio DSP)
     vm_harness_script = r"""
 const fs = require('fs');
 const vm = require('vm');
@@ -438,6 +453,108 @@ function makeSimpleDot() {
   };
 }
 
+const audioTelemetry = {
+  resumed: 0,
+  oscillators: [],
+  filters: [],
+  compressors: 0,
+  panners: [],
+  noiseBuffers: 0,
+  noiseSources: 0,
+  linearRamps: 0,
+  disconnectedNodes: 0,
+  nanDetected: false
+};
+
+function makeAudioParam() {
+  const events = [];
+  const checkVal = (v, t) => {
+    if (!Number.isFinite(v) || !Number.isFinite(t)) audioTelemetry.nanDetected = true;
+  };
+  return {
+    events,
+    setValueAtTime: (v, t) => { checkVal(v, t); events.push({ type: "set", v, t }); },
+    linearRampToValueAtTime: (v, t) => { checkVal(v, t); audioTelemetry.linearRamps++; events.push({ type: "linear", v, t }); },
+    exponentialRampToValueAtTime: (v, t) => { checkVal(v, t); events.push({ type: "exp", v, t }); }
+  };
+}
+
+class MockAudioContext {
+  constructor() {
+    this.state = "suspended";
+    this.sampleRate = 44100;
+    this.currentTime = 1.0;
+    this.destination = {};
+  }
+  resume() {
+    this.state = "running";
+    audioTelemetry.resumed++;
+  }
+  createOscillator() {
+    const osc = {
+      type: "sine",
+      frequency: makeAudioParam(),
+      startAt: null,
+      stopAt: null,
+      onended: null,
+      connect: () => {},
+      start: function(t = 0) { this.startAt = t; },
+      stop: function(t = 0) { this.stopAt = t; if (typeof this.onended === "function") this.onended(); }
+    };
+    audioTelemetry.oscillators.push(osc);
+    return osc;
+  }
+  createGain() {
+    return {
+      gain: makeAudioParam(),
+      connect: () => {},
+      disconnect: () => { audioTelemetry.disconnectedNodes++; }
+    };
+  }
+  createBiquadFilter() {
+    const f = {
+      type: "lowpass",
+      frequency: makeAudioParam(),
+      Q: makeAudioParam(),
+      connect: () => {},
+      disconnect: () => { audioTelemetry.disconnectedNodes++; }
+    };
+    audioTelemetry.filters.push(f);
+    return f;
+  }
+  createDynamicsCompressor() {
+    audioTelemetry.compressors++;
+    return {
+      threshold: makeAudioParam(), knee: makeAudioParam(), ratio: makeAudioParam(),
+      attack: makeAudioParam(), release: makeAudioParam(), connect: () => {}
+    };
+  }
+  createStereoPanner() {
+    const p = {
+      pan: makeAudioParam(),
+      connect: () => {},
+      disconnect: () => { audioTelemetry.disconnectedNodes++; }
+    };
+    audioTelemetry.panners.push(p);
+    return p;
+  }
+  createBuffer(channels, length, sampleRate) {
+    audioTelemetry.noiseBuffers++;
+    const arr = new Float32Array(length);
+    return { getChannelData: () => arr };
+  }
+  createBufferSource() {
+    audioTelemetry.noiseSources++;
+    return {
+      buffer: null,
+      onended: null,
+      connect: () => {},
+      start: () => {},
+      stop: function() { if (typeof this.onended === "function") this.onended(); }
+    };
+  }
+}
+
 const storage = {};
 const docListeners = {};
 let fastForwardMode = false;
@@ -451,6 +568,7 @@ const sandbox = {
   window: {
     location: { protocol: "https:", origin: "https://evuaeru.github.io" },
     devicePixelRatio: 1,
+    AudioContext: MockAudioContext,
     addEventListener: (ev, fn) => { docListeners[ev] = fn; }
   },
   document: {
@@ -493,7 +611,7 @@ const sandbox = {
     }
   },
   AbortSignal: { timeout: () => ({}) },
-  Uint8Array, Math, Date, console,
+  Uint8Array, Float32Array, Math, Date, console,
   setTimeout: (fn, ms) => {
     if (fastForwardMode && ms <= 500) {
       virtualNow += ms;
@@ -579,6 +697,28 @@ elements.unitToggleBtn.trigger("click");
 if (elements.unitDl.textContent !== "Mbps" || elements.speedUnitText.textContent !== "Mbps") {
   console.error("FAIL: Unit toggle Mbps gagal"); process.exit(1);
 }
+
+// 3b. Verifikasi Sound Profile Selector (zen, minimal, off, on) & Mute Protection
+elements.soundEffectSelect.value = "zen";
+elements.soundEffectSelect.trigger("change");
+if (storage.zen_sound_mode !== "zen") {
+  console.error("FAIL: zen_sound_mode tidak tersimpan untuk 'zen'"); process.exit(1);
+}
+elements.soundEffectSelect.value = "minimal";
+elements.soundEffectSelect.trigger("change");
+if (storage.zen_sound_mode !== "minimal") {
+  console.error("FAIL: zen_sound_mode tidak tersimpan untuk 'minimal'"); process.exit(1);
+}
+elements.soundEffectSelect.value = "off";
+elements.soundEffectSelect.trigger("change");
+const oscCountWhenMuted = audioTelemetry.oscillators.length;
+elements.unitToggleBtn.trigger("click");
+elements.unitToggleBtn.trigger("click");
+if (audioTelemetry.oscillators.length !== oscCountWhenMuted) {
+  console.error("FAIL: Mode 'off' masih membunyikan oscillator!"); process.exit(1);
+}
+elements.soundEffectSelect.value = "on";
+elements.soundEffectSelect.trigger("change");
 
 // 4. Uji Pembatalan (Cancel) SETELAH fase Ping selesai (memastikan seluruh sub-label ikut di-reset ke '--')
 fastForwardMode = true;
@@ -687,6 +827,38 @@ const waitDownloadPhase = setInterval(() => {
                 process.exit(1);
               }
 
+              // 7. Verifikasi mendalam Web Audio DSP (Zen Tactile Acoustic Engine)
+              const hasTriangle = audioTelemetry.oscillators.some(o => o.type === "triangle" || o.type === "square" || o.type === "sawtooth");
+              if (hasTriangle || audioTelemetry.nanDetected) {
+                console.error("FAIL: Ditemukan oscillator kasar atau NaN AudioParam:", { hasTriangle, nanDetected: audioTelemetry.nanDetected });
+                process.exit(1);
+              }
+              if (audioTelemetry.resumed < 1 || audioTelemetry.compressors < 1 || audioTelemetry.noiseBuffers < 1 || audioTelemetry.noiseSources < 4 || audioTelemetry.panners.length < 5 || audioTelemetry.filters.length < 20 || audioTelemetry.linearRamps < 30 || audioTelemetry.disconnectedNodes < 20) {
+                console.error("FAIL: Arsitektur DSP Tactile Acoustic tidak lengkap:", {
+                  resumed: audioTelemetry.resumed,
+                  compressors: audioTelemetry.compressors,
+                  noiseBuffers: audioTelemetry.noiseBuffers,
+                  noiseSources: audioTelemetry.noiseSources,
+                  panners: audioTelemetry.panners.length,
+                  filters: audioTelemetry.filters.length,
+                  linearRamps: audioTelemetry.linearRamps,
+                  disconnectedNodes: audioTelemetry.disconnectedNodes
+                });
+                process.exit(1);
+              }
+
+              // Pastikan chord Dmaj9 (880 Hz top note & 554.37 Hz C#5) terjadwal presisi pada hardware clock (startAt > 1.0)
+              const dmaj9Scheduled = audioTelemetry.oscillators.some(o =>
+                o.frequency.events.some(e => Math.abs(e.v - 554.37) < 0.1) && o.startAt > 1.05
+              );
+              const cancelScheduled = audioTelemetry.oscillators.some(o =>
+                o.frequency.events.some(e => Math.abs(e.v - 185.0) < 0.1) && o.startAt > 1.05
+              );
+              if (!dmaj9Scheduled || !cancelScheduled) {
+                console.error("FAIL: Sample-accurate scheduling Dmaj9 / Cancel tone tidak terdeteksi:", { dmaj9Scheduled, cancelScheduled });
+                process.exit(1);
+              }
+
               // Test Copy Summary & Clear History
               elements.btnCopySummary.trigger("click");
               elements.btnClearHistory.trigger("click");
@@ -706,7 +878,7 @@ const waitDownloadPhase = setInterval(() => {
 """
     proc_vm = subprocess.run(["node", "-e", vm_harness_script, html_path], capture_output=True, text=True)
     assert proc_vm.returncode == 0 and "VM_HARNESS_OK" in proc_vm.stdout, f"Uji VM Harness gagal:\n{proc_vm.stderr}\n{proc_vm.stdout}"
-    print("  [OK] Eksekusi VM <script> asli: Download Persistence across RAF Transition, Object Colo Parsing, Chronological Jitter, Post-Ping Cancel Reset, Upload Bufferbloat, Sparkline Integrity, & Mid-Transition Disconnect lolos 100%.")
+    print("  [OK] Eksekusi VM <script> asli: Tactile Acoustic DSP Graph, Sample-Accurate Dmaj9 Scheduling, Mute/Minimal Profiles, Download Persistence, Chronological Jitter, & Mid-Transition Disconnect lolos 100%.")
 
 def main():
     print("=" * 60)
