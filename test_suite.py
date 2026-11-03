@@ -216,6 +216,9 @@ def test_zen_theme_vector_icons_and_stability_engine():
         "vector-badge ul-vec",
         "vector-badge bb-vec",
         "telemetry-quality-bar",
+        "telemetry-top-row",
+        "pill-stage-label",
+        "pill-ping-val",
         "valPingIdle",
         "valPingDown",
         "valPingUp",
@@ -494,6 +497,7 @@ const sandbox = {
   setTimeout: (fn, ms) => {
     if (fastForwardMode && ms <= 500) {
       virtualNow += ms;
+      if (rafCallback) rafCallback(virtualNow);
       return setTimeout(fn, 1);
     }
     return setTimeout(fn, ms);
@@ -514,7 +518,12 @@ const sandbox = {
       ok: true,
       status: 200,
       headers: { get: (h) => h === "cf-meta-ip" ? "182.10.131.57" : null },
-      json: async () => ({ clientIp: "182.10.131.57", asOrganization: "PT Telekomunikasi Indonesia", country: "ID", colo: "SIN" }),
+      json: async () => ({
+        clientIp: "182.10.131.57",
+        asOrganization: "PT Telekomunikasi Indonesia",
+        country: "ID",
+        colo: { iata: "SIN", city: "Singapore", cca2: "SG" }
+      }),
       blob: async () => ({ size: 1048576 })
     };
   },
@@ -578,6 +587,11 @@ elements.btnStartTest.trigger("click");
 const waitDownloadPhase = setInterval(() => {
   if (elements.phaseBadge.textContent === "MENGUJI DOWNLOAD...") {
     clearInterval(waitDownloadPhase);
+    // Pastikan lokasi tidak pernah menampilkan [object Object] saat meta.colo berupa objek
+    if (elements.clientLocationDisplay.textContent !== "ID (SIN)" || elements.clientLocationDisplay.textContent.includes("[object Object]")) {
+      console.error("FAIL: clientLocationDisplay menampilkan objek mentah:", elements.clientLocationDisplay.textContent);
+      process.exit(1);
+    }
     // Pastikan fase Ping sudah mengisi sub-label dan menghitung chronological jitter (10.0 ms, bukan 1.7 ms)
     const jitterDuringTest = parseFloat(elements.valJitter.textContent);
     if (Math.abs(jitterDuringTest - 10.0) > 0.5 || elements.subJitterQual.textContent !== "Fluktuatif") {
@@ -602,7 +616,7 @@ const waitDownloadPhase = setInterval(() => {
         }
       }
 
-      // 5. Uji Full End-to-End SpeedTest Completion
+      // 5. Uji Full End-to-End SpeedTest Completion (termasuk RAF aktif saat transisi Download -> Upload)
       virtualNow = Date.now();
       pingSampleIndex = 0;
       fastForwardMode = true;
@@ -616,8 +630,9 @@ const waitDownloadPhase = setInterval(() => {
           const dlVal = parseFloat(elements.valDownload.textContent);
           const ulVal = parseFloat(elements.valUpload.textContent);
           const pingVal = parseInt(elements.valPing.textContent, 10);
-          if (!(dlVal > 0) || !(ulVal > 0) || !(pingVal > 0)) {
-            console.error("FAIL: Hasil full test tidak valid:", { dlVal, ulVal, pingVal });
+          const gaugeVal = parseFloat(elements.liveSpeedNumber.textContent);
+          if (!(dlVal > 0) || !(ulVal > 0) || !(pingVal > 0) || dlVal !== gaugeVal) {
+            console.error("FAIL: Hasil full test tidak valid atau valDownload tidak sinkron dengan gauge:", { dlVal, ulVal, pingVal, gaugeVal });
             process.exit(1);
           }
 
@@ -631,9 +646,13 @@ const waitDownloadPhase = setInterval(() => {
             process.exit(1);
           }
 
-          // Pastikan sparkline canvas tidak mengalami vertical spike saat renderEngineLoop berjalan di fase 'completed'
+          // Pastikan sparkline canvas tidak mengalami vertical spike & valDownload tetap utuh saat renderEngineLoop berjalan di fase 'completed'
           if (rafCallback) {
             rafCallback(virtualNow + 200);
+            if (parseFloat(elements.valDownload.textContent) !== dlVal || parseFloat(elements.liveSpeedNumber.textContent) !== dlVal) {
+              console.error("FAIL: Angka download berubah setelah RAF completed:", elements.valDownload.textContent, elements.liveSpeedNumber.textContent);
+              process.exit(1);
+            }
             if (canvasLineToY.length >= 3) {
               const lastY = canvasLineToY[canvasLineToY.length - 1];
               const prevY = canvasLineToY[canvasLineToY.length - 2];
@@ -686,7 +705,7 @@ const waitDownloadPhase = setInterval(() => {
 """
     proc_vm = subprocess.run(["node", "-e", vm_harness_script, html_path], capture_output=True, text=True)
     assert proc_vm.returncode == 0 and "VM_HARNESS_OK" in proc_vm.stdout, f"Uji VM Harness gagal:\n{proc_vm.stderr}\n{proc_vm.stdout}"
-    print("  [OK] Eksekusi VM <script> asli: Chronological Jitter, Post-Ping Cancel Reset, Upload Bufferbloat, Sparkline Integrity, & Mid-Transition Disconnect lolos 100%.")
+    print("  [OK] Eksekusi VM <script> asli: Download Persistence across RAF Transition, Object Colo Parsing, Chronological Jitter, Post-Ping Cancel Reset, Upload Bufferbloat, Sparkline Integrity, & Mid-Transition Disconnect lolos 100%.")
 
 def main():
     print("=" * 60)
