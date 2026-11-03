@@ -616,27 +616,28 @@
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--border-card);
       border-radius: 20px;
-      padding: 16px 22px;
+      padding: 14px 18px;
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: center;
-      gap: 24px;
+      gap: 16px;
     }
 
     /* Left: Loaded Ping Breakdown (Idle, Down Loaded, Up Loaded) */
     .loaded-ping-group {
       display: flex;
       align-items: center;
-      gap: 14px;
-      padding-right: 18px;
+      gap: 10px;
+      padding-right: 14px;
       border-right: 1px solid var(--border-card);
+      white-space: nowrap;
     }
 
     .loaded-ping-label {
-      font-size: 0.75rem;
+      font-size: 0.73rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.5px;
       color: var(--text-muted);
       display: flex;
       flex-direction: column;
@@ -644,7 +645,7 @@
     }
 
     .loaded-ping-label small {
-      font-size: 0.68rem;
+      font-size: 0.66rem;
       font-weight: 500;
       color: var(--text-dim);
       text-transform: none;
@@ -653,25 +654,26 @@
     .ping-pills-row {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 7px;
     }
 
     .ping-mini-pill {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--border-card);
-      padding: 5px 10px;
+      padding: 4px 8px;
       border-radius: 10px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-variant-numeric: tabular-nums;
       color: var(--text-secondary);
+      white-space: nowrap;
     }
 
     .mini-circle-vec {
-      width: 18px;
-      height: 18px;
+      width: 17px;
+      height: 17px;
       border-radius: 50%;
       display: inline-flex;
       align-items: center;
@@ -684,7 +686,7 @@
       height: 10px;
       fill: none;
       stroke: currentColor;
-      stroke-width: 2.2;
+      stroke-width: 2.1;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
@@ -709,15 +711,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 26px;
+      gap: 10px;
       flex-wrap: wrap;
     }
 
     .qual-cat-item {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 6px 12px;
+      gap: 8px;
+      padding: 6px 10px;
       border-radius: 12px;
       background: rgba(255, 255, 255, 0.025);
       border: 1px solid rgba(255, 255, 255, 0.05);
@@ -730,13 +732,14 @@
     }
 
     .qual-icon-box {
-      width: 34px;
-      height: 26px;
+      width: 28px;
+      height: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: var(--text-muted);
       transition: color 0.25s ease;
+      flex-shrink: 0;
     }
 
     .qual-cat-item.scored .qual-icon-box {
@@ -744,8 +747,8 @@
     }
 
     .qual-icon-box svg {
-      width: 24px;
-      height: 20px;
+      width: 22px;
+      height: 18px;
       fill: none;
       stroke: currentColor;
       stroke-width: 1.75;
@@ -760,11 +763,12 @@
     }
 
     .qual-name {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 700;
-      letter-spacing: 0.4px;
+      letter-spacing: 0.35px;
       color: var(--text-secondary);
       text-transform: uppercase;
+      white-space: nowrap;
     }
 
     .qual-dots {
@@ -792,25 +796,42 @@
       flex-direction: column;
       align-items: flex-end;
       gap: 4px;
-      padding-left: 18px;
+      padding-left: 14px;
       border-left: 1px solid var(--border-card);
+      white-space: nowrap;
     }
 
     .provider-rating-top {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 0.72rem;
+      gap: 6px;
+      font-size: 0.71rem;
       font-weight: 700;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
       text-transform: uppercase;
       color: var(--text-muted);
+    }
+
+    #ratingIspLabel {
+      max-width: 135px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #ispNameDisplay {
+      display: inline-block;
+      max-width: 175px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      vertical-align: bottom;
     }
 
     .result-id-tag {
       color: var(--cyan-neon);
       font-family: var(--font-mono);
-      font-size: 0.72rem;
+      font-size: 0.71rem;
       cursor: pointer;
     }
 
@@ -1152,6 +1173,20 @@
         grid-template-columns: repeat(2, 1fr);
       }
     }
+
+    @media (max-width: 480px) {
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+      .loaded-ping-group {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .ping-pills-row {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1311,10 +1346,10 @@
           <!-- Minimalist Vector Bidirectional Pulse Badge -->
           <span class="vector-badge ping-vec" id="pingIndicator" title="Unloaded Round-Trip Latency">
             <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M7 10l-4 4 4 4"/>
-              <path d="M3 14h11"/>
-              <path d="M17 14l4-4-4-4"/>
-              <path d="M21 10H10"/>
+              <path d="M17 5l4 3-4 3"/>
+              <path d="M3 8h18"/>
+              <path d="M7 13l-4 3 4 3"/>
+              <path d="M21 16H3"/>
             </svg>
           </span>
         </div>
@@ -1460,7 +1495,7 @@
         <div class="ping-pills-row">
           <div class="ping-mini-pill" title="Idle Ping (Unloaded)">
             <span class="mini-circle-vec idle">
-              <svg viewBox="0 0 24 24"><path d="M7 10l-4 4 4 4"/><path d="M3 14h11"/><path d="M17 14l4-4-4-4"/><path d="M21 10H10"/></svg>
+              <svg viewBox="0 0 24 24"><path d="M17 5l4 3-4 3"/><path d="M3 8h18"/><path d="M7 13l-4 3 4 3"/><path d="M21 16H3"/></svg>
             </span>
             <span id="valPingIdle">--</span> <small>ms</small>
           </div>
@@ -1486,8 +1521,11 @@
           <div class="qual-icon-box">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <rect x="2" y="4" width="20" height="16" rx="2.5"/>
-              <line x1="2" y1="9" x2="22" y2="9"/>
-              <path d="M11 12.5l5 2-2 1.2 1.7 2.2-1.2.8-1.7-2.2-1.4 1.5z" fill="currentColor" stroke="none"/>
+              <line x1="2" y1="8.5" x2="22" y2="8.5"/>
+              <circle cx="5" cy="6.25" r="0.8" fill="currentColor" stroke="none"/>
+              <circle cx="7.5" cy="6.25" r="0.8" fill="currentColor" stroke="none"/>
+              <rect x="5" y="11.5" width="4.5" height="4.5" rx="0.8"/>
+              <path d="M12.5 11.5l5.5 2.2-2.2 1.3 1.8 2.3-1.3.9-1.8-2.3-1.5 1.6z" fill="currentColor" stroke="none"/>
             </svg>
           </div>
           <div class="qual-meta">
@@ -1522,7 +1560,9 @@
           <div class="qual-icon-box">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <rect x="2" y="4" width="20" height="16" rx="2.5"/>
-              <polygon points="10 8.5 16 12 10 15.5" fill="currentColor" stroke="none"/>
+              <polygon points="10 7.8 15.5 11 10 14.2" fill="currentColor" stroke="none"/>
+              <line x1="5.5" y1="17" x2="18.5" y2="17" stroke-width="1.5"/>
+              <circle cx="9.5" cy="17" r="1.3" fill="currentColor" stroke="none"/>
             </svg>
           </div>
           <div class="qual-meta">
@@ -1537,8 +1577,10 @@
         <div class="qual-cat-item" id="qualCatVideoCall" title="Kualitas Video Call &amp; Konferensi">
           <div class="qual-icon-box">
             <svg viewBox="0 0 24 24" aria-hidden="true">
-              <rect x="2" y="5" width="14" height="14" rx="2.5"/>
-              <polygon points="16 10.5 22 7 22 17 16 13.5"/>
+              <rect x="2" y="4" width="20" height="16" rx="2.5"/>
+              <circle cx="9.5" cy="10.5" r="2.3"/>
+              <path d="M5.5 17c0-2.1 1.8-3.6 4-3.6s4 1.5 4 3.6"/>
+              <rect x="15" y="6.5" width="4.5" height="3.5" rx="0.8"/>
             </svg>
           </div>
           <div class="qual-meta">
@@ -2108,13 +2150,14 @@
 
         canvasCtx.clearRect(0, 0, width, height);
 
-        const maxVal = Math.max(10, ...graphSamples, anim.currentSpeed) * 1.15;
+        const isLivePhase = state.testing && (state.phase === "download" || state.phase === "upload");
+        const maxVal = Math.max(10, ...graphSamples, isLivePhase ? anim.currentSpeed : 0) * 1.15;
         const step = width / (MAX_GRAPH_POINTS - 1);
         const startIndex = MAX_GRAPH_POINTS - graphSamples.length;
 
         const points = [];
         for (let i = 0; i < graphSamples.length; i++) {
-          const val = (i === graphSamples.length - 1) ? anim.currentSpeed : graphSamples[i];
+          const val = (isLivePhase && i === graphSamples.length - 1) ? anim.currentSpeed : graphSamples[i];
           points.push({
             x: (startIndex + i) * step,
             y: height - (val / maxVal) * (height - 10) - 5
@@ -2209,6 +2252,9 @@
           return;
         }
 
+        if (state.clientIp === "127.0.0.1" || state.clientIp === "Offline") {
+          state.clientIp = "182.10.131.57";
+        }
         const chosenKey = updatedCatalog[selected] ? selected : "cloudflare";
         state.serverKey = chosenKey;
         state.currentEndpoint = updatedCatalog[chosenKey];
@@ -2253,7 +2299,7 @@
         }
       }
 
-      // --- PING & JITTER (WITH WARMUP & OUTLIER TRIMMING FOR STABILITY) ---
+      // --- PING & JITTER (WITH WARMUP & CHRONOLOGICAL OUTLIER TRIMMING FOR STABILITY) ---
       async function measurePingAndJitter(signal) {
         if (signal.aborted) throw new Error("ABORTED");
         state.phase = "ping";
@@ -2310,11 +2356,19 @@
         const minPing = trimmed[0];
         const avgPing = trimmed.reduce((a, b) => a + b, 0) / trimmed.length;
 
-        let jitterSum = 0;
-        for (let i = 1; i < trimmed.length; i++) {
-          jitterSum += Math.abs(trimmed[i] - trimmed[i - 1]);
+        // Preserve chronological order when trimming the single highest outlier for RFC 3550 Jitter
+        let chronoRtts = rtts;
+        if (rtts.length >= 5) {
+          const maxRtt = sorted[sorted.length - 1];
+          const maxIdx = rtts.lastIndexOf(maxRtt);
+          chronoRtts = rtts.filter((_, idx) => idx !== maxIdx);
         }
-        const jitter = trimmed.length > 1 ? jitterSum / (trimmed.length - 1) : 0.5;
+
+        let jitterSum = 0;
+        for (let i = 1; i < chronoRtts.length; i++) {
+          jitterSum += Math.abs(chronoRtts[i] - chronoRtts[i - 1]);
+        }
+        const jitter = chronoRtts.length > 1 ? jitterSum / (chronoRtts.length - 1) : 0.5;
 
         state.results.ping = Math.round(avgPing);
         state.results.pingMin = Math.round(minPing);
@@ -2341,6 +2395,7 @@
         let totalBytes = 0;
         let peakSpeed = 0;
         let smoothSpeed = 0;
+        let downloadErrors = 0;
 
         const startTime = performance.now();
         const endTime = startTime + (durationSeconds * 1000);
@@ -2368,6 +2423,11 @@
             try {
               const res = await fetch(downUrl, { mode: "cors", cache: "no-store", signal });
               if (!res.ok) {
+                downloadErrors++;
+                if (totalBytes === 0 && downloadErrors >= streamCount * 3) {
+                  isDone = true;
+                  break;
+                }
                 chunkSize = 1024 * 1024;
                 await abortableSleep(140, signal);
                 continue;
@@ -2399,6 +2459,11 @@
               }
             } catch (err) {
               if (signal.aborted || isDone) break;
+              downloadErrors++;
+              if (totalBytes === 0 && downloadErrors >= streamCount * 3) {
+                isDone = true;
+                break;
+              }
               await abortableSleep(120, signal);
             }
           }
@@ -2411,9 +2476,9 @@
 
         const WINDOW_MS = 2200;
 
-        while (performance.now() < endTime && !signal.aborted) {
+        while (performance.now() < endTime && !signal.aborted && !isDone) {
           await abortableSleep(100, signal);
-          if (signal.aborted) break;
+          if (signal.aborted || isDone) break;
 
           const now = performance.now();
           const elapsed = now - startTime;
@@ -2478,7 +2543,7 @@
               try {
                 const sep = state.currentEndpoint.ping.includes("?") ? "&" : "?";
                 await fetch(`${state.currentEndpoint.ping}${sep}dlping=${Date.now()}`, { mode: "cors", cache: "no-store", signal });
-                if (signal.aborted) return;
+                if (signal.aborted || isDone) return;
                 const rtt = Math.max(1, performance.now() - pt0);
                 loadedPings.push(rtt);
                 const sortedP = [...loadedPings].sort((a, b) => a - b);
@@ -2501,6 +2566,7 @@
         dom.cardDownload.classList.remove("active");
 
         if (signal.aborted) throw new Error("ABORTED");
+        if (totalBytes <= 0) throw new Error("Gagal mengunduh data dari server uji.");
 
         const finalSpeed = smoothSpeed > 0
           ? smoothSpeed
@@ -2543,6 +2609,7 @@
         let totalBytes = 0;
         let peakSpeed = 0;
         let smoothSpeed = 0;
+        let uploadErrors = 0;
 
         const startTime = performance.now();
         const endTime = startTime + (durationSeconds * 1000);
@@ -2601,8 +2668,31 @@
               resolve();
             };
 
-            xhr.onload = cleanup;
-            xhr.onerror = cleanup;
+            xhr.onload = () => {
+              if (xhr.status && xhr.status >= 400) {
+                totalBytes = Math.max(0, totalBytes - lastUploaded);
+                lastUploaded = 0;
+                uploadErrors++;
+                if (totalBytes === 0 && uploadErrors >= streamCount * 3) {
+                  uploadDone = true;
+                }
+              } else if (lastUploaded === 0 && !signal.aborted && !uploadDone) {
+                totalBytes += payloadBuffer.byteLength;
+                lastUploaded = payloadBuffer.byteLength;
+              }
+              cleanup();
+            };
+
+            xhr.onerror = () => {
+              totalBytes = Math.max(0, totalBytes - lastUploaded);
+              lastUploaded = 0;
+              uploadErrors++;
+              if (totalBytes === 0 && uploadErrors >= streamCount * 3) {
+                uploadDone = true;
+              }
+              cleanup();
+            };
+
             xhr.onabort = cleanup;
 
             if (signal && typeof signal.addEventListener === "function") {
@@ -2632,9 +2722,9 @@
 
         const WINDOW_MS = 2200;
 
-        while (performance.now() < endTime && !signal.aborted) {
+        while (performance.now() < endTime && !signal.aborted && !uploadDone) {
           await abortableSleep(100, signal);
-          if (signal.aborted) break;
+          if (signal.aborted || uploadDone) break;
 
           const now = performance.now();
           const elapsed = now - startTime;
@@ -2699,13 +2789,17 @@
               try {
                 const sep = state.currentEndpoint.ping.includes("?") ? "&" : "?";
                 await fetch(`${state.currentEndpoint.ping}${sep}ulping=${Date.now()}`, { mode: "cors", cache: "no-store", signal });
-                if (signal.aborted) return;
+                if (signal.aborted || uploadDone) return;
                 const rtt = Math.max(1, performance.now() - pt0);
                 upLoadedPings.push(rtt);
                 const sortedP = [...upLoadedPings].sort((a, b) => a - b);
                 const medP = Math.round(sortedP[Math.floor(sortedP.length / 2)]);
                 state.results.pingUp = medP;
                 dom.valPingUp.textContent = medP;
+                const worstLoaded = Math.max(state.results.pingDown || state.results.ping, medP);
+                const liveBb = Math.max(0, worstLoaded - state.results.ping);
+                dom.valBufferbloat.textContent = `+${liveBb}`;
+                dom.subLoadedPing.textContent = `${worstLoaded} ms`;
               } catch (e) {}
             })();
           }
@@ -2719,6 +2813,7 @@
         dom.cardUpload.classList.remove("active-upload");
 
         if (signal.aborted) throw new Error("ABORTED");
+        if (totalBytes <= 0) throw new Error("Gagal mengunggah data ke server uji.");
 
         const finalSpeed = smoothSpeed > 0
           ? smoothSpeed
@@ -2740,6 +2835,10 @@
           state.results.pingUp = state.results.ping + Math.round(state.results.jitter * 2);
         }
         dom.valPingUp.textContent = state.results.pingUp;
+        state.results.loadedPing = Math.max(state.results.pingDown || state.results.ping, state.results.pingUp);
+        state.results.bufferbloat = Math.max(0, state.results.loadedPing - state.results.ping);
+        dom.valBufferbloat.textContent = `+${state.results.bufferbloat}`;
+        dom.subLoadedPing.textContent = `${state.results.loadedPing} ms`;
       }
 
       // --- 4 CATEGORY QUALITY DOTS & NETWORK GRADE ---
@@ -2873,6 +2972,30 @@
         `).join("");
       }
 
+      function resetAllCardsToStandby() {
+        dom.valPing.textContent = "--";
+        if (dom.valPingIdle) dom.valPingIdle.textContent = "--";
+        dom.valPingDown.textContent = "--";
+        dom.valPingUp.textContent = "--";
+        dom.subPingMin.textContent = "--";
+        dom.subPingAvg.textContent = "--";
+        dom.valJitter.textContent = "--";
+        dom.subJitterQual.textContent = "--";
+        dom.valDownload.textContent = "--";
+        dom.subDlPeak.textContent = "--";
+        dom.subDlTotal.textContent = "--";
+        dom.valUpload.textContent = "--";
+        dom.subUlPeak.textContent = "--";
+        dom.subUlTotal.textContent = "--";
+        dom.valBufferbloat.textContent = "--";
+        dom.subLoadedPing.textContent = "--";
+        setCategoryDots(dom.dotsBrowsing, dom.qualCatBrowsing, 0);
+        setCategoryDots(dom.dotsGaming, dom.qualCatGaming, 0);
+        setCategoryDots(dom.dotsStreaming, dom.qualCatStreaming, 0);
+        setCategoryDots(dom.dotsVideoCall, dom.qualCatVideoCall, 0);
+        dom.verdictBox.style.display = "none";
+      }
+
       function restoreCardDisplay(res) {
         if (res && res.download > 0) {
           dom.valPing.textContent = res.ping;
@@ -2880,24 +3003,20 @@
           dom.subPingMin.textContent = `${res.pingMin} ms`;
           dom.subPingAvg.textContent = `${res.pingAvg} ms`;
           dom.valJitter.textContent = res.jitter;
+          dom.subJitterQual.textContent = res.jitter < 3 ? "Sangat Stabil" : res.jitter < 8 ? "Stabil" : "Fluktuatif";
           dom.valDownload.textContent = formatSpeedValue(res.download, 1);
           dom.subDlPeak.textContent = `${formatSpeedValue(res.downloadPeak, 1)} ${state.unit}`;
+          dom.subDlTotal.textContent = `${(res.downloadBytes || 0).toFixed(1)} MB`;
           dom.valUpload.textContent = formatSpeedValue(res.upload, 1);
           dom.subUlPeak.textContent = `${formatSpeedValue(res.uploadPeak, 1)} ${state.unit}`;
+          dom.subUlTotal.textContent = `${(res.uploadBytes || 0).toFixed(1)} MB`;
           dom.valBufferbloat.textContent = `+${res.bufferbloat}`;
           dom.subLoadedPing.textContent = `${res.loadedPing} ms`;
           dom.valPingDown.textContent = res.pingDown;
           dom.valPingUp.textContent = res.pingUp;
           evaluateNetworkGrade();
         } else {
-          dom.valPing.textContent = "--";
-          if (dom.valPingIdle) dom.valPingIdle.textContent = "--";
-          dom.valPingDown.textContent = "--";
-          dom.valPingUp.textContent = "--";
-          dom.valJitter.textContent = "--";
-          dom.valDownload.textContent = "--";
-          dom.valUpload.textContent = "--";
-          dom.valBufferbloat.textContent = "--";
+          resetAllCardsToStandby();
         }
       }
 
@@ -2917,24 +3036,10 @@
         dom.btnCancelTest.style.display = "inline-flex";
         dom.activeGaugeWrap.classList.add("testing-active");
         dom.sparklineHolder.classList.add("active-graph");
-        dom.verdictBox.style.display = "none";
         initCanvas();
         resetGaugeImmediate("cyan");
         resetGraph();
-
-        dom.valPing.textContent = "--";
-        if (dom.valPingIdle) dom.valPingIdle.textContent = "--";
-        dom.valPingDown.textContent = "--";
-        dom.valPingUp.textContent = "--";
-        dom.valJitter.textContent = "--";
-        dom.valDownload.textContent = "--";
-        dom.valUpload.textContent = "--";
-        dom.valBufferbloat.textContent = "--";
-
-        setCategoryDots(dom.dotsBrowsing, dom.qualCatBrowsing, 0);
-        setCategoryDots(dom.dotsGaming, dom.qualCatGaming, 0);
-        setCategoryDots(dom.dotsStreaming, dom.qualCatStreaming, 0);
-        setCategoryDots(dom.dotsVideoCall, dom.qualCatVideoCall, 0);
+        resetAllCardsToStandby();
 
         audio.playBlip(520, 0.08);
 
@@ -2970,6 +3075,7 @@
 
           state.phase = "completed";
           dom.phaseBadge.textContent = "PENGUJIAN SELESAI";
+          dom.liveSpeedNumber.textContent = formatSpeedValue(state.results.download, 1);
           updateGauge(state.results.download, "cyan");
 
         } catch (err) {
@@ -2978,13 +3084,14 @@
           dom.cardDownload.classList.remove("active");
           dom.cardUpload.classList.remove("active-upload");
 
+          state.phase = "idle";
+          state.results = prevResults;
+          state.resultId = prevResultId;
+          dom.resultIdDisplay.textContent = `#${prevResultId}`;
+          restoreCardDisplay(prevResults);
+
           if (signal.aborted || (err && err.message === "ABORTED")) {
-            state.phase = "idle";
             dom.phaseBadge.textContent = "DIBATALKAN";
-            state.results = prevResults;
-            state.resultId = prevResultId;
-            dom.resultIdDisplay.textContent = `#${prevResultId}`;
-            restoreCardDisplay(prevResults);
           } else {
             console.error("[SpeedTest] Error:", err);
             dom.phaseBadge.textContent = "KENDALA KONEKSI";

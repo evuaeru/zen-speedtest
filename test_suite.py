@@ -238,16 +238,21 @@ def test_zen_theme_vector_icons_and_stability_engine():
     for elem in zen_elements:
         assert elem in html, f"Elemen Zen SpeedTest Pro / Vector '{elem}' tidak ditemukan di index.html"
 
-    # 2. Pastikan emoji sistem lama (⚡, 〰, ⬇️, ⬆️, 📶, 📋) dan path SVG keliru (pause / music note) sudah bersih 100%
+    # 2. Pastikan emoji sistem lama (⚡, 〰, ⬇️, ⬆️, 📶, 📋) dan path SVG keliru (pause / music note / panah bertabrakan) sudah bersih 100%
     banned_legacy_artifacts = [
         "⚡", "〰", "⬇️", "⬆️", "📶", "📋", "✅",
         "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z", # pause icon
-        "M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" # music note icon
+        "M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z", # music note icon
+        "M7 10l-4 4 4 4" # old colliding bidirectional arrow path
     ]
     for banned in banned_legacy_artifacts:
         assert banned not in html, f"Artefak emoji/ikon lama yang tidak diinginkan '{banned}' masih ditemukan di index.html"
 
-    print(f"  [OK] Tema Zen SpeedTest Pro & {len(zen_elements)} komponen Ikon Vektor Minimalis terverifikasi (0 emoji sistem).")
+    # Pastikan aturan responsif <480px dan koordinat panah vektor baru tersedia
+    assert "@media (max-width: 480px)" in html, "Aturan responsif mobile @media (max-width: 480px) belum tersedia"
+    assert "M17 5l4 3-4 3" in html and "M7 13l-4 3 4 3" in html, "Path SVG panah dua arah terpisah pada #pingIndicator belum terpasang"
+
+    print(f"  [OK] Tema Zen SpeedTest Pro & {len(zen_elements)} komponen Ikon Vektor Minimalis terverifikasi (0 emoji sistem, proporsi responsif 100%-125% & <480px).")
 
     # 3. Simulasi matematis & behavioral di Node.js untuk menguji kestabilan angka pada jaringan bursty, delayed handshake, & TCP slow-start
     node_test_script = r"""
@@ -350,7 +355,7 @@ console.log(JSON.stringify({
     res = json.loads(proc.stdout.strip())
     print(f"  [OK] Uji Slew-Rate Limiter: Bursty={res['finalSpeed']} Mbps (Max jump {res['maxJumpPct']}%), TCP Slow-Start={res['slowStartSpeed']}/300.0 Mbps.")
 
-    # 4. Eksekusi langsung blok <script> asli dari index.html di dalam Node VM (Behavioral, Mid-Test Cancel, & Unit Conversion)
+    # 4. Eksekusi langsung blok <script> asli dari index.html di dalam Node VM
     vm_harness_script = r"""
 const fs = require('fs');
 const vm = require('vm');
@@ -360,6 +365,7 @@ if (!match) { console.error("No script tag found"); process.exit(1); }
 const scriptCode = match[1];
 
 const elements = {};
+const canvasLineToY = [];
 function makeEl(id) {
   const listeners = {};
   const classSet = new Set();
@@ -396,8 +402,11 @@ function makeEl(id) {
     trigger: (ev, arg) => { (listeners[ev] || []).forEach(fn => fn(arg)); },
     getBoundingClientRect: () => ({ width: 600, height: 56 }),
     getContext: () => ({
-      scale: () => {}, clearRect: () => {}, beginPath: () => {}, moveTo: () => {},
-      quadraticCurveTo: () => {}, lineTo: () => {}, stroke: () => {}, closePath: () => {},
+      scale: () => {}, clearRect: () => { canvasLineToY.length = 0; }, beginPath: () => {},
+      moveTo: (x, y) => { canvasLineToY.push(y); },
+      quadraticCurveTo: (cx, cy, x, y) => { canvasLineToY.push(y); },
+      lineTo: (x, y) => { if (y < 56) canvasLineToY.push(y); },
+      stroke: () => {}, closePath: () => {},
       createLinearGradient: () => ({ addColorStop: () => {} }), fill: () => {}
     }),
     querySelectorAll: (sel) => {
@@ -430,6 +439,11 @@ const storage = {};
 const docListeners = {};
 let fastForwardMode = false;
 let virtualNow = Date.now();
+let pingSampleIndex = 0;
+const oscillatingRtts = [10, 20, 10, 20, 10, 20, 10, 50];
+let simulateUploadDrop = false;
+let rafCallback = null;
+
 const sandbox = {
   window: {
     location: { protocol: "https:", origin: "https://evuaeru.github.io" },
@@ -458,10 +472,10 @@ const sandbox = {
         virtualNow += 4;
         return virtualNow;
       }
-      return Date.now();
+      return virtualNow;
     }
   },
-  requestAnimationFrame: () => {},
+  requestAnimationFrame: (fn) => { rafCallback = fn; },
   AbortController: class {
     constructor() {
       this.signal = {
@@ -485,20 +499,37 @@ const sandbox = {
     return setTimeout(fn, ms);
   },
   clearTimeout, Promise, Array, Object, String, Number, JSON, parseInt, parseFloat, encodeURI,
-  fetch: async (url) => ({
-    ok: true,
-    status: 200,
-    headers: { get: (h) => h === "cf-meta-ip" ? "182.10.131.57" : null },
-    json: async () => ({ clientIp: "182.10.131.57", asOrganization: "PT Telekomunikasi Indonesia", country: "ID", colo: "SIN" }),
-    blob: async () => ({ size: 1048576 })
-  }),
+  fetch: async (url) => {
+    if (String(url).includes("t=")) {
+      const rtt = oscillatingRtts[pingSampleIndex % oscillatingRtts.length];
+      pingSampleIndex++;
+      // Advance virtualNow by rtt minus 4 (since performance.now() in fastForwardMode adds 4)
+      virtualNow += (fastForwardMode ? (rtt - 4) : rtt);
+    } else if (String(url).includes("dlping=")) {
+      virtualNow += (fastForwardMode ? 12 : 16);
+    } else if (String(url).includes("ulping=")) {
+      virtualNow += (fastForwardMode ? 91 : 95);
+    }
+    return {
+      ok: true,
+      status: 200,
+      headers: { get: (h) => h === "cf-meta-ip" ? "182.10.131.57" : null },
+      json: async () => ({ clientIp: "182.10.131.57", asOrganization: "PT Telekomunikasi Indonesia", country: "ID", colo: "SIN" }),
+      blob: async () => ({ size: 1048576 })
+    };
+  },
   XMLHttpRequest: class {
-    constructor() { this.upload = {}; }
+    constructor() { this.upload = {}; this.status = 200; }
     open() {}
     setRequestHeader() {}
     send() {
       if (this.upload.onprogress) this.upload.onprogress({ loaded: 524288 });
-      if (this.onload) setTimeout(() => this.onload(), 2);
+      if (simulateUploadDrop) {
+        this.status = 0;
+        if (this.onerror) setTimeout(() => this.onerror(), 2);
+      } else {
+        if (this.onload) setTimeout(() => this.onload(), 2);
+      }
     }
     abort() { if (this.onabort) this.onabort(); }
   }
@@ -540,85 +571,122 @@ if (elements.unitDl.textContent !== "Mbps" || elements.speedUnitText.textContent
   console.error("FAIL: Unit toggle Mbps gagal"); process.exit(1);
 }
 
-// 4. Uji Pembatalan (Cancel) di tengah tes aktif (setelah 150ms saat Ping/Download sudah berjalan)
+// 4. Uji Pembatalan (Cancel) SETELAH fase Ping selesai (memastikan seluruh sub-label ikut di-reset ke '--')
+fastForwardMode = true;
+pingSampleIndex = 0;
 elements.btnStartTest.trigger("click");
-if (elements.btnStartTest.style.display !== "none" || elements.btnCancelTest.style.display !== "inline-flex") {
-  console.error("FAIL: State saat tes mulai tidak menampilkan tombol Batalkan"); process.exit(1);
-}
-setTimeout(() => {
-  elements.btnCancelTest.trigger("click");
-}, 150);
-
-setTimeout(() => {
-  if (elements.btnStartTest.style.display !== "inline-flex" || elements.btnCancelTest.style.display !== "none") {
-    console.error("FAIL: State setelah cancel tidak kembali ke tombol MULAI TES"); process.exit(1);
-  }
-  if (elements.phaseBadge.textContent !== "DIBATALKAN") {
-    console.error("FAIL: phaseBadge setelah mid-test cancel bukan DIBATALKAN:", elements.phaseBadge.textContent); process.exit(1);
-  }
-  if (storage.zen_speedtest_history !== undefined) {
-    console.error("FAIL: Mid-test cancel menyimpan riwayat palsu ke localStorage:", storage.zen_speedtest_history); process.exit(1);
-  }
-  if (elements.valPing.textContent !== "--" || elements.valDownload.textContent !== "--") {
-    console.error("FAIL: Mid-test cancel tidak mengembalikan nilai standby '--':", elements.valPing.textContent, elements.valDownload.textContent); process.exit(1);
-  }
-
-  // 5. Uji Full End-to-End SpeedTest Completion (Ping -> Download -> Upload -> Verdict -> History -> Copy/CSV)
-  virtualNow = Date.now();
-  fastForwardMode = true;
-  elements.btnStartTest.trigger("click");
-
-  const pollDone = setInterval(() => {
-    if (elements.phaseBadge.textContent === "PENGUJIAN SELESAI") {
-      clearInterval(pollDone);
-      fastForwardMode = false;
-
-      const dlVal = parseFloat(elements.valDownload.textContent);
-      const ulVal = parseFloat(elements.valUpload.textContent);
-      const pingVal = parseInt(elements.valPing.textContent, 10);
-      if (!(dlVal > 0) || !(ulVal > 0) || !(pingVal > 0)) {
-        console.error("FAIL: Hasil full test tidak valid:", { dlVal, ulVal, pingVal });
-        process.exit(1);
-      }
-      if (elements.verdictBox.style.display !== "flex") {
-        console.error("FAIL: verdictBox tidak tampil setelah selesai");
-        process.exit(1);
-      }
-      if (!storage.zen_speedtest_history) {
-        console.error("FAIL: Riwayat tidak tersimpan ke localStorage setelah selesai");
-        process.exit(1);
-      }
-      const hist = JSON.parse(storage.zen_speedtest_history);
-      if (!Array.isArray(hist) || hist.length !== 1) {
-        console.error("FAIL: Panjang riwayat tidak tepat:", hist);
-        process.exit(1);
-      }
-
-      // Test unit conversion on completed values (Mbps -> MB/s)
-      elements.unitToggleBtn.trigger("click");
-      const mbpsToMbs = parseFloat(elements.valDownload.textContent);
-      if (Math.abs(mbpsToMbs - (dlVal / 8)) > 0.2) {
-        console.error("FAIL: Konversi Mbps -> MB/s tidak akurat:", { dlVal, mbpsToMbs });
-        process.exit(1);
-      }
-      elements.unitToggleBtn.trigger("click");
-
-      // Test Copy Summary & Clear History
-      elements.btnCopySummary.trigger("click");
-      elements.btnClearHistory.trigger("click");
-      if (storage.zen_speedtest_history !== undefined) {
-        console.error("FAIL: btnClearHistory gagal menghapus localStorage");
-        process.exit(1);
-      }
-
-      console.log("VM_HARNESS_OK");
+const waitDownloadPhase = setInterval(() => {
+  if (elements.phaseBadge.textContent === "MENGUJI DOWNLOAD...") {
+    clearInterval(waitDownloadPhase);
+    // Pastikan fase Ping sudah mengisi sub-label dan menghitung chronological jitter (10.0 ms, bukan 1.7 ms)
+    const jitterDuringTest = parseFloat(elements.valJitter.textContent);
+    if (Math.abs(jitterDuringTest - 10.0) > 0.5 || elements.subJitterQual.textContent !== "Fluktuatif") {
+      console.error("FAIL: Chronological Jitter salah:", jitterDuringTest, elements.subJitterQual.textContent);
+      process.exit(1);
     }
-  }, 20);
-}, 320);
+    elements.btnCancelTest.trigger("click");
+
+    setTimeout(() => {
+      fastForwardMode = false;
+      if (elements.phaseBadge.textContent !== "DIBATALKAN") {
+        console.error("FAIL: phaseBadge setelah cancel bukan DIBATALKAN:", elements.phaseBadge.textContent); process.exit(1);
+      }
+      const mustBeStandby = [
+        "valPing", "valJitter", "valDownload", "valUpload", "valBufferbloat",
+        "subPingMin", "subPingAvg", "subJitterQual", "subDlPeak", "subDlTotal", "subUlPeak", "subUlTotal", "subLoadedPing"
+      ];
+      for (const k of mustBeStandby) {
+        if (elements[k].textContent !== "--") {
+          console.error(`FAIL: Elemen ${k} tidak di-reset ke '--' setelah cancel:`, elements[k].textContent);
+          process.exit(1);
+        }
+      }
+
+      // 5. Uji Full End-to-End SpeedTest Completion
+      virtualNow = Date.now();
+      pingSampleIndex = 0;
+      fastForwardMode = true;
+      elements.btnStartTest.trigger("click");
+
+      const pollDone = setInterval(() => {
+        if (elements.phaseBadge.textContent === "PENGUJIAN SELESAI") {
+          clearInterval(pollDone);
+          fastForwardMode = false;
+
+          const dlVal = parseFloat(elements.valDownload.textContent);
+          const ulVal = parseFloat(elements.valUpload.textContent);
+          const pingVal = parseInt(elements.valPing.textContent, 10);
+          if (!(dlVal > 0) || !(ulVal > 0) || !(pingVal > 0)) {
+            console.error("FAIL: Hasil full test tidak valid:", { dlVal, ulVal, pingVal });
+            process.exit(1);
+          }
+
+          // Pastikan Upload Bufferbloat (ulping > dlping) terhitung ke Bufferbloat & subLoadedPing
+          const pingDownVal = parseInt(elements.valPingDown.textContent, 10);
+          const pingUpVal = parseInt(elements.valPingUp.textContent, 10);
+          const expectedLoaded = Math.max(pingDownVal, pingUpVal);
+          const expectedBb = Math.max(0, expectedLoaded - pingVal);
+          if (!(pingUpVal > pingDownVal) || elements.subLoadedPing.textContent !== `${expectedLoaded} ms` || elements.valBufferbloat.textContent !== `+${expectedBb}`) {
+            console.error("FAIL: Upload Bufferbloat tidak teragregasi:", elements.subLoadedPing.textContent, elements.valBufferbloat.textContent, { pingVal, pingDownVal, pingUpVal });
+            process.exit(1);
+          }
+
+          // Pastikan sparkline canvas tidak mengalami vertical spike saat renderEngineLoop berjalan di fase 'completed'
+          if (rafCallback) {
+            rafCallback(virtualNow + 200);
+            if (canvasLineToY.length >= 3) {
+              const lastY = canvasLineToY[canvasLineToY.length - 1];
+              const prevY = canvasLineToY[canvasLineToY.length - 2];
+              if (Math.abs(lastY - prevY) > 12) {
+                console.error("FAIL: Sparkline mengalami vertical spike pada titik terakhir saat completed:", { prevY, lastY });
+                process.exit(1);
+              }
+            }
+          }
+
+          // 6. Uji Putus Koneksi di Transisi Download -> Upload (simulateUploadDrop = true)
+          const savedHistoryBeforeDrop = storage.zen_speedtest_history;
+          simulateUploadDrop = true;
+          pingSampleIndex = 0;
+          fastForwardMode = true;
+          elements.btnStartTest.trigger("click");
+
+          const pollDrop = setInterval(() => {
+            if (elements.phaseBadge.textContent === "KENDALA KONEKSI") {
+              clearInterval(pollDrop);
+              fastForwardMode = false;
+              simulateUploadDrop = false;
+
+              // Pastikan hasil tes sebelumnya dipulihkan utuh & riwayat tidak tertimpa data 0.0 Mbps
+              if (parseFloat(elements.valDownload.textContent) !== dlVal || parseFloat(elements.valUpload.textContent) !== ulVal) {
+                console.error("FAIL: Hasil sebelumnya tidak dipulihkan saat koneksi upload terputus:", elements.valDownload.textContent, elements.valUpload.textContent);
+                process.exit(1);
+              }
+              if (storage.zen_speedtest_history !== savedHistoryBeforeDrop) {
+                console.error("FAIL: Koneksi terputus menyimpan riwayat rusak ke localStorage");
+                process.exit(1);
+              }
+
+              // Test Copy Summary & Clear History
+              elements.btnCopySummary.trigger("click");
+              elements.btnClearHistory.trigger("click");
+              if (storage.zen_speedtest_history !== undefined) {
+                console.error("FAIL: btnClearHistory gagal menghapus localStorage");
+                process.exit(1);
+              }
+
+              console.log("VM_HARNESS_OK");
+            }
+          }, 20);
+        }
+      }, 20);
+    }, 30);
+  }
+}, 15);
 """
     proc_vm = subprocess.run(["node", "-e", vm_harness_script, html_path], capture_output=True, text=True)
     assert proc_vm.returncode == 0 and "VM_HARNESS_OK" in proc_vm.stdout, f"Uji VM Harness gagal:\n{proc_vm.stderr}\n{proc_vm.stdout}"
-    print("  [OK] Eksekusi VM <script> asli: Toggle Multi/Single, IP Masking (Anti-Bubble), Satuan Mbps/MB/s, Mid-Test Cancel, & Full E2E Completion lolos 100%.")
+    print("  [OK] Eksekusi VM <script> asli: Chronological Jitter, Post-Ping Cancel Reset, Upload Bufferbloat, Sparkline Integrity, & Mid-Transition Disconnect lolos 100%.")
 
 def main():
     print("=" * 60)
