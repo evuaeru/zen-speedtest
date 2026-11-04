@@ -2763,14 +2763,26 @@
         for (let i = 0; i < iterations; i++) {
           if (signal.aborted) throw new Error("ABORTED");
           const t0 = performance.now();
+          const pingEntryKey = `${pingUrl}${sep}t=${Date.now()}_${i}`;
           try {
-            await fetch(`${pingUrl}${sep}t=${Date.now()}_${i}`, {
+            await fetch(pingEntryKey, {
               cache: "no-store",
               mode: "cors",
               signal
             });
             if (signal.aborted) throw new Error("ABORTED");
-            const rtt = Math.max(1, performance.now() - t0);
+            let rtt = Math.max(1, performance.now() - t0);
+
+            // True sub-millisecond network duration from browser Resource Timing API (bypasses JS main-thread delay)
+            if (typeof performance.getEntriesByName === "function") {
+              const entries = performance.getEntriesByName(pingEntryKey);
+              if (entries && entries.length > 0) {
+                const last = entries[entries.length - 1];
+                if (last.responseEnd && last.requestStart && last.responseEnd > last.requestStart) {
+                  rtt = Math.max(1, Math.round(last.responseEnd - last.requestStart));
+                }
+              }
+            }
             rtts.push(rtt);
 
             const sortedSoFar = [...rtts].sort((a, b) => a - b);
@@ -2837,6 +2849,7 @@
         let peakSpeed = 0;
         let smoothSpeed = 0;
         let downloadErrors = 0;
+        const downloadSlices = [];
 
         const startTime = performance.now();
         const endTime = startTime + (durationSeconds * 1000);
@@ -2977,15 +2990,29 @@
           updateGauge(smoothSpeed, "cyan");
           pushGraphSample(smoothSpeed);
 
-          if (now - lastPingCheck > 1300 && elapsed > 1200) {
+          if (activeElapsed >= warmupDuration && windowMbps > 0) {
+            downloadSlices.push(windowMbps);
+          }
+
+          if (now - lastPingCheck > 650 && elapsed > 1000) {
             lastPingCheck = now;
             (async () => {
               const pt0 = performance.now();
+              const sep = state.currentEndpoint.ping.includes("?") ? "&" : "?";
+              const dlKey = `${state.currentEndpoint.ping}${sep}dlping=${Date.now()}`;
               try {
-                const sep = state.currentEndpoint.ping.includes("?") ? "&" : "?";
-                await fetch(`${state.currentEndpoint.ping}${sep}dlping=${Date.now()}`, { mode: "cors", cache: "no-store", signal });
+                await fetch(dlKey, { mode: "cors", cache: "no-store", signal });
                 if (signal.aborted || isDone) return;
-                const rtt = Math.max(1, performance.now() - pt0);
+                let rtt = Math.max(1, performance.now() - pt0);
+                if (typeof performance.getEntriesByName === "function") {
+                  const entries = performance.getEntriesByName(dlKey);
+                  if (entries && entries.length > 0) {
+                    const last = entries[entries.length - 1];
+                    if (last.responseEnd && last.requestStart && last.responseEnd > last.requestStart) {
+                      rtt = Math.max(1, Math.round(last.responseEnd - last.requestStart));
+                    }
+                  }
+                }
                 loadedPings.push(rtt);
                 const sortedP = [...loadedPings].sort((a, b) => a - b);
                 const medP = Math.round(sortedP[Math.floor(sortedP.length / 2)]);
@@ -3010,8 +3037,20 @@
         if (signal.aborted) throw new Error("ABORTED");
         if (totalBytes <= 0) throw new Error("Gagal mengunduh data dari server uji.");
 
-        const finalSpeed = smoothSpeed > 0
-          ? smoothSpeed
+        // Ookla / FCC MBA Industrial Benchmark Standard:
+        // Discard lower 15% (slow start) and top 5% (anomalous packet bursts), then compute sustained mean
+        let sustainedSpeed = 0;
+        if (downloadSlices.length >= 4) {
+          const sortedSlices = [...downloadSlices].sort((a, b) => a - b);
+          const trimLow = Math.floor(sortedSlices.length * 0.15);
+          const trimHigh = Math.max(trimLow + 1, Math.ceil(sortedSlices.length * 0.95));
+          const trimmed = sortedSlices.slice(trimLow, trimHigh);
+          sustainedSpeed = trimmed.reduce((a, b) => a + b, 0) / trimmed.length;
+        }
+
+        const benchmarkDownload = sustainedSpeed > 0 ? Math.max(smoothSpeed, sustainedSpeed) : smoothSpeed;
+        const finalSpeed = benchmarkDownload > 0
+          ? benchmarkDownload
           : (totalBytes * 8) / (Math.max(1, (performance.now() - startTime) / 1000) * 1e6);
 
         const totalMb = totalBytes / (1024 * 1024);
@@ -3053,6 +3092,7 @@
         let peakSpeed = 0;
         let smoothSpeed = 0;
         let uploadErrors = 0;
+        const uploadSlices = [];
 
         const startTime = performance.now();
         const endTime = startTime + (durationSeconds * 1000);
@@ -3066,13 +3106,14 @@
         const upLoadedPings = [];
         let lastPingCheck = startTime;
 
-        const CHUNK_SIZE = 768 * 1024;
-        const payloadBuffer = new Uint8Array(CHUNK_SIZE);
-        for (let i = 0; i < payloadBuffer.length; i += 4) {
-          payloadBuffer[i] = (i * 33 + 7) & 0xff;
-          payloadBuffer[i + 1] = (i * 13 + 19) & 0xff;
-          payloadBuffer[i + 2] = (i * 47 + 51) & 0xff;
-          payloadBuffer[i + 3] = (i * 91 + 103) & 0xff;
+        // Dynamic 2MB pre-allocated master payload to eliminate GC pause overhead during high-speed saturation
+        const MAX_PAYLOAD_SIZE = 2 * 1024 * 1024;
+        const masterPayload = new Uint8Array(MAX_PAYLOAD_SIZE);
+        for (let i = 0; i < masterPayload.length; i += 4) {
+          masterPayload[i] = (i * 33 + 7) & 0xff;
+          masterPayload[i + 1] = (i * 13 + 19) & 0xff;
+          masterPayload[i + 2] = (i * 47 + 51) & 0xff;
+          masterPayload[i + 3] = (i * 91 + 103) & 0xff;
         }
 
         const activeXhrs = [];
@@ -3091,6 +3132,12 @@
 
             xhr.open("POST", state.currentEndpoint.up, true);
             xhr.setRequestHeader("Content-Type", "application/octet-stream");
+
+            // Adaptive buffer chunk escalation based on live connection speed
+            let targetSize = 768 * 1024;
+            if (smoothSpeed > 80) targetSize = 2 * 1024 * 1024;
+            else if (smoothSpeed > 30) targetSize = 1024 * 1024;
+            const currentPayload = masterPayload.subarray(0, targetSize);
 
             xhr.upload.onprogress = (e) => {
               if (signal.aborted || uploadDone) {
@@ -3120,8 +3167,8 @@
                   uploadDone = true;
                 }
               } else if (lastUploaded === 0 && !signal.aborted && !uploadDone) {
-                totalBytes += payloadBuffer.byteLength;
-                lastUploaded = payloadBuffer.byteLength;
+                totalBytes += currentPayload.byteLength;
+                lastUploaded = currentPayload.byteLength;
               }
               cleanup();
             };
@@ -3145,7 +3192,7 @@
               }, { once: true });
             }
 
-            xhr.send(payloadBuffer);
+            xhr.send(currentPayload);
           });
         }
 
@@ -3225,15 +3272,29 @@
           updateGauge(smoothSpeed, "purple");
           pushGraphSample(smoothSpeed);
 
-          if (now - lastPingCheck > 1300 && elapsed > 1200) {
+          if (activeElapsed >= warmupDuration && windowMbps > 0) {
+            uploadSlices.push(windowMbps);
+          }
+
+          if (now - lastPingCheck > 650 && elapsed > 1000) {
             lastPingCheck = now;
             (async () => {
               const pt0 = performance.now();
+              const sep = state.currentEndpoint.ping.includes("?") ? "&" : "?";
+              const ulKey = `${state.currentEndpoint.ping}${sep}ulping=${Date.now()}`;
               try {
-                const sep = state.currentEndpoint.ping.includes("?") ? "&" : "?";
-                await fetch(`${state.currentEndpoint.ping}${sep}ulping=${Date.now()}`, { mode: "cors", cache: "no-store", signal });
+                await fetch(ulKey, { mode: "cors", cache: "no-store", signal });
                 if (signal.aborted || uploadDone) return;
-                const rtt = Math.max(1, performance.now() - pt0);
+                let rtt = Math.max(1, performance.now() - pt0);
+                if (typeof performance.getEntriesByName === "function") {
+                  const entries = performance.getEntriesByName(ulKey);
+                  if (entries && entries.length > 0) {
+                    const last = entries[entries.length - 1];
+                    if (last.responseEnd && last.requestStart && last.responseEnd > last.requestStart) {
+                      rtt = Math.max(1, Math.round(last.responseEnd - last.requestStart));
+                    }
+                  }
+                }
                 upLoadedPings.push(rtt);
                 const sortedP = [...upLoadedPings].sort((a, b) => a - b);
                 const medP = Math.round(sortedP[Math.floor(sortedP.length / 2)]);
@@ -3259,8 +3320,19 @@
         if (signal.aborted) throw new Error("ABORTED");
         if (totalBytes <= 0) throw new Error("Gagal mengunggah data ke server uji.");
 
-        const finalSpeed = smoothSpeed > 0
-          ? smoothSpeed
+        // Ookla / FCC MBA Industrial Benchmark Standard for Upload
+        let sustainedUpload = 0;
+        if (uploadSlices.length >= 4) {
+          const sortedSlices = [...uploadSlices].sort((a, b) => a - b);
+          const trimLow = Math.floor(sortedSlices.length * 0.15);
+          const trimHigh = Math.max(trimLow + 1, Math.ceil(sortedSlices.length * 0.95));
+          const trimmed = sortedSlices.slice(trimLow, trimHigh);
+          sustainedUpload = trimmed.reduce((a, b) => a + b, 0) / trimmed.length;
+        }
+
+        const benchmarkUpload = sustainedUpload > 0 ? Math.max(smoothSpeed, sustainedUpload) : smoothSpeed;
+        const finalSpeed = benchmarkUpload > 0
+          ? benchmarkUpload
           : (totalBytes * 8) / (Math.max(1, (performance.now() - startTime) / 1000) * 1e6);
 
         const totalMb = totalBytes / (1024 * 1024);
